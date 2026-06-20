@@ -134,6 +134,12 @@ _SECONDARY_CSS = """
     .back { display: inline-block; margin-top: 34px; font-family: var(--mono); font-size: 12.5px;
       color: var(--accent); text-decoration: none; }
     .back:hover { text-decoration: underline; }
+    @media print {
+      body { background: #fff; color: #000; }
+      .wrap { max-width: 100%; padding: 0; }
+      .list a { color: #000; }
+      .sponsor-card, .back, .site { display: none !important; }
+    }
 """
 
 
@@ -513,6 +519,17 @@ def render_person_page(
       .wrap {{ padding: 32px 18px 64px; }}
       .portrait {{ float: none; width: 100%; max-width: 100%; margin: 0 0 18px; }}
       .sponsor-card__logo img {{ height: 72px; }}
+    }}
+    @media print {{
+      body {{ background: #fff; color: #000; font-size: 11pt; }}
+      .wrap {{ max-width: 100%; padding: 0; }}
+      .masthead__rule {{ border-top-color: #999; }}
+      .kicker, .lifespan {{ color: #333; }}
+      .rule {{ background: #000; }}
+      .portrait {{ cursor: default; border-color: #999; }}
+      .arrangements a {{ color: #000; text-decoration: none; }}
+      /* Drop the interactive chrome — keep the name, dates, portrait, and text. */
+      .share, .sponsor-card, .more, .back, .lightbox {{ display: none !important; }}
     }}
   </style>
 </head>
