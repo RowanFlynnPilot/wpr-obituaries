@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import html
 import json
+from urllib.parse import quote
 
 from models import Obituary
 
@@ -124,7 +125,42 @@ def _sponsor_section(sponsor: dict, base_url: str) -> str:
     </section>"""
 
 
-def render_person_page(ob: Obituary, sponsor: dict, base_url: str) -> str:
+def _share_section(name: str, page_url: str) -> str:
+    """Facebook / email / print — families share obituaries widely."""
+    fb = f"https://www.facebook.com/sharer/sharer.php?u={quote(page_url, safe='')}"
+    subject = quote(f"{name} Obituary")
+    body = quote(f"{name} — obituary on Wausau Pilot & Review:\n{page_url}")
+    return f"""<div class="share">
+      <span class="share__label">Share</span>
+      <a class="share__btn" href="{fb}" target="_blank" rel="noopener">Facebook</a>
+      <a class="share__btn" href="mailto:?subject={subject}&amp;body={body}">Email</a>
+      <button class="share__btn" type="button" onclick="window.print();return false;">Print</button>
+    </div>"""
+
+
+def _related_section(related: list[Obituary], base_url: str) -> str:
+    """Internal links to recent obituaries — recirculation and crawl depth."""
+    if not related:
+        return ""
+    items = []
+    for r in related:
+        span = _lifespan(r)
+        meta = f' <span class="more__span">{span}</span>' if span else ""
+        items.append(
+            f'<li><a href="{base_url}/o/{r.slug}.html">{html.escape(r.name)}</a>{meta}</li>'
+        )
+    links = "\n        ".join(items)
+    return f"""<section class="more">
+      <p class="more__label">More recent obituaries</p>
+      <ul class="more__list">
+        {links}
+      </ul>
+    </section>"""
+
+
+def render_person_page(
+    ob: Obituary, sponsor: dict, base_url: str, related: list[Obituary] | None = None
+) -> str:
     page_url = f"{base_url}/o/{ob.slug}.html"
     body_paragraphs = "\n".join(
         f"      <p>{html.escape(p)}</p>" for p in ob.body.split("\n\n") if p.strip()
@@ -142,6 +178,8 @@ def render_person_page(ob: Obituary, sponsor: dict, base_url: str) -> str:
         else ""
     )
     sponsor_section = _sponsor_section(sponsor, base_url)
+    share_section = _share_section(ob.name, page_url)
+    related_section = _related_section(related or [], base_url)
 
     return f"""<!doctype html>
 <html lang="en">
@@ -228,6 +266,35 @@ def render_person_page(ob: Obituary, sponsor: dict, base_url: str) -> str:
       margin: 0;
     }}
     .sponsor-card__name a {{ color: var(--ink); text-decoration: none; }}
+    .share {{
+      clear: both; display: flex; flex-wrap: wrap; align-items: center;
+      gap: 10px; margin: 30px 0 0;
+    }}
+    .share__label {{
+      font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--muted);
+    }}
+    .share__btn {{
+      font-family: var(--mono); font-size: 12px; letter-spacing: 0.03em;
+      color: var(--accent); background: var(--paper-2); border: 1px solid var(--rule);
+      border-radius: 2px; padding: 6px 12px; text-decoration: none; cursor: pointer;
+    }}
+    .share__btn:hover {{ background: var(--hover); }}
+    .more {{ margin: 40px 0 0; padding-top: 22px; border-top: 1px solid var(--rule); }}
+    .more__label {{
+      margin: 0 0 12px; font-family: var(--mono); font-size: 11px;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
+    }}
+    .more__list {{ list-style: none; margin: 0; padding: 0; }}
+    .more__list li {{ margin: 0 0 8px; }}
+    .more__list a {{
+      font-family: var(--serif); font-weight: 700; color: var(--ink);
+      text-decoration: none;
+    }}
+    .more__list a:hover {{ color: var(--accent); text-decoration: underline; }}
+    .more__span {{
+      font-family: var(--mono); font-size: 12px; color: var(--muted); margin-left: 6px;
+    }}
     .back {{
       display: inline-block; margin-top: 36px; font-family: var(--mono);
       font-size: 12.5px; letter-spacing: 0.04em; color: var(--accent);
@@ -259,7 +326,9 @@ def render_person_page(ob: Obituary, sponsor: dict, base_url: str) -> str:
 {body_paragraphs}
     </article>
     {funeral_line}
+    {share_section}
     {sponsor_section}
+    {related_section}
     <a class="back" href="{base_url}/">&larr; All obituaries</a>
   </main>
 </body>

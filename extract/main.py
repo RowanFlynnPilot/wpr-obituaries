@@ -117,9 +117,11 @@ def _write_pages(records: list[Obituary], sponsor: dict, base_url: str) -> None:
     PAGES_DIR.mkdir(parents=True, exist_ok=True)
     for stale in PAGES_DIR.glob("*.html"):
         stale.unlink()  # render is authoritative: never leave an orphaned page
+    recent = sorted(records, key=lambda r: r.source_date, reverse=True)[:7]
     for ob in records:
+        related = [r for r in recent if r.slug != ob.slug][:6]
         (PAGES_DIR / f"{ob.slug}.html").write_text(
-            render_person_page(ob, sponsor, base_url), encoding="utf-8"
+            render_person_page(ob, sponsor, base_url, related), encoding="utf-8"
         )
 
 
