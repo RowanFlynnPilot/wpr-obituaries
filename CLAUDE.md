@@ -25,17 +25,32 @@ Source of truth → static output → embedded widget:
    structured record per person. Regex parsing is wrong here: obituary
    formatting varies too much. The model extracts only what is present and
    never invents detail.
-3. `extract/templates.py` — renders one crawlable HTML page per person. **This
-   is the SEO layer.** Each page has the name in the title and H1, schema.org
-   `Obituary` structured data, canonical, and OG tags. Google ranks these.
-4. `extract/main.py` — orchestrates fetch → extract → dedupe → write. Outputs:
-   - `web/public/data/obituaries.json` (light index for the widget)
-   - `web/public/o/<slug>.html` (per-person pages)
-   Any post that fails to parse aborts the run with exit 1 — no silent gaps.
-5. `web/` — React 18 / Vite memorial register. The **browse + search** layer
+3. `extract/templates.py` — renders one crawlable HTML page per person plus a
+   `sitemap.xml`. **This is the SEO layer.** Each page has the name in the title
+   and H1, schema.org `Obituary` structured data, canonical, and OG tags.
+4. `extract/store.py` — the **persistent master** (`data/obituaries_master.json`,
+   `{posts, records}`). This is the source of truth that lets pages outlive the
+   fetch window. It is committed to the repo and grows over time.
+5. `extract/main.py` — two phases:
+   - **Sync** (skipped by `--render-only`): fetch the window, extract only *new
+     or changed* batch posts (`posts` map tracks each processed post id by its
+     `modified_gmt`), and upsert them into the master. Per-post failures are
+     quarantined to `data/failures.json` and exit the run non-zero, but the
+     master is still saved first — no silent gaps, no lost catalogue.
+   - **Render** (always): rebuild `web/public/data/obituaries.json` (light
+     index), every `web/public/o/<slug>.html`, and `web/public/sitemap.xml`
+     from the **entire master**. Rendering is free (no API), so the window only
+     bounds extraction cost, never what stays published. A 0-record render is
+     refused (`--allow-empty` to override) so a bad fetch can't wipe the site.
+   The rendered files are gitignored build artifacts; only the master is
+   committed. `python extract/main.py --render-only` regenerates them locally
+   (and reaches every existing page after a template/brand change).
+6. `web/` — React 18 / Vite memorial register. The **browse + search** layer
    only. It fetches the JSON index and links each card to the static page.
-6. `.github/workflows/extract.yml` — cron Mon/Wed/Fri 6 AM Central, then
-   builds the widget (which bundles the static pages) and deploys to Pages.
+7. `.github/workflows/extract.yml` — cron Mon/Wed/Fri 6 AM Central. Runs sync +
+   render, commits the updated master back (`contents: write`), then builds the
+   widget and deploys to Pages. A failed extract skips the deploy (the last good
+   deploy stays live) but still persists the master.
 
 The React widget is the iframe embed on WordPress. The static `o/*.html` pages
 are what actually get crawled and ranked. Do not collapse these two layers —
@@ -82,22 +97,34 @@ arrangement metadata on each record.
   the per-person pages own the ranking. Not solved in v1.
 - **SEO domain**: pointing `obituaries.wausaupilotandreview.com` at Pages keeps
   ranking equity on the brand domain. Recommended before heavy promotion.
-- **Backfill cost**: `python extract/main.py --backfill` parses every obituary
-  post ever published (one Haiku call per post). The default run uses a recent
-  window (`WINDOW_DAYS` in `main.py`) for the cron — bounded cost. Currently set
-  to **14 days** while runs are being tuned; the intended steady-state is 45.
-  Note the index is rebuilt from only that window each run (it does not
-  accumulate), so the register shows exactly the trailing window of names.
-- **Sitemap**: not yet generated. A `sitemap.xml` of the per-person pages would
-  speed up indexing; add to `main.py` when ready.
+- **Backfill / seeding**: `python extract/main.py --backfill` parses every
+  obituary post ever published (one Haiku call per *new* post) and seeds the
+  master. **Migration:** after the master store ships, run a one-time backfill
+  (workflow dispatch with the backfill box checked, or locally) to recover the
+  back-catalogue; until then the cron simply accumulates forward from the recent
+  window. The cron uses `WINDOW_DAYS` (currently **14**, steady-state target 45)
+  only to bound *new-post extraction* — it no longer bounds what stays published,
+  because render always covers the whole master.
+- **Persistence (fixed)**: pages used to be regenerated from only the window and
+  would 404 once they aged out — fatal for the SEO premise. The master store +
+  render-everything design fixes this; a published page is permanent.
+- **Sitemap (done)**: `web/public/sitemap.xml` is generated from the master each
+  render. Submit it in Search Console. (A root `robots.txt` only helps once a
+  custom domain serves the site at root — a project Pages subpath ignores it.)
+- **Open follow-ups**: (a) **cross-post dedupe** — the slug keys on the source
+  post, so the same person in two posts (notice + full obituary) yields two
+  pages; needs an identity key (name + dates). (b) **Vendor photos** — portraits
+  still hotlink WPR's Cloudflare CDN. (c) **Fetch retries** — `wp_client` has no
+  backoff yet (the Anthropic client now retries). (d) **Soft-failure deploys** —
+  today any per-post failure skips the deploy that run; a follow-up could deploy
+  the good catalogue and surface failures via a separate red report job.
 - **Front-end brand**: the widget (`web/src/index.css`) and the per-person pages
   (`extract/templates.py`) share one WPR newsroom type system — **Oswald** for
   the nameplate/labels (WPR's heading face), **Merriweather** for names and body
   (WPR's reading serif), and **Courier Prime** as the typewriter accent for
   datelines and metadata — on a warm newsprint palette with an oxblood accent
-  (`#7c2e36`). Keep the two surfaces visually in sync. A template change only
-  reaches already-published `o/*.html` pages on the next `main.py` run, since the
-  full body text needed to re-render lives only in the source posts.
+  (`#7c2e36`). Keep the two surfaces visually in sync. `--render-only` reaches
+  every existing page after a brand/template change (no API needed).
 
 ## v2 (deferred, by decision)
 

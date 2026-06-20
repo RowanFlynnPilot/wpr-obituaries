@@ -8,6 +8,15 @@ venv/
 web/node_modules/
 web/dist/
 
+# Generated site output — rebuilt from data/obituaries_master.json every run by
+# extract/main.py (`--render-only` regenerates locally). The master itself IS
+# committed (it is the source of truth); these derivatives are not.
+web/public/data/obituaries.json
+web/public/sitemap.xml
+web/public/o/*.html
+!web/public/o/.gitkeep
+data/failures.json
+
 # Local env
 .env
 

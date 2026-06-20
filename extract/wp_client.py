@@ -61,7 +61,7 @@ def fetch_batch_posts(window_days: int | None) -> list[dict]:
         "per_page": 100,
         "orderby": "date",
         "order": "desc",
-        "_fields": "id,date,link,title.rendered,content.rendered",
+        "_fields": "id,date,modified_gmt,link,title.rendered,content.rendered",
     }
     if window_days is not None:
         from datetime import datetime, timedelta, timezone

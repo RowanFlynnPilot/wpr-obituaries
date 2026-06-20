@@ -12,7 +12,7 @@ on:
         default: false
 
 permissions:
-  contents: read
+  contents: write  # commit the accumulating obituary master back to the repo
   pages: write
   id-token: write
 
@@ -37,12 +37,28 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
-      - name: Extract obituaries
+      - name: Extract obituaries and render site
         run: |
           if [ "${{ inputs.backfill }}" = "true" ]; then
             python extract/main.py --backfill
           else
             python extract/main.py
+          fi
+
+      # Persist the accumulating master even when extraction exits non-zero, so a
+      # single failed post never loses the records that did succeed. A failed
+      # extract still stops the build below, so no deploy happens that run.
+      - name: Persist obituary master
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No master changes to commit."
+          else
+            git commit -m "data: update obituaries master [skip ci]"
+            git push
           fi
 
       - uses: actions/setup-node@v4

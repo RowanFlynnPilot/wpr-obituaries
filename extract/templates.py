@@ -28,6 +28,27 @@ FONTS = (
 )
 
 
+def render_sitemap(obituaries: list[Obituary], base_url: str) -> str:
+    """Build a sitemap.xml of the register plus every per-person page.
+
+    Speeds indexing and tells search engines these URLs are canonical. Driven by
+    the full master, so every published page is always listed.
+    """
+    urls = [f"  <url><loc>{html.escape(base_url)}/</loc></url>"]
+    for ob in obituaries:
+        loc = html.escape(f"{base_url}/o/{ob.slug}.html")
+        urls.append(
+            f"  <url><loc>{loc}</loc><lastmod>{ob.source_date}</lastmod></url>"
+        )
+    body = "\n".join(urls)
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        f"{body}\n"
+        "</urlset>\n"
+    )
+
+
 def _structured_data(ob: Obituary, page_url: str, sponsor: dict, base_url: str) -> str:
     data = {
         "@context": "https://schema.org",
