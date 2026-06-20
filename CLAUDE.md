@@ -93,11 +93,14 @@ arrangement metadata on each record.
 ## Known decisions and open items
 
 - **Duplicate content**: per-person pages reproduce the full obit text, which
-  overlaps the original batch posts. v1 sets each page canonical to itself. The
-  clean follow-up is to manage `rel=canonical`/noindex on the WP batch posts so
-  the per-person pages own the ranking. Not solved in v1.
+  overlaps the original batch posts. Each page is self-canonical with unique
+  title/H1/URL + schema, so it should win on specificity; the WordPress-side
+  playbook (sitemap, batch-post linking, when to trim batch posts) is in
+  `docs/seo-batch-posts.md`.
 - **SEO domain**: pointing `obituaries.wausaupilotandreview.com` at Pages keeps
-  ranking equity on the brand domain. Recommended before heavy promotion.
+  ranking equity on the brand domain. Recommended before heavy promotion — the
+  exact DNS + repo steps are prepped in `docs/custom-subdomain.md` (apply after
+  DNS resolves; don't merge the `base: "/"` change before then).
 - **Seeding the master**: the chosen migration is a one-time **6-month seed**,
   `python extract/main.py --days 180` (or workflow dispatch with `seed_days=180`)
   — ~73 posts, ~15-20 min, a few dollars. The full `--backfill` (every post since
