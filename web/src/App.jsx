@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Masthead from "./components/Masthead.jsx";
+import FeaturedCarousel from "./components/FeaturedCarousel.jsx";
 import SearchBar from "./components/SearchBar.jsx";
 import Register from "./components/Register.jsx";
 import Footer from "./components/Footer.jsx";
@@ -50,6 +51,7 @@ export default function App() {
       <Masthead sponsor={sponsor} />
       {data ? (
         <>
+          {!query && <FeaturedCarousel obituaries={data.obituaries} />}
           <SearchBar value={query} onChange={setQuery} count={filtered.length} />
           <Register obituaries={filtered} query={query} />
         </>

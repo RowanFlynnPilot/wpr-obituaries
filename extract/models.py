@@ -49,6 +49,17 @@ class Obituary:
         digest = hashlib.sha1(self.source_url.encode()).hexdigest()[:6]
         return f"{slugify(self.name)}-{stamp}-{digest}"
 
+    def excerpt(self, limit: int = 200) -> str:
+        """The opening of the obituary body, trimmed at a word boundary.
+
+        A warmer teaser than the one-line summary — used by the featured
+        carousel to show "the beginning of their obituary".
+        """
+        first = self.body.split("\n\n")[0].strip() if self.body else ""
+        if len(first) <= limit:
+            return first
+        return first[:limit].rsplit(" ", 1)[0].rstrip(",.;:— ") + "…"
+
     def to_index_dict(self) -> dict:
         """Light record for the searchable JSON index (no full body)."""
         return {
@@ -61,6 +72,7 @@ class Obituary:
             "funeralHome": self.funeral_home,
             "photoUrl": self.photo_url,
             "summary": self.summary,
+            "excerpt": self.excerpt(),
             "sourceUrl": self.source_url,
             "sourceDate": self.source_date,
         }
