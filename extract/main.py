@@ -30,6 +30,7 @@ from pathlib import Path
 from anthropic import Anthropic
 
 from extractor import extract_obituaries
+from homes import load_homes, resolve_home
 from models import Obituary
 from og import render_card
 from photos import vendor_photos, vendored_slugs
@@ -48,6 +49,7 @@ INDEX_FILE = DATA_DIR / "obituaries.json"
 MASTER_FILE = ROOT / "data" / "obituaries_master.json"
 MANUAL_FILE = ROOT / "data" / "manual.json"
 SUPPRESSED_FILE = ROOT / "data" / "suppressed.json"
+HOMES_FILE = ROOT / "data" / "funeral_homes.json"
 FAILURES_FILE = ROOT / "data" / "failures.json"
 WINDOW_DAYS = 14  # days to look back for new/changed posts each run; a safety
 #                   buffer (covers missed crons), not a retention limit — the
@@ -119,7 +121,7 @@ def _page_photo(ob: Obituary, vendored: set[str], base_url: str) -> str | None:
     return ob.photo_url
 
 
-def _write_index(records: list[Obituary], vendored: set[str]) -> None:
+def _write_index(records: list[Obituary], vendored: set[str], homes: list[dict]) -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     # Newest batch first, then alphabetical by name within a date.
     ordered = sorted(records, key=lambda r: r.name)
@@ -128,6 +130,8 @@ def _write_index(records: list[Obituary], vendored: set[str]) -> None:
     for r in ordered:
         record = r.to_index_dict()
         record["photoUrl"] = _index_photo(r, vendored)
+        home = resolve_home(r.funeral_home, homes)
+        record["funeralHomeUrl"] = home["url"] if home else None
         obituaries.append(record)
     payload = {"count": len(ordered), "obituaries": obituaries}
     INDEX_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -145,7 +149,7 @@ def _sponsor_line(sponsor: dict) -> str:
 
 
 def _write_pages(
-    records: list[Obituary], sponsor: dict, base_url: str, vendored: set[str]
+    records: list[Obituary], sponsor: dict, base_url: str, vendored: set[str], homes: list[dict]
 ) -> None:
     PAGES_DIR.mkdir(parents=True, exist_ok=True)
     OG_DIR.mkdir(parents=True, exist_ok=True)
@@ -158,9 +162,11 @@ def _write_pages(
         portrait = PHOTOS_DIR / f"{ob.slug}.jpg" if ob.slug in vendored else None
         render_card(ob.name, _lifespan_str(ob), portrait, OG_DIR / f"{ob.slug}.png", sponsor_line)
         og_image = f"{base_url}/assets/og/{ob.slug}.png"
+        home = resolve_home(ob.funeral_home, homes)
         (PAGES_DIR / f"{ob.slug}.html").write_text(
             render_person_page(
-                ob, sponsor, base_url, related, _page_photo(ob, vendored, base_url), og_image
+                ob, sponsor, base_url, related, _page_photo(ob, vendored, base_url),
+                og_image, home["url"] if home else None,
             ),
             encoding="utf-8",
         )
@@ -184,8 +190,9 @@ def render(master: Master, sponsor: dict, base_url: str, allow_empty: bool) -> N
             "Seed the master with `--backfill`, or pass --allow-empty if intended."
         )
     vendored = vendored_slugs(PHOTOS_DIR)
-    _write_index(records, vendored)
-    _write_pages(records, sponsor, base_url, vendored)
+    homes = load_homes(HOMES_FILE)
+    _write_index(records, vendored, homes)
+    _write_pages(records, sponsor, base_url, vendored, homes)
     SITEMAP_FILE.write_text(render_sitemap(records, base_url), encoding="utf-8")
     extras = []
     if manual:

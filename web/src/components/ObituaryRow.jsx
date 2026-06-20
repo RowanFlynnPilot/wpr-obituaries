@@ -17,7 +17,14 @@ export default function ObituaryRow({ ob }) {
     <li className="entry">
       <a className="entry__link" href={href}>
         {ob.photoUrl ? (
-          <img className="entry__photo" src={photoSrc(ob.photoUrl)} alt="" loading="lazy" />
+          <img
+            className="entry__photo"
+            src={photoSrc(ob.photoUrl)}
+            alt=""
+            loading="lazy"
+            width="66"
+            height="66"
+          />
         ) : (
           <span className="entry__photo entry__photo--blank" aria-hidden="true">
             {initials(ob.name)}

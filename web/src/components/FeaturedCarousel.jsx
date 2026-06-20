@@ -82,6 +82,8 @@ export default function FeaturedCarousel({ obituaries }) {
             src={photoSrc(ob.photoUrl)}
             alt={ob.name}
             loading="lazy"
+            width="132"
+            height="168"
           />
           <div className="featured__text">
             <span className="featured__name">{ob.name}</span>
