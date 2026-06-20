@@ -35,12 +35,13 @@ from models import Obituary
 from og import render_card
 from photos import vendor_photos, vendored_slugs
 from store import Master, load_manual, load_master, load_suppressed, save_master
-from templates import render_person_page, render_sitemap
+from templates import render_home_page, render_person_page, render_sitemap
 from wp_client import fetch_batch_posts, make_session
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "web" / "public" / "data"
 PAGES_DIR = ROOT / "web" / "public" / "o"
+HOME_PAGES_DIR = ROOT / "web" / "public" / "funeral-home"
 PHOTOS_DIR = ROOT / "web" / "public" / "assets" / "photos"
 OG_DIR = ROOT / "web" / "public" / "assets" / "og"
 SITEMAP_FILE = ROOT / "web" / "public" / "sitemap.xml"
@@ -131,7 +132,7 @@ def _write_index(records: list[Obituary], vendored: set[str], homes: list[dict])
         record = r.to_index_dict()
         record["photoUrl"] = _index_photo(r, vendored)
         home = resolve_home(r.funeral_home, homes)
-        record["funeralHomeUrl"] = home["url"] if home else None
+        record["funeralHomeUrl"] = f"funeral-home/{home['slug']}.html" if home else None
         obituaries.append(record)
     payload = {"count": len(ordered), "obituaries": obituaries}
     INDEX_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -163,13 +164,38 @@ def _write_pages(
         render_card(ob.name, _lifespan_str(ob), portrait, OG_DIR / f"{ob.slug}.png", sponsor_line)
         og_image = f"{base_url}/assets/og/{ob.slug}.png"
         home = resolve_home(ob.funeral_home, homes)
+        home_url = f"{base_url}/funeral-home/{home['slug']}.html" if home else None
         (PAGES_DIR / f"{ob.slug}.html").write_text(
             render_person_page(
                 ob, sponsor, base_url, related, _page_photo(ob, vendored, base_url),
-                og_image, home["url"] if home else None,
+                og_image, home_url,
             ),
             encoding="utf-8",
         )
+
+
+def _write_home_pages(
+    records: list[Obituary], sponsor: dict, base_url: str, homes: list[dict]
+) -> list[str]:
+    """A landing page per canonical funeral home. Returns the home slugs (sitemap)."""
+    HOME_PAGES_DIR.mkdir(parents=True, exist_ok=True)
+    for stale in HOME_PAGES_DIR.glob("*.html"):
+        stale.unlink()
+    groups: dict[str, list[Obituary]] = {}
+    meta: dict[str, dict] = {}
+    for r in records:
+        home = resolve_home(r.funeral_home, homes)
+        if not home:
+            continue
+        groups.setdefault(home["slug"], []).append(r)
+        meta[home["slug"]] = home
+    for slug, recs in groups.items():
+        recs = sorted(recs, key=lambda r: r.name)
+        recs = sorted(recs, key=lambda r: r.source_date, reverse=True)
+        (HOME_PAGES_DIR / f"{slug}.html").write_text(
+            render_home_page(meta[slug], recs, sponsor, base_url), encoding="utf-8"
+        )
+    return list(groups)
 
 
 def render(master: Master, sponsor: dict, base_url: str, allow_empty: bool) -> None:
@@ -193,14 +219,20 @@ def render(master: Master, sponsor: dict, base_url: str, allow_empty: bool) -> N
     homes = load_homes(HOMES_FILE)
     _write_index(records, vendored, homes)
     _write_pages(records, sponsor, base_url, vendored, homes)
-    SITEMAP_FILE.write_text(render_sitemap(records, base_url), encoding="utf-8")
+    home_slugs = _write_home_pages(records, sponsor, base_url, homes)
+    SITEMAP_FILE.write_text(
+        render_sitemap(records, base_url, home_slugs), encoding="utf-8"
+    )
     extras = []
     if manual:
         extras.append(f"+{len(manual)} manual")
     if suppressed:
         extras.append(f"-{len(suppressed)} suppressed")
     note = f" ({', '.join(extras)})" if extras else ""
-    print(f"Rendered {len(records)} pages, index, and sitemap{note}.")
+    print(
+        f"Rendered {len(records)} pages, {len(home_slugs)} funeral-home pages, "
+        f"index, and sitemap{note}."
+    )
 
 
 def main() -> int:

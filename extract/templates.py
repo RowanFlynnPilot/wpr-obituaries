@@ -29,8 +29,11 @@ FONTS = (
 )
 
 
-def render_sitemap(obituaries: list[Obituary], base_url: str) -> str:
-    """Build a sitemap.xml of the register plus every per-person page.
+def render_sitemap(
+    obituaries: list[Obituary], base_url: str, home_slugs: list[str] | None = None
+) -> str:
+    """Build a sitemap.xml of the register, every per-person page, and the
+    funeral-home landing pages.
 
     Speeds indexing and tells search engines these URLs are canonical. Driven by
     the full master, so every published page is always listed.
@@ -41,6 +44,9 @@ def render_sitemap(obituaries: list[Obituary], base_url: str) -> str:
         urls.append(
             f"  <url><loc>{loc}</loc><lastmod>{ob.source_date}</lastmod></url>"
         )
+    for slug in home_slugs or []:
+        loc = html.escape(f"{base_url}/funeral-home/{slug}.html")
+        urls.append(f"  <url><loc>{loc}</loc></url>")
     body = "\n".join(urls)
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -48,6 +54,119 @@ def render_sitemap(obituaries: list[Obituary], base_url: str) -> str:
         f"{body}\n"
         "</urlset>\n"
     )
+
+
+_SECONDARY_CSS = """
+    :root {
+      --ink: #1b1a18; --paper: #f6f2ea; --paper-2: #fffdf7; --muted: #6f6a61;
+      --faint: #9b958a; --rule: #d9d3c6; --hairline: #e7e1d5; --accent: #7c2e36;
+      --serif: "Merriweather", Georgia, serif;
+      --nameplate: "Oswald", "Arial Narrow", sans-serif;
+      --mono: "Courier Prime", "Courier New", monospace;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink);
+      font-family: var(--serif); line-height: 1.7; -webkit-font-smoothing: antialiased; }
+    .wrap { max-width: 680px; margin: 0 auto; padding: 44px 24px 80px; }
+    .masthead { text-align: center; margin-bottom: 30px; }
+    .masthead__logo img { height: 30px; mix-blend-mode: multiply; }
+    .kicker { margin: 16px 0 0; font-family: var(--mono); font-size: 11.5px;
+      letter-spacing: 0.26em; text-transform: uppercase; color: var(--accent); }
+    .masthead__rule { height: 0; border: 0; border-top: 3px double var(--rule); margin: 22px auto 0; }
+    h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(1.9rem, 5vw, 2.6rem);
+      line-height: 1.1; margin: 0; }
+    .count { font-family: var(--mono); font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+    .site { display: inline-block; margin-top: 8px; font-family: var(--mono); font-size: 13px;
+      color: var(--accent); text-decoration: none; }
+    .site:hover { text-decoration: underline; }
+    .rule { height: 3px; background: var(--accent); width: 54px; margin: 26px 0; }
+    .list { list-style: none; margin: 0; padding: 0; }
+    .list li { padding: 12px 2px; border-top: 1px solid var(--hairline); }
+    .list li:first-child { border-top: 1px solid var(--rule); }
+    .list a { font-family: var(--serif); font-weight: 700; font-size: 1.15rem;
+      color: var(--ink); text-decoration: none; }
+    .list a:hover { color: var(--accent); text-decoration: underline; }
+    .list .meta { font-family: var(--mono); font-size: 12.5px; color: var(--muted); margin-left: 8px; }
+    .sponsor-card { text-align: center; background: var(--paper-2); border: 1px solid var(--rule);
+      border-top: 3px solid var(--accent); border-radius: 2px; padding: 26px 24px 28px; margin: 44px 0 0; }
+    .sponsor-card__label { margin: 0 0 16px; font-family: var(--mono); font-size: 11px;
+      letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); }
+    .sponsor-card__logos { display: flex; flex-wrap: wrap; align-items: center;
+      justify-content: center; gap: 20px 38px; }
+    .sponsor-card__logo img { height: 64px; width: auto; max-width: 100%; }
+    .sponsor-card__name { font-family: var(--nameplate); font-size: 1.2rem; font-weight: 600; margin: 0; }
+    .sponsor-card__name a { color: var(--ink); text-decoration: none; }
+    .back { display: inline-block; margin-top: 34px; font-family: var(--mono); font-size: 12.5px;
+      color: var(--accent); text-decoration: none; }
+    .back:hover { text-decoration: underline; }
+"""
+
+
+def render_home_page(
+    home: dict, records: list[Obituary], sponsor: dict, base_url: str
+) -> str:
+    """A landing page listing every obituary arranged by one funeral home."""
+    page_url = f"{base_url}/funeral-home/{home['slug']}.html"
+    name = html.escape(home["name"])
+    items = []
+    for r in records:
+        span = _lifespan(r)
+        meta = f' <span class="meta">{span}</span>' if span else ""
+        items.append(
+            f'<li><a href="{base_url}/o/{r.slug}.html">{html.escape(r.name)}</a>{meta}</li>'
+        )
+    links = "\n      ".join(items)
+    website = (
+        f'<p><a class="site" href="{html.escape(home["url"])}" target="_blank" '
+        f'rel="noopener">Visit {name} &rarr;</a></p>'
+        if home.get("url")
+        else ""
+    )
+    description = (
+        f"Obituaries arranged by {home['name']}, published by Wausau Pilot & Review."
+    )
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{name} Obituaries — Wausau Pilot &amp; Review</title>
+  <meta name="description" content="{html.escape(description)}" />
+  <meta name="theme-color" content="#f6f2ea" />
+  <link rel="canonical" href="{page_url}" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Wausau Pilot &amp; Review" />
+  <meta property="og:title" content="{name} Obituaries" />
+  <meta property="og:description" content="{html.escape(description)}" />
+  <meta property="og:url" content="{page_url}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="{FONTS}" rel="stylesheet" />
+  <style>{_SECONDARY_CSS}</style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="masthead">
+      <a class="masthead__logo" href="https://wausaupilotandreview.com"
+         target="_blank" rel="noopener">
+        <img src="{WPR_LOGO}" alt="Wausau Pilot &amp; Review" />
+      </a>
+      <p class="kicker">Funeral Home</p>
+      <hr class="masthead__rule" />
+    </header>
+    <h1>{name}</h1>
+    <p class="count">{len(records)} obituaries on Wausau Pilot &amp; Review</p>
+    {website}
+    <div class="rule"></div>
+    <ul class="list">
+      {links}
+    </ul>
+    {_sponsor_section(sponsor, base_url)}
+    <a class="back" href="{base_url}/">&larr; All obituaries</a>
+  </main>
+</body>
+</html>
+"""
 
 
 def _structured_data(
@@ -200,11 +319,8 @@ def render_person_page(
     )
     if ob.funeral_home:
         home = html.escape(ob.funeral_home)
-        if funeral_home_url:
-            home = (
-                f'<a href="{html.escape(funeral_home_url)}" target="_blank" '
-                f'rel="noopener">{home}</a>'
-            )
+        if funeral_home_url:  # internal link to the funeral-home landing page
+            home = f'<a href="{html.escape(funeral_home_url)}">{home}</a>'
         funeral_line = f'<p class="arrangements">Arrangements by {home}.</p>'
     else:
         funeral_line = ""
