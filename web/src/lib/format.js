@@ -13,11 +13,38 @@ export function lifespan(ob) {
 
 export function publishedOn(ob) {
   // ob.sourceDate is an ISO date like "2026-06-19".
-  const [y, m, d] = ob.sourceDate.split("-").map(Number);
-  const date = new Date(y, m - 1, d);
-  return date.toLocaleDateString("en-US", {
+  return dateLabel(ob.sourceDate);
+}
+
+export function dateLabel(sourceDate) {
+  const [y, m, d] = sourceDate.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
   });
+}
+
+export function monthKey(sourceDate) {
+  return sourceDate.slice(0, 7); // "2026-06"
+}
+
+export function monthLabel(monthKey) {
+  const [y, m] = monthKey.split("-").map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+}
+
+const SUFFIXES = new Set(["jr", "jr.", "sr", "sr.", "ii", "iii", "iv", "v"]);
+
+export function lastNameInitial(name) {
+  const parts = name
+    .trim()
+    .split(/\s+/)
+    .filter((p) => !SUFFIXES.has(p.toLowerCase()));
+  const last = parts[parts.length - 1] || name;
+  const ch = (last[0] || "").toUpperCase();
+  return /[A-Z]/.test(ch) ? ch : "#";
 }
