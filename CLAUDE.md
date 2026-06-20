@@ -122,13 +122,19 @@ arrangement metadata on each record.
   prefers the local copy and falls back to the remote URL for anything not yet
   vendored. The widget's `photoSrc` prepends the base path for these repo-relative
   photos.
-- **Open follow-ups**: (a) **cross-post dedupe** — the slug keys on the source
-  post, so the same person in two posts (notice + full obituary) yields two
-  pages; needs an identity key (name + dates). (b) **Fetch retries** — `wp_client`
-  has no backoff yet (the Anthropic client now retries). (c) **Soft-failure
-  deploys** — today any per-post failure skips the deploy that run; a follow-up
-  could deploy the good catalogue and surface failures via a separate red report
-  job.
+- **Cross-post dedupe (done)**: `main._dedupe_people` collapses the same person
+  (name + death date) appearing in two posts to one canonical record for the
+  index/feed/home pages/sitemap (the fullest body wins); the duplicate page still
+  renders but `rel=canonical`s at its primary, so no URL 404s and ranking isn't
+  split.
+- **Robustness (done)**: `wp_client._get` retries the fetch with exponential
+  backoff (the Anthropic client also retries); `extractor.sanity_warnings` logs
+  implausible dates/ages (non-fatal); `extract/test_pipeline.py` is a no-dep
+  regression suite run in CI before the extract step (a broken build never
+  deploys).
+- **Open follow-up**: **Soft-failure deploys** — today any per-post failure skips
+  the deploy that run; a follow-up could deploy the good catalogue and surface
+  failures via a separate red report job.
 - **Editorial controls** (`data/`, documented in `data/README.md`):
   `manual.json` adds hand-entered obituaries that don't come through the WPR
   batches (a stray notice, an out-of-town home) — each becomes a full page;
