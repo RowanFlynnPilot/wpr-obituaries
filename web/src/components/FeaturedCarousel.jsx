@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { lifespan, photoSrc } from "../lib/format.js";
 
 const BASE = import.meta.env.BASE_URL;
-const DAYS = 7; // feature the past week
-const MAX = 10; // a highlight, not the whole list
+const DAYS = 7; // draw from the past week
+const MAX = 10; // a random handful, fresh on each load
 const INTERVAL = 6500; // gentle, dignified cadence
 
 function withinDays(sourceDate, days) {
@@ -16,13 +16,18 @@ function withinDays(sourceDate, days) {
 }
 
 export default function FeaturedCarousel({ obituaries }) {
-  const featured = useMemo(
-    () =>
-      obituaries
-        .filter((o) => o.photoUrl && withinDays(o.sourceDate, DAYS))
-        .slice(0, MAX),
-    [obituaries]
-  );
+  const featured = useMemo(() => {
+    // filter() returns a fresh array, so shuffling it in place is safe.
+    const pool = obituaries.filter(
+      (o) => o.photoUrl && withinDays(o.sourceDate, DAYS)
+    );
+    // Fisher–Yates shuffle, then take MAX — a unique selection each page load.
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool.slice(0, MAX);
+  }, [obituaries]);
 
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
