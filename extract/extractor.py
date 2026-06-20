@@ -8,7 +8,6 @@ person. The model only extracts what is present; it never invents detail.
 from __future__ import annotations
 
 import json
-from datetime import datetime
 
 from anthropic import Anthropic
 from bs4 import BeautifulSoup
@@ -16,7 +15,7 @@ from bs4 import BeautifulSoup
 from models import Obituary
 
 MODEL = "claude-haiku-4-5-20251001"
-MAX_TOKENS = 8000
+MAX_TOKENS = 16000
 
 PROMPT = """You are extracting individual obituaries from a single \
 newspaper batch post. The post below contains one or more obituaries \
@@ -84,6 +83,11 @@ def extract_obituaries(post: dict, client: Anthropic) -> list[Obituary]:
         max_tokens=MAX_TOKENS,
         messages=[{"role": "user", "content": PROMPT.format(text=text)}],
     )
+    if response.stop_reason == "max_tokens":
+        raise ValueError(
+            f"Output truncated for {source_url} (hit max_tokens={MAX_TOKENS}); "
+            "raise MAX_TOKENS."
+        )
     records = _parse_response(response.content[0].text)
 
     obituaries: list[Obituary] = []
@@ -107,7 +111,3 @@ def extract_obituaries(post: dict, client: Anthropic) -> list[Obituary]:
             )
         )
     return obituaries
-
-
-def _now_iso() -> str:
-    return datetime.utcnow().isoformat(timespec="seconds") + "Z"
