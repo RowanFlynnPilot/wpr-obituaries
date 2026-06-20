@@ -2,16 +2,20 @@ import { useEffect, useMemo, useState } from "react";
 import Masthead from "./components/Masthead.jsx";
 import FeaturedCarousel from "./components/FeaturedCarousel.jsx";
 import SearchBar from "./components/SearchBar.jsx";
+import BrowseBar from "./components/BrowseBar.jsx";
 import Register from "./components/Register.jsx";
 import Footer from "./components/Footer.jsx";
+import { monthKey, lastNameInitial } from "./lib/format.js";
 
 const BASE = import.meta.env.BASE_URL;
+const NO_FILTER = { kind: "none" };
 
 export default function App() {
   const [data, setData] = useState(null);
   const [sponsor, setSponsor] = useState(null);
   const [error, setError] = useState(null);
   const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState(NO_FILTER);
 
   useEffect(() => {
     Promise.all([
@@ -25,16 +29,34 @@ export default function App() {
       .catch((e) => setError(e.message));
   }, []);
 
-  const filtered = useMemo(() => {
+  // Search and browse are independent narrowings; activating one clears the other.
+  const onSearch = (v) => {
+    setQuery(v);
+    if (v) setFilter(NO_FILTER);
+  };
+  const onFilter = (f) => {
+    setFilter(f);
+    setQuery("");
+  };
+
+  const displayed = useMemo(() => {
     if (!data) return [];
     const q = query.trim().toLowerCase();
-    if (!q) return data.obituaries;
-    return data.obituaries.filter(
-      (ob) =>
-        ob.name.toLowerCase().includes(q) ||
-        (ob.funeralHome || "").toLowerCase().includes(q)
-    );
-  }, [data, query]);
+    if (q) {
+      return data.obituaries.filter(
+        (ob) =>
+          ob.name.toLowerCase().includes(q) ||
+          (ob.funeralHome || "").toLowerCase().includes(q)
+      );
+    }
+    if (filter.kind === "month") {
+      return data.obituaries.filter((o) => monthKey(o.sourceDate) === filter.value);
+    }
+    if (filter.kind === "letter") {
+      return data.obituaries.filter((o) => lastNameInitial(o.name) === filter.value);
+    }
+    return data.obituaries;
+  }, [data, query, filter]);
 
   if (error) {
     return (
@@ -46,14 +68,23 @@ export default function App() {
     );
   }
 
+  const isDefault = !query && filter.kind === "none";
+
   return (
     <main className="page">
       <Masthead sponsor={sponsor} />
       {data ? (
         <>
-          {!query && <FeaturedCarousel obituaries={data.obituaries} />}
-          <SearchBar value={query} onChange={setQuery} count={filtered.length} />
-          <Register obituaries={filtered} query={query} />
+          {isDefault && <FeaturedCarousel obituaries={data.obituaries} />}
+          <SearchBar value={query} onChange={onSearch} count={displayed.length} />
+          {!query && (
+            <BrowseBar
+              obituaries={data.obituaries}
+              filter={filter}
+              onFilter={onFilter}
+            />
+          )}
+          <Register obituaries={displayed} query={query} />
         </>
       ) : (
         <p className="page__loading">Loading…</p>
