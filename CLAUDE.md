@@ -63,9 +63,13 @@ Environment (extractor):
   subdomain is in place.
 
 The single anchor sponsor lives in `web/public/data/sponsor.json`:
-`{ "name": "...", "url": "..." }`. Swap it there — no code change. This is the
-"one premium check" sponsorship model; per-funeral-home attribution still
-appears as arrangement metadata on each record.
+`{ "name", "url", "logo", "tagline" }`. `name` + `url` are required; `logo`
+(repo-relative path, e.g. `assets/peterson-kraemer.png`, served identically by
+the widget and the static pages) and `tagline` are optional and drive the
+sponsor card. Vendor the logo under `web/public/assets/` rather than hotlinking
+the sponsor's CDN. Swap it all there — no code change. This is the "one premium
+check" sponsorship model; per-funeral-home attribution still appears as
+arrangement metadata on each record.
 
 `web/vite.config.js` `base` must match the serving path
 (`/wpr-obituaries/` for a Pages project site, `/` for a custom domain root).
@@ -83,6 +87,14 @@ appears as arrangement metadata on each record.
   window (`WINDOW_DAYS` in `main.py`) for the cron — bounded cost.
 - **Sitemap**: not yet generated. A `sitemap.xml` of the per-person pages would
   speed up indexing; add to `main.py` when ready.
+- **Front-end brand**: the widget (`web/src/index.css`) and the per-person pages
+  (`extract/templates.py`) share one WPR newsroom type system — **Oswald** for
+  the nameplate/labels (WPR's heading face), **Merriweather** for names and body
+  (WPR's reading serif), and **Courier Prime** as the typewriter accent for
+  datelines and metadata — on a warm newsprint palette with an oxblood accent
+  (`#7c2e36`). Keep the two surfaces visually in sync. A template change only
+  reaches already-published `o/*.html` pages on the next `main.py` run, since the
+  full body text needed to re-render lives only in the source posts.
 
 ## v2 (deferred, by decision)
 

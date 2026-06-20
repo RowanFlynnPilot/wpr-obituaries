@@ -10,3 +10,6 @@ web/dist/
 
 # Local env
 .env
+
+# Claude Code local settings
+.claude/settings.local.json
