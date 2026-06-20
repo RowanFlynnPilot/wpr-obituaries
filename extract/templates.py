@@ -161,12 +161,27 @@ def _related_section(related: list[Obituary], base_url: str) -> str:
     </section>"""
 
 
+def _image_meta(og_image: str | None, pic: str | None) -> str:
+    """og:image (the branded card when available, else the portrait) + Twitter card."""
+    image = og_image or pic
+    if not image:
+        return '<meta name="twitter:card" content="summary" />'
+    tags = [f'<meta property="og:image" content="{html.escape(image)}" />']
+    if og_image:  # the composed card is a known 1200x630
+        tags.append('<meta property="og:image:width" content="1200" />')
+        tags.append('<meta property="og:image:height" content="630" />')
+    tags.append('<meta name="twitter:card" content="summary_large_image" />')
+    tags.append(f'<meta name="twitter:image" content="{html.escape(image)}" />')
+    return "\n  ".join(tags)
+
+
 def render_person_page(
     ob: Obituary,
     sponsor: dict,
     base_url: str,
     related: list[Obituary] | None = None,
     photo_url: str | None = None,
+    og_image: str | None = None,
 ) -> str:
     page_url = f"{base_url}/o/{ob.slug}.html"
     pic = photo_url or ob.photo_url  # vendored local copy when available, else remote
@@ -203,7 +218,7 @@ def render_person_page(
   <meta property="og:title" content="{html.escape(ob.name)} Obituary" />
   <meta property="og:description" content="{html.escape(ob.summary)}" />
   <meta property="og:url" content="{page_url}" />
-  {f'<meta property="og:image" content="{html.escape(pic)}" />' if pic else ''}
+  {_image_meta(og_image, pic)}
   <script type="application/ld+json">
 {_structured_data(ob, page_url, sponsor, base_url, pic)}
   </script>

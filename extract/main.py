@@ -31,6 +31,7 @@ from anthropic import Anthropic
 
 from extractor import extract_obituaries
 from models import Obituary
+from og import render_card
 from photos import vendor_photos, vendored_slugs
 from store import Master, load_manual, load_master, load_suppressed, save_master
 from templates import render_person_page, render_sitemap
@@ -40,6 +41,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "web" / "public" / "data"
 PAGES_DIR = ROOT / "web" / "public" / "o"
 PHOTOS_DIR = ROOT / "web" / "public" / "assets" / "photos"
+OG_DIR = ROOT / "web" / "public" / "assets" / "og"
 SITEMAP_FILE = ROOT / "web" / "public" / "sitemap.xml"
 SPONSOR_FILE = DATA_DIR / "sponsor.json"
 INDEX_FILE = DATA_DIR / "obituaries.json"
@@ -131,17 +133,35 @@ def _write_index(records: list[Obituary], vendored: set[str]) -> None:
     INDEX_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
+def _lifespan_str(ob: Obituary) -> str:
+    birth = ob.birth_date[:4] if ob.birth_date else ""
+    death = ob.death_date[:4] if ob.death_date else (str(ob.death_year) if ob.death_year else "")
+    return f"{birth} – {death}" if birth and death else death
+
+
+def _sponsor_line(sponsor: dict) -> str:
+    names = [s["name"].split()[0] for s in (sponsor.get("sponsors") or []) if s.get("name")]
+    return "Obituaries  ·  " + " + ".join(names) if names else "Obituaries"
+
+
 def _write_pages(
     records: list[Obituary], sponsor: dict, base_url: str, vendored: set[str]
 ) -> None:
     PAGES_DIR.mkdir(parents=True, exist_ok=True)
+    OG_DIR.mkdir(parents=True, exist_ok=True)
     for stale in PAGES_DIR.glob("*.html"):
         stale.unlink()  # render is authoritative: never leave an orphaned page
+    sponsor_line = _sponsor_line(sponsor)
     recent = sorted(records, key=lambda r: r.source_date, reverse=True)[:7]
     for ob in records:
         related = [r for r in recent if r.slug != ob.slug][:6]
+        portrait = PHOTOS_DIR / f"{ob.slug}.jpg" if ob.slug in vendored else None
+        render_card(ob.name, _lifespan_str(ob), portrait, OG_DIR / f"{ob.slug}.png", sponsor_line)
+        og_image = f"{base_url}/assets/og/{ob.slug}.png"
         (PAGES_DIR / f"{ob.slug}.html").write_text(
-            render_person_page(ob, sponsor, base_url, related, _page_photo(ob, vendored, base_url)),
+            render_person_page(
+                ob, sponsor, base_url, related, _page_photo(ob, vendored, base_url), og_image
+            ),
             encoding="utf-8",
         )
 
