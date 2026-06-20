@@ -103,6 +103,11 @@ _SECONDARY_CSS = """
     body { margin: 0; background: var(--paper); color: var(--ink);
       font-family: var(--serif); line-height: 1.7; -webkit-font-smoothing: antialiased; }
     .wrap { max-width: 680px; margin: 0 auto; padding: 44px 24px 80px; }
+    .topnav { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono);
+      font-size: 12px; letter-spacing: 0.04em; color: var(--accent); background: var(--paper-2);
+      border: 1px solid var(--rule); border-radius: 2px; padding: 7px 13px;
+      text-decoration: none; margin-bottom: 24px; }
+    .topnav:hover { background: var(--hover); }
     .masthead { text-align: center; margin-bottom: 30px; }
     .masthead__logo img { height: 30px; mix-blend-mode: multiply; }
     .kicker { margin: 16px 0 0; font-family: var(--mono); font-size: 11.5px;
@@ -138,7 +143,7 @@ _SECONDARY_CSS = """
       body { background: #fff; color: #000; }
       .wrap { max-width: 100%; padding: 0; }
       .list a { color: #000; }
-      .sponsor-card, .back, .site { display: none !important; }
+      .topnav, .sponsor-card, .back, .site { display: none !important; }
     }
 """
 
@@ -187,6 +192,7 @@ def render_home_page(
 </head>
 <body>
   <main class="wrap">
+    <a class="topnav" href="{base_url}/">&larr; All obituaries</a>
     <header class="masthead">
       <a class="masthead__logo" href="https://wausaupilotandreview.com"
          target="_blank" rel="noopener">
@@ -424,6 +430,13 @@ def render_person_page(
       -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
     }}
     .wrap {{ max-width: 680px; margin: 0 auto; padding: 44px 24px 80px; }}
+    .topnav {{
+      display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono);
+      font-size: 12px; letter-spacing: 0.04em; color: var(--accent);
+      background: var(--paper-2); border: 1px solid var(--rule); border-radius: 2px;
+      padding: 7px 13px; text-decoration: none; margin-bottom: 24px;
+    }}
+    .topnav:hover {{ background: var(--hover); }}
     .masthead {{ text-align: center; margin-bottom: 30px; }}
     .masthead__logo img {{ height: 30px; width: auto; mix-blend-mode: multiply; }}
     .kicker {{
@@ -529,12 +542,13 @@ def render_person_page(
       .portrait {{ cursor: default; border-color: #999; }}
       .arrangements a {{ color: #000; text-decoration: none; }}
       /* Drop the interactive chrome — keep the name, dates, portrait, and text. */
-      .share, .sponsor-card, .more, .back, .lightbox {{ display: none !important; }}
+      .topnav, .share, .sponsor-card, .more, .back, .lightbox {{ display: none !important; }}
     }}
   </style>
 </head>
 <body>
   <main class="wrap">
+    <a class="topnav" href="{base_url}/">&larr; All obituaries</a>
     <header class="masthead">
       <a class="masthead__logo" href="https://wausaupilotandreview.com"
          target="_blank" rel="noopener">
