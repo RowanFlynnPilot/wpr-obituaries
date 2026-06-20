@@ -1,133 +1,202 @@
+/* Wausau Pilot & Review — Obituaries
+   Type system mirrors the WPR newsroom: Oswald (the condensed nameplate face),
+   Merriweather (the reading serif), and Courier Prime as the typewriter accent
+   used for datelines, labels and metadata. Warm newsprint palette, dignified
+   oxblood accent. */
+
 :root {
-  --ink: #1c1b19;
-  --paper: #f7f4ee;
-  --muted: #6b665e;
-  --teal: #3a867c;
-  --teal-light: #4aaba7;
-  --rule: #d8d2c6;
+  --ink: #1b1a18;
+  --paper: #f6f2ea;
+  --paper-2: #fffdf7;
+  --muted: #6f6a61;
+  --faint: #9b958a;
+  --rule: #d9d3c6;
+  --hairline: #e7e1d5;
+  --accent: #7c2e36;       /* oxblood — dignified, ties to the sponsor crimson */
+  --accent-2: #9a3a43;
   --hover: #efe9dd;
+
+  --serif: "Merriweather", Georgia, "Times New Roman", serif;
+  --nameplate: "Oswald", "Arial Narrow", system-ui, sans-serif;
+  --mono: "Courier Prime", "Courier New", monospace;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: "Source Sans 3", system-ui, sans-serif;
-  line-height: 1.6;
+  font-family: var(--serif);
+  font-weight: 400;
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 .page {
-  max-width: 760px;
+  max-width: 720px;
   margin: 0 auto;
-  padding: 40px 24px 72px;
+  padding: 44px 24px 80px;
+}
+
+/* Shared typewriter label */
+.kicker {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
 /* ---------- Masthead ---------- */
 .masthead {
   text-align: center;
-  padding-bottom: 28px;
-  border-bottom: 1px solid var(--rule);
+}
+
+.masthead__logo {
+  display: inline-block;
 }
 
 .masthead__logo img {
-  height: 38px;
+  height: 34px;
   width: auto;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
+  /* The WPR wordmark ships on a white plate; multiply drops it onto the
+     newsprint paper so the box disappears and the black mark stays black. */
+  mix-blend-mode: multiply;
 }
 
 .masthead__eyebrow {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 12px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--muted);
   margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--accent);
 }
 
 .masthead__title {
-  font-family: "Fraunces", serif;
+  font-family: var(--nameplate);
   font-weight: 600;
-  font-size: clamp(2.4rem, 7vw, 3.4rem);
-  line-height: 1;
-  margin: 6px 0 0;
+  font-size: clamp(2.7rem, 9vw, 4rem);
+  line-height: 0.98;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 8px 0 0;
 }
 
 .masthead__lede {
-  max-width: 46ch;
-  margin: 14px auto 0;
+  max-width: 44ch;
+  margin: 16px auto 0;
   color: var(--muted);
-  font-size: 0.98rem;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+/* Double newspaper rule under the masthead */
+.masthead__rule {
+  height: 0;
+  border: 0;
+  border-top: 3px double var(--rule);
+  margin: 26px auto 0;
+  max-width: 100%;
 }
 
 .masthead__sponsor {
-  margin: 18px 0 0;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 12.5px;
-  letter-spacing: 0.04em;
-  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  margin-top: 26px;
 }
 
-.masthead__sponsor a {
-  color: var(--teal);
-  text-decoration: none;
+.masthead__sponsor-label {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--faint);
 }
 
-.masthead__sponsor a:hover {
-  text-decoration: underline;
+.masthead__sponsor-logo img {
+  height: 38px;
+  width: auto;
+  display: block;
+  transition: opacity 0.15s ease;
+}
+
+.masthead__sponsor-logo:hover img {
+  opacity: 0.78;
 }
 
 /* ---------- Search ---------- */
 .search {
-  margin: 32px 0 8px;
+  margin: 38px 0 4px;
 }
 
 .search__label {
   display: block;
-  font-family: "JetBrains Mono", monospace;
+  font-family: var(--mono);
   font-size: 11px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 8px;
+  margin-bottom: 9px;
 }
 
 .search__input {
   width: 100%;
-  padding: 13px 16px;
+  padding: 14px 16px;
   font-size: 1rem;
-  font-family: inherit;
+  font-family: var(--serif);
   color: var(--ink);
-  background: #fffdf8;
+  background: var(--paper-2);
   border: 1px solid var(--rule);
   border-radius: 2px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.search__input::placeholder {
+  color: var(--faint);
+  font-style: italic;
 }
 
 .search__input:focus {
   outline: none;
-  border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(58, 134, 124, 0.15);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124, 46, 54, 0.13);
 }
 
 .search__count {
-  margin: 10px 0 0;
-  font-family: "JetBrains Mono", monospace;
+  margin: 11px 0 0;
+  font-family: var(--mono);
   font-size: 12px;
+  letter-spacing: 0.04em;
   color: var(--muted);
 }
 
 /* ---------- Register ---------- */
 .register {
   list-style: none;
-  margin: 16px 0 0;
+  margin: 18px 0 0;
   padding: 0;
+  counter-reset: none;
 }
 
 .entry {
+  border-top: 1px solid var(--hairline);
+}
+
+.entry:first-child {
   border-top: 1px solid var(--rule);
 }
 
@@ -137,9 +206,9 @@ body {
 
 .entry__link {
   display: flex;
-  gap: 18px;
+  gap: 20px;
   align-items: flex-start;
-  padding: 20px 8px;
+  padding: 22px 10px;
   text-decoration: none;
   color: inherit;
   transition: background-color 0.15s ease;
@@ -152,118 +221,195 @@ body {
 }
 
 .entry__photo {
-  flex: 0 0 64px;
-  width: 64px;
-  height: 64px;
+  flex: 0 0 66px;
+  width: 66px;
+  height: 66px;
   object-fit: cover;
   border: 1px solid var(--rule);
-  background: #fffdf8;
+  background: var(--paper-2);
+  filter: grayscale(0.15);
 }
 
 .entry__photo--blank {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Fraunces", serif;
-  font-size: 1.5rem;
-  color: var(--rule);
-  letter-spacing: 0.02em;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: var(--accent);
+  background: var(--paper-2);
+  letter-spacing: 0.01em;
+  box-shadow: inset 0 0 0 1px var(--hairline);
 }
 
 .entry__text {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
+  padding-top: 2px;
 }
 
 .entry__name {
-  font-family: "Fraunces", serif;
-  font-weight: 600;
-  font-size: 1.4rem;
-  line-height: 1.15;
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.32rem;
+  line-height: 1.2;
+  color: var(--ink);
 }
 
 .entry__link:hover .entry__name,
 .entry__link:focus-visible .entry__name {
+  color: var(--accent);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
 
 .entry__span {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 13px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
   color: var(--muted);
 }
 
 .entry__summary {
-  margin-top: 4px;
-  font-size: 0.96rem;
+  margin-top: 3px;
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.55;
   color: var(--ink);
 }
 
 .entry__home {
-  margin-top: 4px;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 11.5px;
-  letter-spacing: 0.04em;
+  margin-top: 5px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--faint);
 }
 
 .register__empty {
-  margin: 28px 0;
+  margin: 32px 0;
   color: var(--muted);
-  font-size: 0.98rem;
+  font-style: italic;
+  font-size: 1.02rem;
 }
 
 /* ---------- Footer ---------- */
 .footer {
-  margin-top: 40px;
+  margin-top: 48px;
+}
+
+/* Sponsor showcase card */
+.sponsor-card {
+  text-align: center;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--accent);
+  border-radius: 2px;
+  padding: 30px 28px 32px;
+  margin-bottom: 40px;
+}
+
+.sponsor-card__label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+
+.sponsor-card__logo {
+  display: inline-block;
+}
+
+.sponsor-card__logo img {
+  height: 92px;
+  width: auto;
+  max-width: 100%;
+  transition: opacity 0.15s ease;
+}
+
+.sponsor-card__logo:hover img {
+  opacity: 0.82;
+}
+
+.sponsor-card__tagline {
+  max-width: 38ch;
+  margin: 18px auto 0;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 0.98rem;
+  color: var(--muted);
 }
 
 .footer__rule {
-  height: 2px;
-  width: 56px;
-  background: var(--teal);
-  margin-bottom: 20px;
+  height: 0;
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 0 0 22px;
 }
 
 .footer__submit {
-  font-size: 0.95rem;
+  font-size: 0.98rem;
+  font-weight: 300;
+  line-height: 1.6;
   color: var(--ink);
   margin: 0;
 }
 
 .footer__submit a {
-  color: var(--teal);
+  color: var(--accent);
+  text-decoration-color: rgba(124, 46, 54, 0.4);
+  text-underline-offset: 2px;
 }
 
-.footer__sponsor {
-  margin: 16px 0 0;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 12px;
-  color: var(--muted);
+.footer__submit a:hover {
+  text-decoration-color: var(--accent);
+}
+
+.footer__fineprint {
+  margin: 18px 0 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--faint);
 }
 
 /* ---------- States ---------- */
 .page__loading,
 .page__error {
-  margin: 40px 0;
-  font-family: "JetBrains Mono", monospace;
+  margin: 48px 0;
+  font-family: var(--mono);
   font-size: 13px;
   color: var(--muted);
 }
 
 @media (max-width: 480px) {
+  .page {
+    padding: 32px 18px 64px;
+  }
+  .entry__link {
+    gap: 15px;
+    padding: 18px 4px;
+  }
   .entry__photo {
-    flex-basis: 52px;
-    width: 52px;
-    height: 52px;
+    flex-basis: 54px;
+    width: 54px;
+    height: 54px;
   }
   .entry__name {
-    font-size: 1.2rem;
+    font-size: 1.18rem;
+  }
+  .sponsor-card {
+    padding: 26px 18px 28px;
+  }
+  .sponsor-card__logo img {
+    height: 74px;
   }
 }
 
