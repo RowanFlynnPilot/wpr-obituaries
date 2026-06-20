@@ -45,7 +45,9 @@ MASTER_FILE = ROOT / "data" / "obituaries_master.json"
 MANUAL_FILE = ROOT / "data" / "manual.json"
 SUPPRESSED_FILE = ROOT / "data" / "suppressed.json"
 FAILURES_FILE = ROOT / "data" / "failures.json"
-WINDOW_DAYS = 14  # temporary: tight recent window while tuning runs; restore to 45
+WINDOW_DAYS = 14  # days to look back for new/changed posts each run; a safety
+#                   buffer (covers missed crons), not a retention limit — the
+#                   master keeps every published page forever.
 
 
 def _load_sponsor() -> dict:
