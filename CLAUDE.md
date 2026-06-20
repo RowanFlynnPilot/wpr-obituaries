@@ -97,14 +97,13 @@ arrangement metadata on each record.
   the per-person pages own the ranking. Not solved in v1.
 - **SEO domain**: pointing `obituaries.wausaupilotandreview.com` at Pages keeps
   ranking equity on the brand domain. Recommended before heavy promotion.
-- **Backfill / seeding**: `python extract/main.py --backfill` parses every
-  obituary post ever published (one Haiku call per *new* post) and seeds the
-  master. **Migration:** after the master store ships, run a one-time backfill
-  (workflow dispatch with the backfill box checked, or locally) to recover the
-  back-catalogue; until then the cron simply accumulates forward from the recent
-  window. The cron uses `WINDOW_DAYS` (currently **14**, steady-state target 45)
-  only to bound *new-post extraction* — it no longer bounds what stays published,
-  because render always covers the whole master.
+- **Seeding the master**: the chosen migration is a one-time **6-month seed**,
+  `python extract/main.py --days 180` (or workflow dispatch with `seed_days=180`)
+  — ~73 posts, ~15-20 min, a few dollars. The full `--backfill` (every post since
+  Oct 2017, ~1,309 posts / multiple hours, risks the 6 h Actions timeout) exists
+  but is not needed; deep history isn't wanted. After seeding, the cron's
+  `WINDOW_DAYS` (currently **14**) only bounds *new-post extraction* — the master
+  accumulates forward forever, so the published catalogue only grows.
 - **Persistence (fixed)**: pages used to be regenerated from only the window and
   would 404 once they aged out — fatal for the SEO premise. The master store +
   render-everything design fixes this; a published page is permanent.

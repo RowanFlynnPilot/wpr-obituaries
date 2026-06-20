@@ -1,6 +1,7 @@
 """Build the obituary master, then render the whole site from it.
 
   python -m extract.main               # recent window: extract new posts, render all
+  python -m extract.main --days 180    # one-off seed: extract the last ~6 months
   python -m extract.main --backfill    # extract every obituary post ever published
   python -m extract.main --render-only # re-render from the master, no fetch/API
 
@@ -134,7 +135,13 @@ def render(master: Master, sponsor: dict, base_url: str, allow_empty: bool) -> N
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--backfill", action="store_true", help="extract all history")
+    scope = parser.add_mutually_exclusive_group()
+    scope.add_argument("--backfill", action="store_true", help="extract all history")
+    scope.add_argument(
+        "--days", type=int, metavar="N",
+        help="one-off: extract the last N days instead of the default window "
+        "(e.g. --days 180 to seed ~6 months)",
+    )
     parser.add_argument(
         "--render-only", action="store_true", help="re-render from master; no fetch/API"
     )
@@ -148,7 +155,12 @@ def main() -> int:
     failures: list[tuple[str, str]] = []
     if not args.render_only:
         client = Anthropic(max_retries=4)
-        window = None if args.backfill else WINDOW_DAYS
+        if args.backfill:
+            window = None
+        elif args.days is not None:
+            window = args.days
+        else:
+            window = WINDOW_DAYS
         failures = sync(master, client, window)
         save_master(master, MASTER_FILE)  # persist successes before anything can fail
 
