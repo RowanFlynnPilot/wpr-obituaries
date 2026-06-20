@@ -13,6 +13,7 @@ web/dist/
 # committed (it is the source of truth); these derivatives are not.
 web/public/data/obituaries.json
 web/public/sitemap.xml
+web/public/feed.xml
 web/public/o/*.html
 !web/public/o/.gitkeep
 web/public/funeral-home/
