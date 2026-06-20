@@ -41,6 +41,9 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
+      - name: Run pipeline tests
+        run: python extract/test_pipeline.py
+
       - name: Extract obituaries and render site
         run: |
           if [ "${{ inputs.backfill }}" = "true" ]; then

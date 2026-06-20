@@ -8,11 +8,29 @@ person. The model only extracts what is present; it never invents detail.
 from __future__ import annotations
 
 import json
+import sys
+from datetime import date
 
 from anthropic import Anthropic
 from bs4 import BeautifulSoup
 
 from models import Obituary
+
+
+def sanity_warnings(ob: Obituary) -> list[str]:
+    """Flag implausible extracted data — logged loudly, never fatal."""
+    warnings = []
+    if ob.birth_date and ob.death_date and ob.birth_date > ob.death_date:
+        warnings.append(f"birth {ob.birth_date} after death {ob.death_date}")
+    if ob.death_year and not (1900 <= ob.death_year <= date.today().year + 1):
+        warnings.append(f"implausible death year {ob.death_year}")
+    if ob.age is not None and not (0 <= ob.age <= 120):
+        warnings.append(f"implausible age {ob.age}")
+    if ob.birth_date and ob.death_date and ob.age is not None:
+        years = int(ob.death_date[:4]) - int(ob.birth_date[:4])
+        if abs(years - ob.age) > 1:
+            warnings.append(f"age {ob.age} inconsistent with dates (~{years})")
+    return warnings
 
 MODEL = "claude-haiku-4-5-20251001"
 MAX_TOKENS = 16000
@@ -96,20 +114,21 @@ def extract_obituaries(post: dict, client: Anthropic) -> list[Obituary]:
         name = (r.get("name") or "").strip()
         if not name:
             raise ValueError(f"Record with no name in post {source_url}: {r}")
-        obituaries.append(
-            Obituary(
-                name=name,
-                source_id=source_id,
-                source_url=source_url,
-                source_date=source_date,
-                death_year=r.get("death_year"),
-                birth_date=r.get("birth_date"),
-                death_date=r.get("death_date"),
-                age=r.get("age"),
-                funeral_home=r.get("funeral_home"),
-                photo_url=r.get("photo_url"),
-                summary=(r.get("summary") or "").strip(),
-                body=(r.get("body") or "").strip(),
-            )
+        ob = Obituary(
+            name=name,
+            source_id=source_id,
+            source_url=source_url,
+            source_date=source_date,
+            death_year=r.get("death_year"),
+            birth_date=r.get("birth_date"),
+            death_date=r.get("death_date"),
+            age=r.get("age"),
+            funeral_home=r.get("funeral_home"),
+            photo_url=r.get("photo_url"),
+            summary=(r.get("summary") or "").strip(),
+            body=(r.get("body") or "").strip(),
         )
+        for warning in sanity_warnings(ob):
+            print(f"  WARN {ob.name} ({source_url}): {warning}", file=sys.stderr)
+        obituaries.append(ob)
     return obituaries

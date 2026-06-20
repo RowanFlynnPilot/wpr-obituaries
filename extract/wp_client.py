@@ -9,12 +9,37 @@ missing.
 from __future__ import annotations
 
 import os
+import sys
+import time
 
 from curl_cffi import requests
 
 BASE = "https://wausaupilotandreview.com/wp-json/wp/v2"
 CATEGORY_SLUG = "obituaries"
 TIMEOUT = 30
+RETRIES = 3  # the residential proxy + Cloudflare are flaky; ride out blips
+
+
+def _get(session: requests.Session, url: str, params: dict) -> requests.Response:
+    """GET with bounded exponential backoff on transport errors and 5xx.
+
+    Returns 4xx responses as-is (the caller distinguishes the 400 that marks the
+    end of pagination); only server errors and exceptions are retried.
+    """
+    last_error: Exception | None = None
+    for attempt in range(RETRIES + 1):
+        try:
+            resp = session.get(url, params=params, timeout=TIMEOUT)
+            if resp.status_code < 500:
+                return resp
+            last_error = RuntimeError(f"{resp.status_code} from {url}")
+        except Exception as exc:  # noqa: BLE001 — network/proxy/TLS blips
+            last_error = exc
+        if attempt < RETRIES:
+            wait = 2**attempt  # 1s, 2s, 4s
+            print(f"  fetch retry {attempt + 1}/{RETRIES} after {wait}s: {last_error}", file=sys.stderr)
+            time.sleep(wait)
+    raise last_error
 
 
 def _proxies() -> dict[str, str]:
@@ -41,10 +66,8 @@ def make_session() -> requests.Session:
 
 def _category_id(session: requests.Session) -> int:
     """Resolve the obituaries category ID. Raise if it cannot be found."""
-    resp = session.get(
-        f"{BASE}/categories",
-        params={"slug": CATEGORY_SLUG, "_fields": "id,slug"},
-        timeout=TIMEOUT,
+    resp = _get(
+        session, f"{BASE}/categories", {"slug": CATEGORY_SLUG, "_fields": "id,slug"}
     )
     resp.raise_for_status()
     rows = resp.json()
@@ -78,9 +101,7 @@ def fetch_batch_posts(window_days: int | None) -> list[dict]:
     posts: list[dict] = []
     page = 1
     while True:
-        resp = session.get(
-            f"{BASE}/posts", params={**params, "page": page}, timeout=TIMEOUT
-        )
+        resp = _get(session, f"{BASE}/posts", {**params, "page": page})
         if resp.status_code == 400:
             # WordPress returns 400 once page exceeds the available range.
             break
