@@ -83,8 +83,11 @@ arrangement metadata on each record.
 - **SEO domain**: pointing `obituaries.wausaupilotandreview.com` at Pages keeps
   ranking equity on the brand domain. Recommended before heavy promotion.
 - **Backfill cost**: `python extract/main.py --backfill` parses every obituary
-  post ever published (one Haiku call per post). The default run uses a 45-day
-  window (`WINDOW_DAYS` in `main.py`) for the cron — bounded cost.
+  post ever published (one Haiku call per post). The default run uses a recent
+  window (`WINDOW_DAYS` in `main.py`) for the cron — bounded cost. Currently set
+  to **14 days** while runs are being tuned; the intended steady-state is 45.
+  Note the index is rebuilt from only that window each run (it does not
+  accumulate), so the register shows exactly the trailing window of names.
 - **Sitemap**: not yet generated. A `sitemap.xml` of the per-person pages would
   speed up indexing; add to `main.py` when ready.
 - **Front-end brand**: the widget (`web/src/index.css`) and the per-person pages
