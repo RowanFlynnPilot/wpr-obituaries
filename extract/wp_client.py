@@ -1,8 +1,9 @@
 """Fetch obituary batch posts from the Newspack/WordPress REST API.
 
-Wausau Pilot & Review sits behind Cloudflare, so every request is routed
-through a Webshare residential proxy — the same mechanism the gas-prices
-widget already relies on. Fail loudly the moment a precondition is missing.
+Wausau Pilot & Review sits behind Cloudflare, so every request routes through a
+Webshare residential proxy and impersonates Chrome at the TLS layer (curl_cffi)
+to clear Cloudflare's bot detection. Fail loudly the moment a precondition is
+missing.
 """
 
 from __future__ import annotations
@@ -15,14 +16,6 @@ BASE = "https://wausaupilotandreview.com/wp-json/wp/v2"
 CATEGORY_SLUG = "obituaries"
 TIMEOUT = 30
 
-HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
-    ),
-    "Accept": "application/json",
-}
-
 
 def _proxies() -> dict[str, str]:
     """Read the Webshare proxy URL from the environment or raise."""
@@ -30,16 +23,14 @@ def _proxies() -> dict[str, str]:
     if not url:
         raise RuntimeError(
             "WEBSHARE_PROXY_URL is not set. Expected a value like "
-            "http://user:pass@proxy.webshare.io:80"
+            "http://user:pass@p.webshare.io:80"
         )
     return {"http": url, "https": url}
 
 
 def _session() -> requests.Session:
-    session = requests.Session()
-    session.headers.update(HEADERS)
-    session.proxies.update(_proxies())
-    return session
+    """Browser-impersonating session that routes through the residential proxy."""
+    return requests.Session(impersonate="chrome", proxies=_proxies())
 
 
 def _category_id(session: requests.Session) -> int:
