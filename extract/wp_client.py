@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import os
 
-import requests
+from curl_cffi import requests
 
 BASE = "https://wausaupilotandreview.com/wp-json/wp/v2"
 CATEGORY_SLUG = "obituaries"
