@@ -43,10 +43,14 @@ export default function App() {
     if (!data) return [];
     const q = query.trim().toLowerCase();
     if (q) {
-      return data.obituaries.filter(
-        (ob) =>
-          ob.name.toLowerCase().includes(q) ||
-          (ob.funeralHome || "").toLowerCase().includes(q)
+      // Match across name, funeral home, and the summary/excerpt — the latter
+      // carries the town ("of Wausau") and other searchable detail.
+      return data.obituaries.filter((ob) =>
+        [ob.name, ob.funeralHome, ob.summary, ob.excerpt]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase()
+          .includes(q)
       );
     }
     if (filter.kind === "month") {
