@@ -349,8 +349,10 @@ def render_person_page(
     photo_url: str | None = None,
     og_image: str | None = None,
     funeral_home_url: str | None = None,
+    canonical_url: str | None = None,
 ) -> str:
     page_url = f"{base_url}/o/{ob.slug}.html"
+    canonical = canonical_url or page_url  # a duplicate points at the primary page
     pic = photo_url or ob.photo_url  # vendored local copy when available, else remote
     body_paragraphs = "\n".join(
         f"      <p>{html.escape(p)}</p>" for p in ob.body.split("\n\n") if p.strip()
@@ -383,7 +385,7 @@ def render_person_page(
   <title>{html.escape(ob.name)} Obituary — Wausau Pilot &amp; Review</title>
   <meta name="description" content="{html.escape(ob.summary)}" />
   <meta name="theme-color" content="#f6f2ea" />
-  <link rel="canonical" href="{page_url}" />
+  <link rel="canonical" href="{canonical}" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="Wausau Pilot &amp; Review" />
   <meta property="og:title" content="{html.escape(ob.name)} Obituary" />

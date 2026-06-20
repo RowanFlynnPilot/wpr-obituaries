@@ -150,8 +150,38 @@ def _sponsor_line(sponsor: dict) -> str:
     return "Obituaries  ·  " + " + ".join(names) if names else "Obituaries"
 
 
+def _dedupe_people(
+    records: list[Obituary],
+) -> tuple[list[Obituary], dict[str, Obituary]]:
+    """Collapse one person (name + death date) appearing in two batch posts.
+
+    Returns (canonical, primary_by_slug): `canonical` has one record per person
+    for the index/feed/home pages; `primary_by_slug` maps every record's slug to
+    its chosen primary, so a duplicate page can rel=canonical at the primary
+    instead of competing with it (and without 404ing the duplicate URL).
+    """
+    groups: dict[tuple, list[Obituary]] = {}
+    for r in records:
+        stamp = r.death_date or (str(r.death_year) if r.death_year else r.source_date)
+        groups.setdefault((r.name.lower().strip(), stamp), []).append(r)
+    canonical: list[Obituary] = []
+    primary_by_slug: dict[str, Obituary] = {}
+    for group in groups.values():
+        # the fullest record wins (longest body), then the later post
+        primary = max(group, key=lambda r: (len(r.body or ""), r.source_date, r.slug))
+        canonical.append(primary)
+        for r in group:
+            primary_by_slug[r.slug] = primary
+    return canonical, primary_by_slug
+
+
 def _write_pages(
-    records: list[Obituary], sponsor: dict, base_url: str, vendored: set[str], homes: list[dict]
+    records: list[Obituary],
+    sponsor: dict,
+    base_url: str,
+    vendored: set[str],
+    homes: list[dict],
+    primary_by_slug: dict[str, Obituary],
 ) -> None:
     PAGES_DIR.mkdir(parents=True, exist_ok=True)
     OG_DIR.mkdir(parents=True, exist_ok=True)
@@ -166,10 +196,12 @@ def _write_pages(
         og_image = f"{base_url}/assets/og/{ob.slug}.png"
         home = resolve_home(ob.funeral_home, homes)
         home_url = f"{base_url}/funeral-home/{home['slug']}.html" if home else None
+        primary = primary_by_slug.get(ob.slug, ob)
+        canonical_url = f"{base_url}/o/{primary.slug}.html"
         (PAGES_DIR / f"{ob.slug}.html").write_text(
             render_person_page(
                 ob, sponsor, base_url, related, _page_photo(ob, vendored, base_url),
-                og_image, home_url,
+                og_image, home_url, canonical_url,
             ),
             encoding="utf-8",
         )
@@ -216,16 +248,22 @@ def render(master: Master, sponsor: dict, base_url: str, allow_empty: bool) -> N
             "Refusing to render an empty site (0 records after manual/suppression). "
             "Seed the master with `--backfill`, or pass --allow-empty if intended."
         )
+    # One canonical record per person for the visible surfaces; every record
+    # still gets a page (duplicates rel=canonical at their primary).
+    canonical, primary_by_slug = _dedupe_people(records)
     vendored = vendored_slugs(PHOTOS_DIR)
     homes = load_homes(HOMES_FILE)
-    _write_index(records, vendored, homes)
-    _write_pages(records, sponsor, base_url, vendored, homes)
-    home_slugs = _write_home_pages(records, sponsor, base_url, homes)
+    _write_index(canonical, vendored, homes)
+    _write_pages(records, sponsor, base_url, vendored, homes, primary_by_slug)
+    home_slugs = _write_home_pages(canonical, sponsor, base_url, homes)
     SITEMAP_FILE.write_text(
-        render_sitemap(records, base_url, home_slugs), encoding="utf-8"
+        render_sitemap(canonical, base_url, home_slugs), encoding="utf-8"
     )
-    FEED_FILE.write_text(render_feed(records, base_url), encoding="utf-8")
+    FEED_FILE.write_text(render_feed(canonical, base_url), encoding="utf-8")
     extras = []
+    dupes = len(records) - len(canonical)
+    if dupes:
+        extras.append(f"{dupes} cross-post dupes deduped")
     if manual:
         extras.append(f"+{len(manual)} manual")
     if suppressed:
