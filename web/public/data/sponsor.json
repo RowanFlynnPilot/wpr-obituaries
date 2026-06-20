@@ -1,6 +1,15 @@
 {
-  "name": "Peterson/Kraemer Funeral Homes & Crematory, Inc.",
-  "url": "https://www.petersonkraemer.com",
-  "logo": "assets/peterson-kraemer.png",
-  "tagline": "Serving Wausau-area families with compassion, dignity and respect."
+  "label": "Obituaries made possible by",
+  "sponsors": [
+    {
+      "name": "Helke Funeral Home and Cremation Service",
+      "url": "https://www.helke.com",
+      "logo": "assets/helke.png"
+    },
+    {
+      "name": "Brainard Funeral Home and Cremation Center",
+      "url": "https://www.brainardfuneral.com",
+      "logo": "assets/brainard.png"
+    }
+  ]
 }

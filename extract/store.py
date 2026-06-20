@@ -25,7 +25,7 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from models import Obituary
+from models import Obituary, slugify
 
 VERSION = 1
 
@@ -82,3 +82,60 @@ def save_master(master: Master, path: Path) -> None:
         "records": [r.to_record_dict() for r in ordered],
     }
     path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
+def load_suppressed(path: Path) -> set[str]:
+    """Slugs the newsroom has asked us never to publish (e.g. a family request).
+
+    Each entry is a slug string, or an object with a `slug` key (an optional
+    `reason` is for the editor's own record). Suppression is applied at render,
+    so the record stays in the master but never reaches the site or sitemap.
+    """
+    if not path.exists():
+        return set()
+    slugs: set[str] = set()
+    for item in json.loads(path.read_text(encoding="utf-8")):
+        if isinstance(item, str):
+            slugs.add(item)
+        elif isinstance(item, dict) and item.get("slug"):
+            slugs.add(item["slug"])
+    return slugs
+
+
+def load_manual(path: Path) -> list[Obituary]:
+    """Hand-entered obituaries that don't come from a WPR batch post.
+
+    For one-offs (a stray notice, an out-of-town funeral home). Only `name` and
+    `source_date` (YYYY-MM-DD, used for ordering) are required; everything else
+    defaults sensibly. These live only here, so the incremental sync never
+    touches them and they persist across runs.
+    """
+    if not path.exists():
+        return []
+    out: list[Obituary] = []
+    for d in json.loads(path.read_text(encoding="utf-8")):
+        name = (d.get("name") or "").strip()
+        if not name:
+            raise ValueError(f"Manual record with no name: {d}")
+        source_date = d.get("source_date") or d.get("date")
+        if not source_date:
+            raise ValueError(f"Manual record '{name}' is missing source_date")
+        summary = (d.get("summary") or f"{name}.").strip()
+        body = (d.get("body") or summary).strip()
+        out.append(
+            Obituary(
+                name=name,
+                source_id=int(d.get("source_id", 0)),
+                source_url=d.get("source_url") or f"manual:{slugify(name)}-{source_date}",
+                source_date=source_date,
+                death_year=d.get("death_year"),
+                birth_date=d.get("birth_date"),
+                death_date=d.get("death_date"),
+                age=d.get("age"),
+                funeral_home=d.get("funeral_home"),
+                photo_url=d.get("photo_url"),
+                summary=summary,
+                body=body,
+            )
+        )
+    return out

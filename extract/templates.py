@@ -65,13 +65,18 @@ def _structured_data(ob: Obituary, page_url: str, sponsor: dict, base_url: str) 
             **({"image": ob.photo_url} if ob.photo_url else {}),
         },
     }
-    if sponsor.get("name"):
-        org = {"@type": "Organization", "name": sponsor["name"]}
-        if sponsor.get("url"):
-            org["url"] = sponsor["url"]
-        if sponsor.get("logo"):
-            org["logo"] = f"{base_url}/{sponsor['logo']}"
-        data["sponsor"] = org
+    orgs = []
+    for s in sponsor.get("sponsors") or []:
+        if not s.get("name"):
+            continue
+        org = {"@type": "Organization", "name": s["name"]}
+        if s.get("url"):
+            org["url"] = s["url"]
+        if s.get("logo"):
+            org["logo"] = f"{base_url}/{s['logo']}"
+        orgs.append(org)
+    if orgs:
+        data["sponsor"] = orgs if len(orgs) > 1 else orgs[0]
     return json.dumps(data, indent=2)
 
 
@@ -85,34 +90,37 @@ def _lifespan(ob: Obituary) -> str:
     return ""
 
 
-def _sponsor_section(sponsor: dict, base_url: str) -> str:
-    """Showcase the anchor sponsor: logo lockup, link and tagline when present."""
-    if not sponsor.get("name"):
-        return ""
-    name = html.escape(sponsor["name"])
-    url = html.escape(sponsor["url"]) if sponsor.get("url") else ""
-    tagline = (
-        f'<p class="sponsor-card__tagline">{html.escape(sponsor["tagline"])}</p>'
-        if sponsor.get("tagline")
-        else ""
-    )
-    if sponsor.get("logo"):
-        img = (
-            f'<img src="{base_url}/{html.escape(sponsor["logo"])}" alt="{name}" />'
-        )
-        lockup = (
-            f'<a class="sponsor-card__logo" href="{url}" target="_blank" '
-            f'rel="noopener">{img}</a>'
-            if url
-            else f'<span class="sponsor-card__logo">{img}</span>'
-        )
+def _sponsor_lockup(s: dict, base_url: str) -> str:
+    """A single sponsor's logo (or name), linked to its site when present."""
+    name = html.escape(s["name"])
+    if s.get("logo"):
+        inner = f'<img src="{base_url}/{html.escape(s["logo"])}" alt="{name}" />'
     else:
-        linked = f'<a href="{url}">{name}</a>' if url else name
-        lockup = f'<p class="sponsor-card__name">{linked}</p>'
+        inner = f'<span class="sponsor-card__name">{name}</span>'
+    if s.get("url"):
+        return (
+            f'<a class="sponsor-card__logo" href="{html.escape(s["url"])}" '
+            f'target="_blank" rel="noopener">{inner}</a>'
+        )
+    return f'<span class="sponsor-card__logo">{inner}</span>'
+
+
+def _sponsor_section(sponsor: dict, base_url: str) -> str:
+    """Showcase the anchor sponsors: one logo lockup per sponsor."""
+    lockups = [
+        _sponsor_lockup(s, base_url)
+        for s in (sponsor.get("sponsors") or [])
+        if s.get("name")
+    ]
+    if not lockups:
+        return ""
+    label = html.escape(sponsor.get("label") or "Obituaries made possible by")
+    logos = "\n        ".join(lockups)
     return f"""<section class="sponsor-card">
-      <p class="sponsor-card__label">Obituaries made possible by</p>
-      {lockup}
-      {tagline}
+      <p class="sponsor-card__label">{label}</p>
+      <div class="sponsor-card__logos">
+        {logos}
+      </div>
     </section>"""
 
 
@@ -210,16 +218,16 @@ def render_person_page(ob: Obituary, sponsor: dict, base_url: str) -> str:
       margin: 0 0 18px; font-family: var(--mono); font-size: 11px;
       letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted);
     }}
-    .sponsor-card__logo img {{ height: 88px; width: auto; max-width: 100%; }}
+    .sponsor-card__logos {{
+      display: flex; flex-wrap: wrap; align-items: center;
+      justify-content: center; gap: 22px 40px;
+    }}
+    .sponsor-card__logo img {{ height: 80px; width: auto; max-width: 100%; }}
     .sponsor-card__name {{
       font-family: var(--nameplate); font-size: 1.3rem; font-weight: 600;
       margin: 0;
     }}
     .sponsor-card__name a {{ color: var(--ink); text-decoration: none; }}
-    .sponsor-card__tagline {{
-      max-width: 38ch; margin: 18px auto 0; font-style: italic;
-      font-weight: 300; font-size: 0.96rem; color: var(--muted);
-    }}
     .back {{
       display: inline-block; margin-top: 36px; font-family: var(--mono);
       font-size: 12.5px; letter-spacing: 0.04em; color: var(--accent);

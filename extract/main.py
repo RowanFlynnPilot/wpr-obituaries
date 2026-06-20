@@ -31,7 +31,7 @@ from anthropic import Anthropic
 
 from extractor import extract_obituaries
 from models import Obituary
-from store import Master, load_master, save_master
+from store import Master, load_manual, load_master, load_suppressed, save_master
 from templates import render_person_page, render_sitemap
 from wp_client import fetch_batch_posts
 
@@ -42,8 +42,12 @@ SITEMAP_FILE = ROOT / "web" / "public" / "sitemap.xml"
 SPONSOR_FILE = DATA_DIR / "sponsor.json"
 INDEX_FILE = DATA_DIR / "obituaries.json"
 MASTER_FILE = ROOT / "data" / "obituaries_master.json"
+MANUAL_FILE = ROOT / "data" / "manual.json"
+SUPPRESSED_FILE = ROOT / "data" / "suppressed.json"
 FAILURES_FILE = ROOT / "data" / "failures.json"
-WINDOW_DAYS = 14  # temporary: tight recent window while tuning runs; restore to 45
+WINDOW_DAYS = 14  # days to look back for new/changed posts each run; a safety
+#                   buffer (covers missed crons), not a retention limit — the
+#                   master keeps every published page forever.
 
 
 def _load_sponsor() -> dict:
@@ -120,17 +124,31 @@ def _write_pages(records: list[Obituary], sponsor: dict, base_url: str) -> None:
 
 
 def render(master: Master, sponsor: dict, base_url: str, allow_empty: bool) -> None:
-    """Rebuild index, pages, and sitemap from the entire master."""
-    records = master.records
+    """Rebuild index, pages, and sitemap from the master + manual records.
+
+    Manual one-offs are merged in; suppressed slugs (family requests) are removed
+    from everything published, though they remain in the master for the record.
+    """
+    suppressed = load_suppressed(SUPPRESSED_FILE)
+    manual = load_manual(MANUAL_FILE)
+    records = [
+        r for r in (master.records + manual) if r.slug not in suppressed
+    ]
     if not records and not allow_empty:
         raise RuntimeError(
-            "Refusing to render an empty site (master has 0 records). Seed it with "
-            "`--backfill`, or pass --allow-empty if this is truly intended."
+            "Refusing to render an empty site (0 records after manual/suppression). "
+            "Seed the master with `--backfill`, or pass --allow-empty if intended."
         )
     _write_index(records)
     _write_pages(records, sponsor, base_url)
     SITEMAP_FILE.write_text(render_sitemap(records, base_url), encoding="utf-8")
-    print(f"Rendered {len(records)} pages, index, and sitemap.")
+    extras = []
+    if manual:
+        extras.append(f"+{len(manual)} manual")
+    if suppressed:
+        extras.append(f"-{len(suppressed)} suppressed")
+    note = f" ({', '.join(extras)})" if extras else ""
+    print(f"Rendered {len(records)} pages, index, and sitemap{note}.")
 
 
 def main() -> int:

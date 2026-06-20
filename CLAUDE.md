@@ -77,13 +77,14 @@ Environment (extractor):
   Currently `https://rowanflynnpilot.github.io/wpr-obituaries` until a custom
   subdomain is in place.
 
-The single anchor sponsor lives in `web/public/data/sponsor.json`:
-`{ "name", "url", "logo", "tagline" }`. `name` + `url` are required; `logo`
-(repo-relative path, e.g. `assets/peterson-kraemer.png`, served identically by
-the widget and the static pages) and `tagline` are optional and drive the
-sponsor card. Vendor the logo under `web/public/assets/` rather than hotlinking
-the sponsor's CDN. Swap it all there — no code change. This is the "one premium
-check" sponsorship model; per-funeral-home attribution still appears as
+Sponsors live in `web/public/data/sponsor.json`:
+`{ "label", "sponsors": [ { "name", "url", "logo" }, ... ] }`. Each sponsor's
+`name` is required; `url` and `logo` (repo-relative path, e.g. `assets/helke.png`,
+served identically by the widget and the static pages) are optional. All
+sponsors render together in the masthead, the footer card, every obituary page,
+and the schema.org `sponsor`. Vendor logos under `web/public/assets/` rather
+than hotlinking. Current sponsors: **Helke** and **Brainard** (co-owned). Swap
+them all there — no code change. Per-funeral-home attribution still appears as
 arrangement metadata on each record.
 
 `web/vite.config.js` `base` must match the serving path
@@ -117,6 +118,15 @@ arrangement metadata on each record.
   backoff yet (the Anthropic client now retries). (d) **Soft-failure deploys** —
   today any per-post failure skips the deploy that run; a follow-up could deploy
   the good catalogue and surface failures via a separate red report job.
+- **Editorial controls** (`data/`, documented in `data/README.md`):
+  `manual.json` adds hand-entered obituaries that don't come through the WPR
+  batches (a stray notice, an out-of-town home) — each becomes a full page;
+  `suppressed.json` omits a page by slug on request (the record stays in the
+  master but is dropped from the site, index, and sitemap). Both are committed
+  and applied at render. The register draws from these funeral homes: Brainard,
+  Helke, Peterson/Kraemer, Schmidt & Schulta (Wittenberg), John J. Buettgen +
+  Mid-Wisconsin Cremation Society, and Ascend (Weston). Submissions go to
+  darren@wausaupilotandreview.com (shown in the masthead).
 - **Front-end brand**: the widget (`web/src/index.css`) and the per-person pages
   (`extract/templates.py`) share one WPR newsroom type system — **Oswald** for
   the nameplate/labels (WPR's heading face), **Merriweather** for names and body

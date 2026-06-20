@@ -102,6 +102,25 @@ body {
   line-height: 1.6;
 }
 
+.masthead__submit {
+  max-width: 46ch;
+  margin: 12px auto 0;
+  font-weight: 300;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.masthead__submit a {
+  color: var(--accent);
+  text-decoration-color: rgba(124, 46, 54, 0.4);
+  text-underline-offset: 2px;
+}
+
+.masthead__submit a:hover {
+  text-decoration-color: var(--accent);
+}
+
 /* Double newspaper rule under the masthead */
 .masthead__rule {
   height: 0;
@@ -111,11 +130,11 @@ body {
   max-width: 100%;
 }
 
-.masthead__sponsor {
+.masthead__sponsors {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 9px;
+  gap: 12px;
   margin-top: 26px;
 }
 
@@ -127,8 +146,16 @@ body {
   color: var(--faint);
 }
 
+.masthead__sponsor-logos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 18px 32px;
+}
+
 .masthead__sponsor-logo img {
-  height: 38px;
+  height: 40px;
   width: auto;
   display: block;
   transition: opacity 0.15s ease;
@@ -323,12 +350,20 @@ body {
   margin: 0 0 18px;
 }
 
+.sponsor-card__logos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 24px 44px;
+}
+
 .sponsor-card__logo {
   display: inline-block;
 }
 
 .sponsor-card__logo img {
-  height: 92px;
+  height: 80px;
   width: auto;
   max-width: 100%;
   transition: opacity 0.15s ease;
@@ -338,38 +373,11 @@ body {
   opacity: 0.82;
 }
 
-.sponsor-card__tagline {
-  max-width: 38ch;
-  margin: 18px auto 0;
-  font-style: italic;
-  font-weight: 300;
-  font-size: 0.98rem;
-  color: var(--muted);
-}
-
 .footer__rule {
   height: 0;
   border: 0;
   border-top: 1px solid var(--rule);
   margin: 0 0 22px;
-}
-
-.footer__submit {
-  font-size: 0.98rem;
-  font-weight: 300;
-  line-height: 1.6;
-  color: var(--ink);
-  margin: 0;
-}
-
-.footer__submit a {
-  color: var(--accent);
-  text-decoration-color: rgba(124, 46, 54, 0.4);
-  text-underline-offset: 2px;
-}
-
-.footer__submit a:hover {
-  text-decoration-color: var(--accent);
 }
 
 .footer__fineprint {
