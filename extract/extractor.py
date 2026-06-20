@@ -73,6 +73,7 @@ def _parse_response(raw: str) -> list[dict]:
 
 def extract_obituaries(post: dict, client: Anthropic) -> list[Obituary]:
     """Extract every person from one batch post."""
+    source_id = int(post["id"])
     source_url = post["link"]
     source_date = post["date"][:10]
     content_html = post["content"]["rendered"]
@@ -98,6 +99,7 @@ def extract_obituaries(post: dict, client: Anthropic) -> list[Obituary]:
         obituaries.append(
             Obituary(
                 name=name,
+                source_id=source_id,
                 source_url=source_url,
                 source_date=source_date,
                 death_year=r.get("death_year"),

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import hashlib
 import re
 from dataclasses import dataclass
@@ -25,6 +26,7 @@ class Obituary:
     """
 
     name: str
+    source_id: int  # WordPress post id of the batch this person came from
     source_url: str
     source_date: str  # ISO date of the batch post, e.g. "2026-06-19"
     death_year: int | None
@@ -62,3 +64,12 @@ class Obituary:
             "sourceUrl": self.source_url,
             "sourceDate": self.source_date,
         }
+
+    def to_record_dict(self) -> dict:
+        """Full record (incl. body + source) for the persistent master store."""
+        return dataclasses.asdict(self)
+
+    @classmethod
+    def from_record_dict(cls, record: dict) -> "Obituary":
+        """Rebuild from a master-store record. Field names must match exactly."""
+        return cls(**record)
