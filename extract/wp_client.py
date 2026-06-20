@@ -17,7 +17,7 @@ from curl_cffi import requests
 BASE = "https://wausaupilotandreview.com/wp-json/wp/v2"
 CATEGORY_SLUG = "obituaries"
 TIMEOUT = 30
-RETRIES = 3  # the residential proxy + Cloudflare are flaky; ride out blips
+RETRIES = 5  # the residential proxy + Cloudflare are flaky (incl. TLS blips); ride them out
 
 
 def _get(session: requests.Session, url: str, params: dict) -> requests.Response:
