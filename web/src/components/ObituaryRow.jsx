@@ -1,4 +1,4 @@
-import { lifespan } from "../lib/format.js";
+import { lifespan, photoSrc } from "../lib/format.js";
 
 function initials(name) {
   return name
@@ -17,7 +17,7 @@ export default function ObituaryRow({ ob }) {
     <li className="entry">
       <a className="entry__link" href={href}>
         {ob.photoUrl ? (
-          <img className="entry__photo" src={ob.photoUrl} alt="" loading="lazy" />
+          <img className="entry__photo" src={photoSrc(ob.photoUrl)} alt="" loading="lazy" />
         ) : (
           <span className="entry__photo entry__photo--blank" aria-hidden="true">
             {initials(ob.name)}
