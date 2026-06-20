@@ -1,5 +1,14 @@
 // Display helpers. Each does exactly one thing.
 
+// Vendored photos are stored as repo-relative paths (e.g. "assets/photos/x.jpg")
+// and need the base prefix; remote URLs are used as-is.
+export function photoSrc(photoUrl) {
+  if (!photoUrl) return photoUrl;
+  return /^https?:\/\//.test(photoUrl)
+    ? photoUrl
+    : import.meta.env.BASE_URL + photoUrl;
+}
+
 export function lifespan(ob) {
   const birth = ob.birthDate ? ob.birthDate.slice(0, 4) : "";
   const death = ob.deathDate

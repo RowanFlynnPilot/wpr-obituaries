@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { lifespan } from "../lib/format.js";
+import { lifespan, photoSrc } from "../lib/format.js";
 
 const BASE = import.meta.env.BASE_URL;
 const DAYS = 7; // feature the past week
@@ -74,7 +74,7 @@ export default function FeaturedCarousel({ obituaries }) {
         <a className="featured__card" href={href} key={ob.slug}>
           <img
             className="featured__photo"
-            src={ob.photoUrl}
+            src={photoSrc(ob.photoUrl)}
             alt={ob.name}
             loading="lazy"
           />

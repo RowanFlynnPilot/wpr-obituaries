@@ -111,13 +111,21 @@ arrangement metadata on each record.
 - **Sitemap (done)**: `web/public/sitemap.xml` is generated from the master each
   render. Submit it in Search Console. (A root `robots.txt` only helps once a
   custom domain serves the site at root — a project Pages subpath ignores it.)
+- **Vendored photos (done)**: `extract/photos.py` downloads each portrait once
+  (through the proxied session, since images sit behind the same Cloudflare),
+  downscales to ~450px JPEG, and saves it to `web/public/assets/photos/<slug>.jpg`,
+  committed alongside the master. Vendoring runs in the sync phase, capped at
+  `PER_RUN_LIMIT` per run so a first-run backlog drains over a few runs; render
+  prefers the local copy and falls back to the remote URL for anything not yet
+  vendored. The widget's `photoSrc` prepends the base path for these repo-relative
+  photos.
 - **Open follow-ups**: (a) **cross-post dedupe** — the slug keys on the source
   post, so the same person in two posts (notice + full obituary) yields two
-  pages; needs an identity key (name + dates). (b) **Vendor photos** — portraits
-  still hotlink WPR's Cloudflare CDN. (c) **Fetch retries** — `wp_client` has no
-  backoff yet (the Anthropic client now retries). (d) **Soft-failure deploys** —
-  today any per-post failure skips the deploy that run; a follow-up could deploy
-  the good catalogue and surface failures via a separate red report job.
+  pages; needs an identity key (name + dates). (b) **Fetch retries** — `wp_client`
+  has no backoff yet (the Anthropic client now retries). (c) **Soft-failure
+  deploys** — today any per-post failure skips the deploy that run; a follow-up
+  could deploy the good catalogue and surface failures via a separate red report
+  job.
 - **Editorial controls** (`data/`, documented in `data/README.md`):
   `manual.json` adds hand-entered obituaries that don't come through the WPR
   batches (a stray notice, an out-of-town home) — each becomes a full page;

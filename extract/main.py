@@ -31,13 +31,15 @@ from anthropic import Anthropic
 
 from extractor import extract_obituaries
 from models import Obituary
+from photos import vendor_photos, vendored_slugs
 from store import Master, load_manual, load_master, load_suppressed, save_master
 from templates import render_person_page, render_sitemap
-from wp_client import fetch_batch_posts
+from wp_client import fetch_batch_posts, make_session
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "web" / "public" / "data"
 PAGES_DIR = ROOT / "web" / "public" / "o"
+PHOTOS_DIR = ROOT / "web" / "public" / "assets" / "photos"
 SITEMAP_FILE = ROOT / "web" / "public" / "sitemap.xml"
 SPONSOR_FILE = DATA_DIR / "sponsor.json"
 INDEX_FILE = DATA_DIR / "obituaries.json"
@@ -101,19 +103,37 @@ def sync(master: Master, client: Anthropic, window: int | None) -> list[tuple[st
     return failures
 
 
-def _write_index(records: list[Obituary]) -> None:
+def _index_photo(ob: Obituary, vendored: set[str]) -> str | None:
+    """Repo-relative local path if vendored (widget prepends BASE), else remote."""
+    if ob.slug in vendored:
+        return f"assets/photos/{ob.slug}.jpg"
+    return ob.photo_url
+
+
+def _page_photo(ob: Obituary, vendored: set[str], base_url: str) -> str | None:
+    """Absolute local URL if vendored, else the remote URL — for static pages."""
+    if ob.slug in vendored:
+        return f"{base_url}/assets/photos/{ob.slug}.jpg"
+    return ob.photo_url
+
+
+def _write_index(records: list[Obituary], vendored: set[str]) -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     # Newest batch first, then alphabetical by name within a date.
     ordered = sorted(records, key=lambda r: r.name)
     ordered = sorted(ordered, key=lambda r: r.source_date, reverse=True)
-    payload = {
-        "count": len(ordered),
-        "obituaries": [r.to_index_dict() for r in ordered],
-    }
+    obituaries = []
+    for r in ordered:
+        record = r.to_index_dict()
+        record["photoUrl"] = _index_photo(r, vendored)
+        obituaries.append(record)
+    payload = {"count": len(ordered), "obituaries": obituaries}
     INDEX_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
-def _write_pages(records: list[Obituary], sponsor: dict, base_url: str) -> None:
+def _write_pages(
+    records: list[Obituary], sponsor: dict, base_url: str, vendored: set[str]
+) -> None:
     PAGES_DIR.mkdir(parents=True, exist_ok=True)
     for stale in PAGES_DIR.glob("*.html"):
         stale.unlink()  # render is authoritative: never leave an orphaned page
@@ -121,7 +141,8 @@ def _write_pages(records: list[Obituary], sponsor: dict, base_url: str) -> None:
     for ob in records:
         related = [r for r in recent if r.slug != ob.slug][:6]
         (PAGES_DIR / f"{ob.slug}.html").write_text(
-            render_person_page(ob, sponsor, base_url, related), encoding="utf-8"
+            render_person_page(ob, sponsor, base_url, related, _page_photo(ob, vendored, base_url)),
+            encoding="utf-8",
         )
 
 
@@ -130,6 +151,7 @@ def render(master: Master, sponsor: dict, base_url: str, allow_empty: bool) -> N
 
     Manual one-offs are merged in; suppressed slugs (family requests) are removed
     from everything published, though they remain in the master for the record.
+    Portraits resolve to the vendored local copy when present, else the remote URL.
     """
     suppressed = load_suppressed(SUPPRESSED_FILE)
     manual = load_manual(MANUAL_FILE)
@@ -141,8 +163,9 @@ def render(master: Master, sponsor: dict, base_url: str, allow_empty: bool) -> N
             "Refusing to render an empty site (0 records after manual/suppression). "
             "Seed the master with `--backfill`, or pass --allow-empty if intended."
         )
-    _write_index(records)
-    _write_pages(records, sponsor, base_url)
+    vendored = vendored_slugs(PHOTOS_DIR)
+    _write_index(records, vendored)
+    _write_pages(records, sponsor, base_url, vendored)
     SITEMAP_FILE.write_text(render_sitemap(records, base_url), encoding="utf-8")
     extras = []
     if manual:
@@ -183,6 +206,9 @@ def main() -> int:
             window = WINDOW_DAYS
         failures = sync(master, client, window)
         save_master(master, MASTER_FILE)  # persist successes before anything can fail
+        saved = vendor_photos(master.records, PHOTOS_DIR, make_session())
+        if saved:
+            print(f"Vendored {saved} new portrait(s).")
 
     render(master, sponsor, base_url, args.allow_empty)
 

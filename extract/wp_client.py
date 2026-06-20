@@ -33,6 +33,12 @@ def _session() -> requests.Session:
     return requests.Session(impersonate="chrome", proxies=_proxies())
 
 
+def make_session() -> requests.Session:
+    """Public proxied, browser-impersonating session (e.g. for vendoring photos
+    that sit behind the same Cloudflare as the posts)."""
+    return _session()
+
+
 def _category_id(session: requests.Session) -> int:
     """Resolve the obituaries category ID. Raise if it cannot be found."""
     resp = session.get(

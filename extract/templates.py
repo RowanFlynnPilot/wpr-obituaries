@@ -50,7 +50,10 @@ def render_sitemap(obituaries: list[Obituary], base_url: str) -> str:
     )
 
 
-def _structured_data(ob: Obituary, page_url: str, sponsor: dict, base_url: str) -> str:
+def _structured_data(
+    ob: Obituary, page_url: str, sponsor: dict, base_url: str, photo_url: str | None = None
+) -> str:
+    image = photo_url or ob.photo_url
     data = {
         "@context": "https://schema.org",
         "@type": "Obituary",
@@ -63,7 +66,7 @@ def _structured_data(ob: Obituary, page_url: str, sponsor: dict, base_url: str) 
             "name": ob.name,
             **({"birthDate": ob.birth_date} if ob.birth_date else {}),
             **({"deathDate": ob.death_date} if ob.death_date else {}),
-            **({"image": ob.photo_url} if ob.photo_url else {}),
+            **({"image": image} if image else {}),
         },
     }
     orgs = []
@@ -159,17 +162,22 @@ def _related_section(related: list[Obituary], base_url: str) -> str:
 
 
 def render_person_page(
-    ob: Obituary, sponsor: dict, base_url: str, related: list[Obituary] | None = None
+    ob: Obituary,
+    sponsor: dict,
+    base_url: str,
+    related: list[Obituary] | None = None,
+    photo_url: str | None = None,
 ) -> str:
     page_url = f"{base_url}/o/{ob.slug}.html"
+    pic = photo_url or ob.photo_url  # vendored local copy when available, else remote
     body_paragraphs = "\n".join(
         f"      <p>{html.escape(p)}</p>" for p in ob.body.split("\n\n") if p.strip()
     )
     lifespan = _lifespan(ob)
     photo = (
-        f'<img class="portrait" src="{html.escape(ob.photo_url)}" '
+        f'<img class="portrait" src="{html.escape(pic)}" '
         f'alt="{html.escape(ob.name)}" />'
-        if ob.photo_url
+        if pic
         else ""
     )
     funeral_line = (
@@ -195,9 +203,9 @@ def render_person_page(
   <meta property="og:title" content="{html.escape(ob.name)} Obituary" />
   <meta property="og:description" content="{html.escape(ob.summary)}" />
   <meta property="og:url" content="{page_url}" />
-  {f'<meta property="og:image" content="{html.escape(ob.photo_url)}" />' if ob.photo_url else ''}
+  {f'<meta property="og:image" content="{html.escape(pic)}" />' if pic else ''}
   <script type="application/ld+json">
-{_structured_data(ob, page_url, sponsor, base_url)}
+{_structured_data(ob, page_url, sponsor, base_url, pic)}
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
