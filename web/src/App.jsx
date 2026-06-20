@@ -87,10 +87,27 @@ export default function App() {
           <Register obituaries={displayed} query={query} />
         </>
       ) : (
-        <p className="page__loading">Loading…</p>
+        <LoadingSkeleton />
       )}
       <Footer sponsor={sponsor} />
     </main>
+  );
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="skeleton" aria-hidden="true">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div className="skeleton__row" key={i}>
+          <div className="skeleton__photo" />
+          <div className="skeleton__text">
+            <div className="skeleton__line skeleton__line--name" />
+            <div className="skeleton__line skeleton__line--meta" />
+            <div className="skeleton__line skeleton__line--summary" />
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 

@@ -182,6 +182,7 @@ def render_person_page(
     related: list[Obituary] | None = None,
     photo_url: str | None = None,
     og_image: str | None = None,
+    funeral_home_url: str | None = None,
 ) -> str:
     page_url = f"{base_url}/o/{ob.slug}.html"
     pic = photo_url or ob.photo_url  # vendored local copy when available, else remote
@@ -189,17 +190,24 @@ def render_person_page(
         f"      <p>{html.escape(p)}</p>" for p in ob.body.split("\n\n") if p.strip()
     )
     lifespan = _lifespan(ob)
+    # Tap the portrait to enlarge (the markup is inert without the small script below).
     photo = (
         f'<img class="portrait" src="{html.escape(pic)}" '
-        f'alt="{html.escape(ob.name)}" />'
+        f'alt="{html.escape(ob.name)}" tabindex="0" role="button" '
+        f'aria-label="Enlarge portrait" />'
         if pic
         else ""
     )
-    funeral_line = (
-        f'<p class="arrangements">Arrangements by {html.escape(ob.funeral_home)}.</p>'
-        if ob.funeral_home
-        else ""
-    )
+    if ob.funeral_home:
+        home = html.escape(ob.funeral_home)
+        if funeral_home_url:
+            home = (
+                f'<a href="{html.escape(funeral_home_url)}" target="_blank" '
+                f'rel="noopener">{home}</a>'
+            )
+        funeral_line = f'<p class="arrangements">Arrangements by {home}.</p>'
+    else:
+        funeral_line = ""
     sponsor_section = _sponsor_section(sponsor, base_url)
     share_section = _share_section(ob.name, page_url)
     related_section = _related_section(related or [], base_url)
@@ -318,6 +326,14 @@ def render_person_page(
     .more__span {{
       font-family: var(--mono); font-size: 12px; color: var(--muted); margin-left: 6px;
     }}
+    .portrait {{ cursor: zoom-in; }}
+    .lightbox {{
+      position: fixed; inset: 0; background: rgba(20, 18, 16, 0.9);
+      display: flex; align-items: center; justify-content: center; padding: 24px;
+      cursor: zoom-out; z-index: 50;
+    }}
+    .lightbox[hidden] {{ display: none; }}
+    .lightbox__img {{ max-width: 92vw; max-height: 92vh; border: 4px solid var(--paper); }}
     .back {{
       display: inline-block; margin-top: 36px; font-family: var(--mono);
       font-size: 12.5px; letter-spacing: 0.04em; color: var(--accent);
@@ -354,6 +370,21 @@ def render_person_page(
     {related_section}
     <a class="back" href="{base_url}/">&larr; All obituaries</a>
   </main>
+  <div class="lightbox" id="lightbox" hidden><img class="lightbox__img" alt="" /></div>
+  <script>
+    (function () {{
+      var p = document.querySelector('.portrait'), lb = document.getElementById('lightbox');
+      if (!p || !lb) return;
+      var img = lb.querySelector('img');
+      function open() {{ img.src = p.src; img.alt = p.alt; lb.hidden = false; }}
+      p.addEventListener('click', open);
+      p.addEventListener('keydown', function (e) {{
+        if (e.key === 'Enter' || e.key === ' ') {{ e.preventDefault(); open(); }}
+      }});
+      lb.addEventListener('click', function () {{ lb.hidden = true; img.src = ''; }});
+      document.addEventListener('keydown', function (e) {{ if (e.key === 'Escape') {{ lb.hidden = true; }} }});
+    }})();
+  </script>
 </body>
 </html>
 """

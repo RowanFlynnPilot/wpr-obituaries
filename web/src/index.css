@@ -659,6 +659,76 @@ body {
   color: var(--faint);
 }
 
+/* ---------- Loading skeleton ---------- */
+.skeleton {
+  margin: 28px 0 0;
+}
+
+.skeleton__row {
+  display: flex;
+  gap: 20px;
+  padding: 22px 10px;
+  border-top: 1px solid var(--hairline);
+}
+
+.skeleton__row:first-child {
+  border-top: 1px solid var(--rule);
+}
+
+.skeleton__photo {
+  flex: 0 0 66px;
+  width: 66px;
+  height: 66px;
+  border: 1px solid var(--rule);
+}
+
+.skeleton__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding-top: 5px;
+}
+
+.skeleton__line {
+  height: 13px;
+  border-radius: 2px;
+}
+
+.skeleton__line--name {
+  width: 45%;
+  height: 21px;
+}
+
+.skeleton__line--meta {
+  width: 22%;
+}
+
+.skeleton__line--summary {
+  width: 80%;
+}
+
+.skeleton__photo,
+.skeleton__line {
+  background: linear-gradient(
+    90deg,
+    var(--hairline) 25%,
+    var(--hover) 37%,
+    var(--hairline) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
 /* ---------- States ---------- */
 .page__loading,
 .page__error {
