@@ -14,9 +14,44 @@ from __future__ import annotations
 
 import html
 import json
+from datetime import datetime, timezone
 from urllib.parse import quote
 
 from models import Obituary
+
+
+def _rfc822(date_str: str) -> str:
+    """ISO date (YYYY-MM-DD) -> RFC-822 for RSS <pubDate>."""
+    dt = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    return dt.strftime("%a, %d %b %Y %H:%M:%S +0000")
+
+
+def render_feed(obituaries: list[Obituary], base_url: str, limit: int = 50) -> str:
+    """RSS 2.0 feed of the most recent obituaries — syndication + auto-discovery."""
+    recent = sorted(obituaries, key=lambda o: o.source_date, reverse=True)[:limit]
+    items = []
+    for ob in recent:
+        link = html.escape(f"{base_url}/o/{ob.slug}.html")
+        items.append(
+            "    <item>\n"
+            f"      <title>{html.escape(ob.name)}</title>\n"
+            f"      <link>{link}</link>\n"
+            f'      <guid isPermaLink="true">{link}</guid>\n'
+            f"      <pubDate>{_rfc822(ob.source_date)}</pubDate>\n"
+            f"      <description>{html.escape(ob.summary)}</description>\n"
+            "    </item>"
+        )
+    body = "\n".join(items)
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<rss version="2.0">\n  <channel>\n'
+        "    <title>Obituaries — Wausau Pilot &amp; Review</title>\n"
+        f"    <link>{html.escape(base_url)}/</link>\n"
+        "    <description>Recent obituaries from Wausau and Marathon County.</description>\n"
+        "    <language>en-us</language>\n"
+        f"{body}\n"
+        "  </channel>\n</rss>\n"
+    )
 
 WPR_LOGO = (
     "https://wausaupilotandreview.com/wp-content/uploads/2024/04/"
@@ -280,6 +315,18 @@ def _related_section(related: list[Obituary], base_url: str) -> str:
     </section>"""
 
 
+def _breadcrumb_json(ob: Obituary, page_url: str, base_url: str) -> str:
+    data = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Obituaries", "item": f"{base_url}/"},
+            {"@type": "ListItem", "position": 2, "name": ob.name, "item": page_url},
+        ],
+    }
+    return json.dumps(data, indent=2)
+
+
 def _image_meta(og_image: str | None, pic: str | None) -> str:
     """og:image (the branded card when available, else the portrait) + Twitter card."""
     image = og_image or pic
@@ -346,6 +393,10 @@ def render_person_page(
   <script type="application/ld+json">
 {_structured_data(ob, page_url, sponsor, base_url, pic)}
   </script>
+  <script type="application/ld+json">
+{_breadcrumb_json(ob, page_url, base_url)}
+  </script>
+  <link rel="alternate" type="application/rss+xml" title="WPR Obituaries" href="{base_url}/feed.xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="{FONTS}" rel="stylesheet" />

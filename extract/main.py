@@ -35,7 +35,7 @@ from models import Obituary
 from og import render_card
 from photos import vendor_photos, vendored_slugs
 from store import Master, load_manual, load_master, load_suppressed, save_master
-from templates import render_home_page, render_person_page, render_sitemap
+from templates import render_feed, render_home_page, render_person_page, render_sitemap
 from wp_client import fetch_batch_posts, make_session
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -45,6 +45,7 @@ HOME_PAGES_DIR = ROOT / "web" / "public" / "funeral-home"
 PHOTOS_DIR = ROOT / "web" / "public" / "assets" / "photos"
 OG_DIR = ROOT / "web" / "public" / "assets" / "og"
 SITEMAP_FILE = ROOT / "web" / "public" / "sitemap.xml"
+FEED_FILE = ROOT / "web" / "public" / "feed.xml"
 SPONSOR_FILE = DATA_DIR / "sponsor.json"
 INDEX_FILE = DATA_DIR / "obituaries.json"
 MASTER_FILE = ROOT / "data" / "obituaries_master.json"
@@ -223,6 +224,7 @@ def render(master: Master, sponsor: dict, base_url: str, allow_empty: bool) -> N
     SITEMAP_FILE.write_text(
         render_sitemap(records, base_url, home_slugs), encoding="utf-8"
     )
+    FEED_FILE.write_text(render_feed(records, base_url), encoding="utf-8")
     extras = []
     if manual:
         extras.append(f"+{len(manual)} manual")
