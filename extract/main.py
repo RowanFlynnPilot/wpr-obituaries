@@ -28,7 +28,7 @@ DATA_DIR = ROOT / "web" / "public" / "data"
 PAGES_DIR = ROOT / "web" / "public" / "o"
 SPONSOR_FILE = DATA_DIR / "sponsor.json"
 INDEX_FILE = DATA_DIR / "obituaries.json"
-WINDOW_DAYS = 45
+WINDOW_DAYS = 14  # temporary: tight recent window while tuning runs; restore to 45
 
 
 def _load_sponsor() -> dict:
