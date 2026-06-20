@@ -8,7 +8,7 @@ export default function SearchBar({ value, onChange, count }) {
         id="obit-search"
         className="search__input"
         type="search"
-        placeholder="Search by name or funeral home"
+        placeholder="Search by name, town, or funeral home"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         autoComplete="off"
