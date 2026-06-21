@@ -67,10 +67,18 @@ body {
 .masthead__logo img {
   height: 34px;
   width: auto;
-  margin-bottom: 22px;
+  margin-bottom: 14px;
   /* The WPR wordmark ships on a white plate; multiply drops it onto the
      newsprint paper so the box disappears and the black mark stays black. */
   mix-blend-mode: multiply;
+}
+
+.masthead__seal {
+  display: block;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  margin: 0 auto 18px;
 }
 
 .masthead__eyebrow {

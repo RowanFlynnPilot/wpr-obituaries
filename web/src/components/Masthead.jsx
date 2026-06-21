@@ -15,6 +15,14 @@ export default function Masthead({ sponsor }) {
       >
         <img src={LOGO} alt="Wausau Pilot & Review" />
       </a>
+      <img
+        className="masthead__seal"
+        src={`${BASE}assets/wpr-seal.png`}
+        alt=""
+        width="58"
+        height="58"
+        loading="lazy"
+      />
       <p className="masthead__eyebrow">In Memoriam</p>
       <h1 className="masthead__title">Obituaries</h1>
       <p className="masthead__lede">

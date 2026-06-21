@@ -110,6 +110,7 @@ _SECONDARY_CSS = """
     .topnav:hover { background: var(--hover); }
     .masthead { text-align: center; margin-bottom: 30px; }
     .masthead__logo img { height: 30px; mix-blend-mode: multiply; }
+    .masthead__seal { display: block; width: 46px; height: 46px; border-radius: 50%; margin: 12px auto 0; }
     .kicker { margin: 16px 0 0; font-family: var(--mono); font-size: 11.5px;
       letter-spacing: 0.26em; text-transform: uppercase; color: var(--accent); }
     .masthead__rule { height: 0; border: 0; border-top: 3px double var(--rule); margin: 22px auto 0; }
@@ -198,6 +199,8 @@ def render_home_page(
          target="_blank" rel="noopener">
         <img src="{WPR_LOGO}" alt="Wausau Pilot &amp; Review" />
       </a>
+      <img class="masthead__seal" src="{base_url}/assets/wpr-seal.png" alt=""
+           width="46" height="46" />
       <p class="kicker">Funeral Home</p>
       <hr class="masthead__rule" />
     </header>
@@ -439,6 +442,7 @@ def render_person_page(
     .topnav:hover {{ background: var(--hover); }}
     .masthead {{ text-align: center; margin-bottom: 30px; }}
     .masthead__logo img {{ height: 30px; width: auto; mix-blend-mode: multiply; }}
+    .masthead__seal {{ display: block; width: 46px; height: 46px; border-radius: 50%; margin: 12px auto 0; }}
     .kicker {{
       margin: 16px 0 0; font-family: var(--mono); font-size: 11.5px;
       letter-spacing: 0.26em; text-transform: uppercase; color: var(--accent);
@@ -554,6 +558,8 @@ def render_person_page(
          target="_blank" rel="noopener">
         <img src="{WPR_LOGO}" alt="Wausau Pilot &amp; Review" />
       </a>
+      <img class="masthead__seal" src="{base_url}/assets/wpr-seal.png" alt=""
+           width="46" height="46" />
       <p class="kicker">In Memoriam</p>
       <hr class="masthead__rule" />
     </header>
