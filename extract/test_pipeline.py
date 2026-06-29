@@ -165,6 +165,18 @@ def test_bootstrap_config():
     print("ok: bootstrap (make_config defaults + validates via loader)")
 
 
+def test_og_cache_hash():
+    a = mk("Jane Doe", 1, "2026-06-10", death_year=2026)
+    fp = main._og_brand_fingerprint(NEWSROOM, "Obituaries · Helke")
+    h = main._og_input_hash(a, None, fp)
+    assert main._og_input_hash(a, None, fp) == h                  # stable
+    fp2 = main._og_brand_fingerprint(NEWSROOM, "Obituaries · Other")
+    assert main._og_input_hash(a, None, fp2) != h                 # brand change busts
+    b = mk("Jane Doe", 1, "2026-06-10", death_year=2025)
+    assert main._og_input_hash(b, None, fp) != h                  # record change busts
+    print("ok: og cache hash (stable, brand- and record-sensitive)")
+
+
 def test_sitemap_and_feed():
     recs = [mk("A A", 1, "2026-06-10"), mk("B B", 2, "2026-06-09")]
     sm = templates.render_sitemap(recs, "http://b", ["helke"])

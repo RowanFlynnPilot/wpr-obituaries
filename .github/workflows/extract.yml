@@ -45,6 +45,21 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
+      # The branded share-cards (web/public/assets/og) are expensive to compose
+      # and gitignored, so a clean checkout would regenerate all of them. Restore
+      # the prior cards + their hash manifest so render only rebuilds the changed
+      # ones. The key tracks the config (brand) and master (records); restore-keys
+      # falls back to the most recent cache so a normal run is mostly cache hits.
+      - name: Restore OG share-card cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            web/public/assets/og
+            .cache/og-cards.json
+          key: og-cards-${{ hashFiles('newsroom.config.json', 'data/obituaries_master.json') }}
+          restore-keys: |
+            og-cards-
+
       - name: Run pipeline tests
         run: python extract/test_pipeline.py
 

@@ -134,6 +134,14 @@ arrangement metadata on each record.
 - **Sitemap (done)**: `web/public/sitemap.xml` is generated from the master each
   render. Submit it in Search Console. (A root `robots.txt` only helps once a
   custom domain serves the site at root — a project Pages subpath ignores it.)
+- **Incremental render (done)**: composing the branded share-cards (`og.py`, PIL)
+  is the dominant render cost, so `_write_pages` memoizes them — a card is rebuilt
+  only when its inputs change (name, dates, portrait bytes, or brand), keyed by a
+  content hash in `.cache/og-cards.json` (gitignored, not deployed). HTML is cheap
+  and always rewritten. Warm renders are ~8× faster (585 cards: ~34s → ~4s). CI
+  restores the cards + manifest via `actions/cache` (key tracks config + master),
+  so a clean checkout doesn't regenerate everything. This is the headroom that
+  keeps render cheap as the catalogue grows.
 - **Vendored photos (done)**: `extract/photos.py` downloads each portrait once
   (through the proxied session, since images sit behind the same Cloudflare),
   downscales to ~450px JPEG, and saves it to `web/public/assets/photos/<slug>.jpg`,
