@@ -177,6 +177,20 @@ def test_og_cache_hash():
     print("ok: og cache hash (stable, brand- and record-sensitive)")
 
 
+def test_derive_town():
+    cases = {
+        "David A. Pautz, age 68, of Irma, Wisconsin passed away on June 22, 2026.": "Irma",
+        "Lori Jane Steinke, age 64, of Wausau passed away on June 18, 2026.": "Wausau",
+        "Judy May Kivlin, 90, of Wausau, Wisconsin, passed away.": "Wausau",
+        "Kevin R. Damask, 53, of Rib Mountain, passed away unexpectedly.": "Rib Mountain",
+        "Julia Katheryn Minter, age 66, passed away on June 22, 2026.": None,  # no town
+        "Someone, 70, of Wisconsin Rapids, Wisconsin, died.": "Wisconsin Rapids",
+    }
+    for summary, expected in cases.items():
+        assert main._derive_town(summary) == expected, (summary, main._derive_town(summary))
+    print("ok: derive town (clean towns, multi-word, no false positives)")
+
+
 def test_analytics():
     import analytics
     assert analytics.head_snippet({}) == ""                          # disabled -> nothing

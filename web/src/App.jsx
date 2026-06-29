@@ -60,6 +60,12 @@ export default function App() {
     if (filter.kind === "letter") {
       return data.obituaries.filter((o) => lastNameInitial(o.name) === filter.value);
     }
+    if (filter.kind === "town") {
+      return data.obituaries.filter((o) => o.town === filter.value);
+    }
+    if (filter.kind === "home") {
+      return data.obituaries.filter((o) => o.homeName === filter.value);
+    }
     return data.obituaries;
   }, [data, query, filter]);
 
