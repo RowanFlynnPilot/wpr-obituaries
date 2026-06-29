@@ -13,8 +13,6 @@ from __future__ import annotations
 import sys
 from collections.abc import Iterator
 
-from anthropic import Anthropic
-
 from extractor import extract_obituaries
 from wp_client import fetch_batch_posts
 
@@ -28,11 +26,24 @@ class WordpressScrape:
 
     name = NAME
 
-    def __init__(self, cfg: dict, client: Anthropic) -> None:
+    def __init__(self, cfg: dict) -> None:
         # Loud KeyError if a fork enables this source without an apiBase.
         self.api_base = cfg["apiBase"]
         self.category_slug = cfg.get("categorySlug", "obituaries")
-        self.client = client
+        self._client = None
+
+    @property
+    def client(self):
+        """The Anthropic client, built lazily on first extraction.
+
+        Constructing it here (not at registry time) means an intake-only fork
+        never needs ANTHROPIC_API_KEY just to enumerate sources or run tests.
+        """
+        if self._client is None:
+            from anthropic import Anthropic
+
+            self._client = Anthropic(max_retries=4)
+        return self._client
 
     def units(self, window: int | None) -> Iterator[Unit]:
         """Yield one work-unit per batch post in the window (newest first)."""

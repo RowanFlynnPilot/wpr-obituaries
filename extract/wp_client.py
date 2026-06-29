@@ -52,14 +52,24 @@ def _proxies() -> dict[str, str]:
 
 
 def _session() -> requests.Session:
-    """Browser-impersonating session that routes through the residential proxy."""
+    """Browser-impersonating session that routes through the residential proxy.
+
+    Used for the post fetch, which must clear Cloudflare — so the proxy is
+    required here and `_proxies()` raises if it is unset.
+    """
     return requests.Session(impersonate="chrome", proxies=_proxies())
 
 
 def make_session() -> requests.Session:
-    """Public proxied, browser-impersonating session (e.g. for vendoring photos
-    that sit behind the same Cloudflare as the posts)."""
-    return _session()
+    """Browser-impersonating session for vendoring photos, proxied *when available*.
+
+    WPR's portraits sit behind the same Cloudflare as its posts, so they need the
+    residential proxy; a fork whose images are plainly reachable (e.g. intake
+    submissions) doesn't. Proxy when WEBSHARE_PROXY_URL is set, plain otherwise.
+    """
+    url = os.environ.get("WEBSHARE_PROXY_URL")
+    proxies = {"http": url, "https": url} if url else None
+    return requests.Session(impersonate="chrome", proxies=proxies)
 
 
 def _category_id(session: requests.Session, api_base: str, category_slug: str) -> int:

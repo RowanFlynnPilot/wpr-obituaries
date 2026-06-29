@@ -28,6 +28,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
+      # ANTHROPIC_API_KEY + WEBSHARE_PROXY_URL are only needed when the
+      # wordpress_scrape source is enabled (Haiku extraction + the proxied
+      # Cloudflare fetch). An intake-only fork can leave both secrets unset —
+      # the client/proxy are built lazily, only when that source runs.
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       WEBSHARE_PROXY_URL: ${{ secrets.WEBSHARE_PROXY_URL }}
       PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL }}

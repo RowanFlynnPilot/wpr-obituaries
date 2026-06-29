@@ -72,10 +72,18 @@ adapters   { wordpress_scrape{enabled,apiBase,categorySlug,windowDays},
 - [ ] **Step 5 — Supabase upgrade (opt-in tier).** `backend: "supabase"`:
   submissions table (pending/approved/rejected + payload + source), Auth, RLS,
   auth-gated review-queue React surface. Gated behind a newsroom enabling it.
-- [ ] **Step 6 — Generalize deploy + bootstrap.** `extract.yml` already reads
-  base URL from vars + secrets from secrets, so identity needs no workflow
-  change. Add conditional Supabase secrets. New `scripts/bootstrap.py`: write
-  config interactively → `gh` set secrets/vars → point subdomain.
+- [x] **Step 6 — Generalize deploy + bootstrap.** `scripts/bootstrap.py` writes
+  + validates `newsroom.config.json` interactively (pure `make_config` with
+  shared brand defaults, intake-only by default), and offers to set the
+  `PUBLIC_BASE_URL` repo var via `gh` (secrets are printed for the user to set,
+  never handled by the script). Made the template **run with no keys when
+  intake-only**: the Anthropic client is built lazily inside `wordpress_scrape`
+  (not at registry time), and `make_session` proxies only when
+  `WEBSHARE_PROXY_URL` is set. `extract.yml` documents that the two scraper
+  secrets are optional for intake-only forks. Fork quickstart in
+  [`forking.md`](forking.md). *Verified: tests pass (incl. bootstrap config gen
+  + loader validation); bootstrap CLI run end-to-end; intake-only config builds
+  sources with the scraper secrets unset.*
 
 ## Notes / decisions
 

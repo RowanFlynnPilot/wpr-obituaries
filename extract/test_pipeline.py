@@ -138,9 +138,31 @@ def test_intake():
 def test_enabled_sources():
     import config
     from adapters import enabled_sources
-    names = [s.name for s in enabled_sources(config.load_newsroom(), object())]
+    names = [s.name for s in enabled_sources(config.load_newsroom())]
     assert names == ["wordpress_scrape", "intake"], names  # WPR runs both
     print("ok: enabled_sources (wordpress + intake per WPR config)")
+
+
+def test_bootstrap_config():
+    import importlib.util
+    root = Path(main.__file__).resolve().parent.parent
+    spec = importlib.util.spec_from_file_location("bootstrap", root / "scripts" / "bootstrap.py")
+    bootstrap = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(bootstrap)
+    cfg = bootstrap.make_config({
+        "name": "Acme County Times", "shortName": "ACT", "url": "https://acme.example",
+        "coverageArea": "Acme County", "submissionsEmail": "obits@acme.example",
+        "logoUrl": "https://acme.example/logo.png",
+    })
+    assert cfg["adapters"]["intake"]["enabled"]                       # intake-only by default
+    assert not cfg["adapters"]["wordpress_scrape"]["enabled"]
+    assert cfg["branding"]["accent"] == "#7c2e36"                     # default brand applied
+    assert cfg["copy"]["lede"] == "Remembering the lives of Acme County."
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d) / "newsroom.config.json"
+        bootstrap.write_config(cfg, p)
+        config.load_newsroom(p)                                       # must pass the real loader
+    print("ok: bootstrap (make_config defaults + validates via loader)")
 
 
 def test_sitemap_and_feed():
