@@ -105,6 +105,44 @@ def test_photo_resolution():
     print("ok: photo resolution (vendored -> local, else remote)")
 
 
+def test_intake():
+    from adapters.intake import IntakeManual
+    with tempfile.TemporaryDirectory() as d:
+        dd = Path(d)
+        (dd / "1001.json").write_text(json.dumps({
+            "id": 1001, "status": "approved", "name": "Jane Q. Doe",
+            "source_date": "2026-06-28", "death_date": "2026-06-20", "body": "Full text.",
+        }), encoding="utf-8")
+        (dd / "1002.json").write_text(json.dumps({
+            "id": 1002, "status": "pending", "name": "Not Yet", "source_date": "2026-06-28",
+        }), encoding="utf-8")
+        units = list(IntakeManual(dd).units(None))
+        assert len(units) == 1, units  # pending is skipped
+        u = units[0]
+        assert u.source == "intake" and u.unit_id == 1001
+        people = u.extract()
+        assert len(people) == 1
+        ob = people[0]
+        assert ob.name == "Jane Q. Doe" and ob.source_url == "intake:1001"
+        assert ob.summary == "Jane Q. Doe." and ob.body == "Full text."
+        # An edit changes the content-hash revision (so it re-emits on sync).
+        before = u.modified
+        (dd / "1001.json").write_text(json.dumps({
+            "id": 1001, "status": "approved", "name": "Jane Q. Doe",
+            "source_date": "2026-06-28", "death_date": "2026-06-20", "body": "Edited text.",
+        }), encoding="utf-8")
+        assert list(IntakeManual(dd).units(None))[0].modified != before
+    print("ok: intake (approved emits, pending skipped, maps to Obituary, hash revisions)")
+
+
+def test_enabled_sources():
+    import config
+    from adapters import enabled_sources
+    names = [s.name for s in enabled_sources(config.load_newsroom(), object())]
+    assert names == ["wordpress_scrape", "intake"], names  # WPR runs both
+    print("ok: enabled_sources (wordpress + intake per WPR config)")
+
+
 def test_sitemap_and_feed():
     recs = [mk("A A", 1, "2026-06-10"), mk("B B", 2, "2026-06-09")]
     sm = templates.render_sitemap(recs, "http://b", ["helke"])

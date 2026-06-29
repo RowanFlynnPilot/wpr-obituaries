@@ -152,10 +152,15 @@ arrangement metadata on each record.
   failures via a separate red report job.
 - **Editorial controls** (`data/`, documented in `data/README.md`):
   `manual.json` adds hand-entered obituaries that don't come through the WPR
-  batches (a stray notice, an out-of-town home) — each becomes a full page;
-  `suppressed.json` omits a page by slug on request (the record stays in the
-  master but is dropped from the site, index, and sitemap). Both are committed
-  and applied at render. The register draws from these funeral homes: Brainard,
+  batches (a stray notice, an out-of-town home) — each becomes a full page, merged
+  at render; `suppressed.json` omits a page by slug on request (the record stays
+  in the master but is dropped from the site, index, and sitemap). Both are
+  committed and applied at render. `data/intake/<id>.json` is the **reviewed
+  submission path** (the intake write-source, `data/intake/README.md`): approved
+  files flow through *sync* into the master (deduped + vendored like scraped
+  obits), and the widget's SubmitForm composes a prefilled email to the
+  submissions address to start one. `manual.json` is the quick hatch; intake is
+  the reviewed, universal path. The register draws from these funeral homes: Brainard,
   Helke, Peterson/Kraemer, Schmidt & Schulta (Wittenberg), John J. Buettgen +
   Mid-Wisconsin Cremation Society, and Ascend (Weston). Submissions go to
   darren@wausaupilotandreview.com (shown in the masthead).

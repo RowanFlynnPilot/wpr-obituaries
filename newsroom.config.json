@@ -28,7 +28,7 @@
       "windowDays": 14
     },
     "intake": {
-      "enabled": false,
+      "enabled": true,
       "backend": "manual"
     }
   }

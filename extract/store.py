@@ -138,27 +138,15 @@ def load_manual(path: Path) -> list[Obituary]:
     out: list[Obituary] = []
     for d in json.loads(path.read_text(encoding="utf-8")):
         name = (d.get("name") or "").strip()
-        if not name:
-            raise ValueError(f"Manual record with no name: {d}")
         source_date = d.get("source_date") or d.get("date")
         if not source_date:
-            raise ValueError(f"Manual record '{name}' is missing source_date")
-        summary = (d.get("summary") or f"{name}.").strip()
-        body = (d.get("body") or summary).strip()
+            raise ValueError(f"Manual record '{name or d}' is missing source_date")
         out.append(
-            Obituary(
-                name=name,
+            Obituary.from_submission(
+                d,
                 source_id=int(d.get("source_id", 0)),
                 source_url=d.get("source_url") or f"manual:{slugify(name)}-{source_date}",
                 source_date=source_date,
-                death_year=d.get("death_year"),
-                birth_date=d.get("birth_date"),
-                death_date=d.get("death_date"),
-                age=d.get("age"),
-                funeral_home=d.get("funeral_home"),
-                photo_url=d.get("photo_url"),
-                summary=summary,
-                body=body,
             )
         )
     return out

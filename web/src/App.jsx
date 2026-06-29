@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Masthead from "./components/Masthead.jsx";
+import SubmitForm from "./components/SubmitForm.jsx";
 import FeaturedCarousel from "./components/FeaturedCarousel.jsx";
 import SearchBar from "./components/SearchBar.jsx";
 import BrowseBar from "./components/BrowseBar.jsx";
@@ -77,6 +78,7 @@ export default function App() {
   return (
     <main className="page">
       <Masthead sponsor={sponsor} />
+      <SubmitForm />
       {data ? (
         <>
           {isDefault && <FeaturedCarousel obituaries={data.obituaries} />}

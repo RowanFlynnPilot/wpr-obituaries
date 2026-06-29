@@ -85,3 +85,33 @@ class Obituary:
     def from_record_dict(cls, record: dict) -> "Obituary":
         """Rebuild from a master-store record. Field names must match exactly."""
         return cls(**record)
+
+    @classmethod
+    def from_submission(
+        cls, d: dict, *, source_id: int, source_url: str, source_date: str
+    ) -> "Obituary":
+        """Build from a loose, human/structured dict (manual entry, intake form).
+
+        The caller supplies provenance (source_id/url/date); everything else is
+        read leniently — absent optional fields stay null, summary/body default
+        sensibly, and a missing name raises (a record without a name is invalid).
+        """
+        name = (d.get("name") or "").strip()
+        if not name:
+            raise ValueError(f"Record with no name: {d}")
+        summary = (d.get("summary") or f"{name}.").strip()
+        body = (d.get("body") or summary).strip()
+        return cls(
+            name=name,
+            source_id=source_id,
+            source_url=source_url,
+            source_date=source_date,
+            death_year=d.get("death_year"),
+            birth_date=d.get("birth_date"),
+            death_date=d.get("death_date"),
+            age=d.get("age"),
+            funeral_home=d.get("funeral_home"),
+            photo_url=d.get("photo_url"),
+            summary=summary,
+            body=body,
+        )
