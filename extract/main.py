@@ -27,8 +27,6 @@ import os
 import sys
 from pathlib import Path
 
-from anthropic import Anthropic
-
 from adapters import enabled_sources
 from config import load_newsroom
 from homes import load_homes, resolve_home
@@ -290,8 +288,7 @@ def main() -> int:
 
     failures: list[tuple[str, str]] = []
     if not args.render_only:
-        client = Anthropic(max_retries=4)
-        sources = enabled_sources(newsroom, client)
+        sources = enabled_sources(newsroom)
         if args.backfill:
             window = None
         elif args.days is not None:

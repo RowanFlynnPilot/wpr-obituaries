@@ -80,8 +80,13 @@ branding (logo, accent, fonts, seal), widget copy, and which `adapters` are
 enabled. Read by both runtimes: Python via `extract/config.py` (validates,
 raises on a missing required key), and the widget via `web/vite.config.js`
 (injected at build, no runtime fetch). A fork rebrands by editing this file — no
-code change. Secrets never live here (they stay in env, below). The static-page
-renderer and the React widget both read it, so the two surfaces stay in lockstep.
+code change (or run `python scripts/bootstrap.py` to generate it; fork quickstart
+in `docs/forking.md`). Secrets never live here (they stay in env, below). The
+static-page renderer and the React widget both read it, so the two surfaces stay
+in lockstep. The template ships **intake-only** and runs with no API keys — the
+Anthropic client and the Webshare proxy are built lazily, only when the
+`wordpress_scrape` source actually runs, so `ANTHROPIC_API_KEY` /
+`WEBSHARE_PROXY_URL` are needed only by newsrooms that enable scraping.
 
 Environment (extractor):
 
