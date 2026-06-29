@@ -311,7 +311,7 @@ def _share_section(name: str, page_url: str) -> str:
       <span class="share__label">Share</span>
       <a class="share__btn" href="{fb}" target="_blank" rel="noopener">Facebook</a>
       <a class="share__btn" href="mailto:?subject={subject}&amp;body={body}">Email</a>
-      <button class="share__btn" type="button" onclick="window.print();return false;">Print</button>
+      <button class="share__btn" type="button" onclick="window.print();return false;">Save as PDF</button>
     </div>"""
 
 
@@ -545,12 +545,23 @@ def render_person_page(
       .sponsor-card__logo img {{ height: 72px; }}
     }}
     @media print {{
-      body {{ background: #fff; color: #000; font-size: 11pt; }}
+      /* A dignified keepsake: centered nameplate, portrait above the text, and
+         none of the interactive chrome — what a family would want to keep. */
+      @page {{ margin: 1.8cm; }}
+      body {{ background: #fff; color: #000; font-size: 11.5pt; }}
       .wrap {{ max-width: 100%; padding: 0; }}
+      .masthead {{ margin-bottom: 22px; }}
       .masthead__rule {{ border-top-color: #999; }}
-      .kicker, .lifespan {{ color: #333; }}
-      .rule {{ background: #000; }}
-      .portrait {{ cursor: default; border-color: #999; }}
+      .kicker {{ color: #333; }}
+      h1 {{ text-align: center; font-size: 26pt; }}
+      .lifespan {{ text-align: center; color: #333; }}
+      .rule {{ background: #000; width: 64px; margin: 18px auto 24px; }}
+      .portrait {{
+        float: none; display: block; margin: 0 auto 22px; width: 190px;
+        max-width: 60%; cursor: default; border-color: #999;
+      }}
+      .body {{ text-align: left; }}
+      .arrangements {{ text-align: center; }}
       .arrangements a {{ color: #000; text-decoration: none; }}
       /* Drop the interactive chrome — keep the name, dates, portrait, and text. */
       .topnav, .share, .sponsor-card, .more, .back, .lightbox {{ display: none !important; }}

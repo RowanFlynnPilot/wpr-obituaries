@@ -21,8 +21,19 @@ export default function BrowseBar({ obituaries, filter, onFilter }) {
     return s;
   }, [obituaries]);
 
+  // Town is derived best-effort from the summary, so the long count-1 tail holds
+  // the occasional non-town ("of Jesus", a hospice). Requiring 2+ keeps the facet
+  // to real places people actually browse; rare towns stay reachable via search.
+  const towns = useMemo(
+    () => countBy(obituaries, (o) => o.town).filter((t) => t.count >= 2),
+    [obituaries]
+  );
+  const homes = useMemo(() => countBy(obituaries, (o) => o.homeName), [obituaries]);
+
   const isMonth = (k) => filter.kind === "month" && filter.value === k;
   const isLetter = (l) => filter.kind === "letter" && filter.value === l;
+  const onSelect = (kind) => (e) =>
+    onFilter(e.target.value ? { kind, value: e.target.value } : { kind: "none" });
 
   return (
     <div className="browse">
@@ -66,6 +77,53 @@ export default function BrowseBar({ obituaries, filter, onFilter }) {
           )
         )}
       </div>
+
+      <div className="browse__row browse__row--selects">
+        {towns.length > 0 && (
+          <label className="browse__select">
+            <span className="browse__label">Town</span>
+            <select
+              value={filter.kind === "town" ? filter.value : ""}
+              onChange={onSelect("town")}
+            >
+              <option value="">All towns</option>
+              {towns.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.value} ({t.count})
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        {homes.length > 0 && (
+          <label className="browse__select">
+            <span className="browse__label">Funeral home</span>
+            <select
+              value={filter.kind === "home" ? filter.value : ""}
+              onChange={onSelect("home")}
+            >
+              <option value="">All funeral homes</option>
+              {homes.map((h) => (
+                <option key={h.value} value={h.value}>
+                  {h.value} ({h.count})
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+      </div>
     </div>
   );
+}
+
+// Distinct non-empty values of `key`, alphabetical, with counts — for the facets.
+function countBy(obituaries, key) {
+  const counts = new Map();
+  for (const o of obituaries) {
+    const v = key(o);
+    if (v) counts.set(v, (counts.get(v) || 0) + 1);
+  }
+  return [...counts.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([value, count]) => ({ value, count }));
 }

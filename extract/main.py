@@ -25,6 +25,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -118,6 +119,24 @@ def _page_photo(ob: Obituary, vendored: set[str], base_url: str) -> str | None:
     return ob.photo_url
 
 
+# The model-written summary reads "Name, age, of <Town>, passed away…", so the
+# town is the capitalized run right after "of " — up to a comma, the state, or a
+# lowercase word. Deriving from the clean summary (not the raw obit) keeps this a
+# safe best-effort facet; an unmatched summary just yields no town.
+_TOWN_RE = re.compile(r"\bof ([A-Z][\w.'-]*(?:\s+[A-Z][\w.'-]*)*)")
+
+
+def _derive_town(summary: str) -> str | None:
+    """Best-effort town for the browse facet, from the summary. None if unclear."""
+    m = _TOWN_RE.search(summary or "")
+    if not m:
+        return None
+    town = m.group(1).strip(" ,.")
+    if town.lower() in {"wisconsin", "wi"}:  # bare state slipped through
+        return None
+    return town or None
+
+
 def _write_index(records: list[Obituary], vendored: set[str], homes: list[dict]) -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     # Newest batch first, then alphabetical by name within a date.
@@ -129,6 +148,8 @@ def _write_index(records: list[Obituary], vendored: set[str], homes: list[dict])
         record["photoUrl"] = _index_photo(r, vendored)
         home = resolve_home(r.funeral_home, homes)
         record["funeralHomeUrl"] = f"funeral-home/{home['slug']}.html" if home else None
+        record["homeName"] = home["name"] if home else None  # canonical, for the facet
+        record["town"] = _derive_town(r.summary)
         obituaries.append(record)
     payload = {"count": len(ordered), "obituaries": obituaries}
     INDEX_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")

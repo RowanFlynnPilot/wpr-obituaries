@@ -469,6 +469,33 @@ body {
   cursor: default;
 }
 
+.browse__row--selects {
+  gap: 18px;
+}
+
+.browse__select {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.browse__select select {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink);
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 5px 9px;
+  max-width: 240px;
+  cursor: pointer;
+}
+
+.browse__select select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
 /* ---------- Register ---------- */
 .register {
   margin: 20px 0 0;
