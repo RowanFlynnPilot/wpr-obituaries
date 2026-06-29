@@ -29,15 +29,15 @@ from pathlib import Path
 
 from anthropic import Anthropic
 
+from adapters import enabled_sources
 from config import load_newsroom
-from extractor import extract_obituaries
 from homes import load_homes, resolve_home
 from models import Obituary
 from og import render_card
 from photos import vendor_photos, vendored_slugs
 from store import Master, load_manual, load_master, load_suppressed, save_master
 from templates import render_feed, render_home_page, render_person_page, render_sitemap
-from wp_client import fetch_batch_posts, make_session
+from wp_client import make_session
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "web" / "public" / "data"
@@ -54,9 +54,9 @@ MANUAL_FILE = ROOT / "data" / "manual.json"
 SUPPRESSED_FILE = ROOT / "data" / "suppressed.json"
 HOMES_FILE = ROOT / "data" / "funeral_homes.json"
 FAILURES_FILE = ROOT / "data" / "failures.json"
-WINDOW_DAYS = 14  # days to look back for new/changed posts each run; a safety
-#                   buffer (covers missed crons), not a retention limit — the
-#                   master keeps every published page forever.
+DEFAULT_WINDOW_DAYS = 14  # fallback if the wordpress_scrape adapter omits
+#                           windowDays; a safety buffer (covers missed crons),
+#                           not a retention limit — the master keeps every page.
 
 
 def _load_sponsor() -> dict:
@@ -75,38 +75,29 @@ def _require_base_url() -> str:
     return base_url.rstrip("/")
 
 
-def _post_modified(post: dict) -> str:
-    """Revision stamp for a post; falls back to publish date if absent."""
-    return post.get("modified_gmt") or post.get("modified") or post["date"]
+def sync(master: Master, sources: list, window: int | None) -> list[tuple[str, str]]:
+    """Fold new/changed units from every enabled source into the master.
 
-
-def sync(master: Master, client: Anthropic, window: int | None) -> list[tuple[str, str]]:
-    """Fetch the window and fold new/changed posts into the master.
-
-    Returns the list of (url, error) for posts that failed to extract.
+    Each source yields work-units; we skip those the master already processed at
+    the same revision, extract the rest, and upsert them. Returns the list of
+    (ref, error) for units that failed to extract.
     """
-    posts = fetch_batch_posts(window)
-    print(f"Fetched {len(posts)} batch posts.")
-    if not posts:
-        print("WARNING: 0 posts fetched — possible proxy/Cloudflare block.", file=sys.stderr)
-
     failures: list[tuple[str, str]] = []
     extracted = skipped = 0
-    for post in posts:
-        post_id = int(post["id"])
-        modified = _post_modified(post)
-        if master.is_processed(post_id, modified):
-            skipped += 1
-            continue
-        try:
-            people = extract_obituaries(post, client)
-        except Exception as exc:  # noqa: BLE001 — quarantine and report loudly
-            failures.append((post.get("link", "unknown"), str(exc)))
-            continue
-        master.upsert_post(post_id, modified, people)
-        extracted += len(people)
+    for source in sources:
+        for unit in source.units(window):
+            if master.is_processed(unit.source, unit.unit_id, unit.modified):
+                skipped += 1
+                continue
+            try:
+                people = unit.extract()
+            except Exception as exc:  # noqa: BLE001 — quarantine and report loudly
+                failures.append((unit.ref, str(exc)))
+                continue
+            master.upsert_post(unit.source, unit.unit_id, unit.modified, people)
+            extracted += len(people)
 
-    print(f"Extracted {extracted} obituaries from new/changed posts; {skipped} unchanged.")
+    print(f"Extracted {extracted} obituaries from new/changed units; {skipped} unchanged.")
     return failures
 
 
@@ -300,13 +291,16 @@ def main() -> int:
     failures: list[tuple[str, str]] = []
     if not args.render_only:
         client = Anthropic(max_retries=4)
+        sources = enabled_sources(newsroom, client)
         if args.backfill:
             window = None
         elif args.days is not None:
             window = args.days
         else:
-            window = WINDOW_DAYS
-        failures = sync(master, client, window)
+            window = newsroom.adapter("wordpress_scrape").get(
+                "windowDays", DEFAULT_WINDOW_DAYS
+            )
+        failures = sync(master, sources, window)
         save_master(master, MASTER_FILE)  # persist successes before anything can fail
         saved = vendor_photos(master.records, PHOTOS_DIR, make_session())
         if saved:

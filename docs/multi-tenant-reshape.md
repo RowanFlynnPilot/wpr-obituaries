@@ -46,12 +46,16 @@ adapters   { wordpress_scrape{enabled,apiBase,categorySlug,windowDays},
   (win over index.css, no flash). Masthead/Footer read identity + copy.
   *Verified: dev render clean, production build passes, full rebrand smoke test
   (Acme County Times / blue accent) propagated with zero WPR leakage.*
-- [ ] **Step 3 — Source-adapter seam.** Move `wp_client` + `extractor` into
-  `adapters/wordpress_scrape.py` behind a single `fetch_new(master)` interface
-  (internals untouched). `main.sync()` loops over enabled adapters. Namespace the
-  master's `posts` processed-map key per source (`"wordpress_scrape:12345"`) so
-  multiple sources can't collide — the one honest `store.py` change. Wire
-  `windowDays`/`apiBase`/`categorySlug` from config.
+- [x] **Step 3 — Source-adapter seam.** Added `extract/adapters/` — `base.Unit`
+  (the contract: `source`/`unit_id`/`modified`/`ref`/`extract()`), `wordpress_scrape`
+  (lifts `wp_client` + `extractor` behind it, internals untouched), and a registry
+  (`enabled_sources`) driven by the config `adapters` block. `main.sync()` now
+  loops over enabled sources, source-agnostic. `store` namespaces the processed-map
+  per source (`wordpress_scrape:12345`) with a v1→v2 on-load migration; the
+  committed master was migrated in this PR. `apiBase`/`categorySlug`/`windowDays`
+  come from config. *Verified: render still byte-identical, tests pass (incl.
+  migration + namespacing), sync loop smoke-tested without network (extract,
+  skip-unchanged, re-extract-on-revision, failure quarantine, enabled_sources).*
 - [ ] **Step 4 — Intake adapter, lightweight backend.** `adapters/intake.py`
   with a backend abstraction; `backend: "manual"` reads approved local JSON and
   emits `Obituary` records. Public React intake form → emits a PR / submission

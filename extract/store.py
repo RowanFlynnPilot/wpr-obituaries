@@ -10,13 +10,16 @@ on the next render.
 On-disk shape (`data/obituaries_master.json`):
 
     {
-      "version": 1,
-      "posts": { "<post_id>": "<modified_gmt>" },   # every post we've processed
-      "records": [ {<full Obituary record>}, ... ]   # sorted oldest-first
+      "version": 2,
+      "posts": { "<source>:<unit_id>": "<modified_gmt>" },  # every unit processed
+      "records": [ {<full Obituary record>}, ... ]          # sorted oldest-first
     }
 
-`posts` records *every* processed batch — including ones that yielded zero
-obituaries — so we never re-spend a Haiku call on an unchanged post.
+`posts` records *every* processed unit — including ones that yielded zero
+obituaries — so we never re-spend an extraction call on an unchanged unit. The
+key is namespaced by source (`wordpress_scrape:12345`) so two write-sources can
+never collide on the same numeric id. v1 files (bare `<unit_id>` keys, all from
+the WordPress scraper) are migrated on load.
 """
 
 from __future__ import annotations
@@ -27,7 +30,7 @@ from pathlib import Path
 
 from models import Obituary, slugify
 
-VERSION = 1
+VERSION = 2
 
 
 @dataclass
@@ -37,23 +40,36 @@ class Master:
     posts: dict[str, str] = field(default_factory=dict)
     records: list[Obituary] = field(default_factory=list)
 
-    def is_processed(self, post_id: int, modified: str) -> bool:
-        """True if this post was already extracted at this exact revision."""
-        return self.posts.get(str(post_id)) == modified
+    def is_processed(self, source: str, unit_id: int, modified: str) -> bool:
+        """True if this source-unit was already extracted at this exact revision."""
+        return self.posts.get(f"{source}:{unit_id}") == modified
 
     def upsert_post(
-        self, post_id: int, modified: str, people: list[Obituary]
+        self, source: str, unit_id: int, modified: str, people: list[Obituary]
     ) -> None:
-        """Replace this post's people with a freshly extracted set.
+        """Replace this unit's people with a freshly extracted set.
 
-        Dropping the post's prior records first makes re-extraction (a correction
-        to a batch) idempotent, and recording the post id even when `people` is
-        empty stops us from re-extracting a person-less post every run.
+        Dropping the unit's prior records first makes re-extraction (a correction
+        to a batch) idempotent, and recording the unit even when `people` is empty
+        stops us from re-extracting a person-less unit every run. The processed
+        key is namespaced by source so sources can't collide on the same id.
         """
-        key = str(post_id)
-        self.records = [r for r in self.records if r.source_id != post_id]
+        self.records = [r for r in self.records if r.source_id != unit_id]
         self.records.extend(people)
-        self.posts[key] = modified
+        self.posts[f"{source}:{unit_id}"] = modified
+
+
+def _migrate_posts(posts: dict[str, str], version: int) -> dict[str, str]:
+    """v1 `posts` keys were bare unit ids, all from the WordPress scraper.
+
+    Namespace them so the processed-map matches the v2 source-qualified scheme.
+    Idempotent: keys already namespaced (containing ':') are left alone.
+    """
+    if version >= 2:
+        return posts
+    return {
+        (k if ":" in k else f"wordpress_scrape:{k}"): v for k, v in posts.items()
+    }
 
 
 def load_master(path: Path) -> Master:
@@ -61,10 +77,17 @@ def load_master(path: Path) -> Master:
     if not path.exists():
         return Master()
     data = json.loads(path.read_text(encoding="utf-8"))
+    posts = _migrate_posts(dict(data.get("posts", {})), int(data.get("version", 1)))
     return Master(
-        posts=dict(data.get("posts", {})),
+        posts=posts,
         records=[Obituary.from_record_dict(r) for r in data.get("records", [])],
     )
+
+
+def _post_sort_key(item: tuple[str, str]) -> tuple:
+    """Order processed keys by (source, numeric id) for stable, readable diffs."""
+    source, _, rest = item[0].partition(":")
+    return (source, int(rest)) if rest.isdigit() else (source, 0, rest)
 
 
 def save_master(master: Master, path: Path) -> None:
@@ -78,7 +101,7 @@ def save_master(master: Master, path: Path) -> None:
     ordered = sorted(master.records, key=lambda r: (r.source_date, r.slug))
     payload = {
         "version": VERSION,
-        "posts": dict(sorted(master.posts.items(), key=lambda kv: int(kv[0]))),
+        "posts": dict(sorted(master.posts.items(), key=_post_sort_key)),
         "records": [r.to_record_dict() for r in ordered],
     }
     path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")

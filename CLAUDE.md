@@ -20,11 +20,16 @@ Source of truth → static output → embedded widget:
 1. `extract/wp_client.py` — pulls obituary batch posts from the Newspack/
    WordPress REST API. WPR is behind Cloudflare, so every request routes
    through a Webshare residential proxy (same mechanism as the gas-prices
-   widget). Fails loudly if `WEBSHARE_PROXY_URL` is unset.
+   widget). Fails loudly if `WEBSHARE_PROXY_URL` is unset. The endpoint
+   (`apiBase`/`categorySlug`) comes from the newsroom config, not constants.
 2. `extract/extractor.py` — Claude Haiku reads each batch post and returns one
    structured record per person. Regex parsing is wrong here: obituary
    formatting varies too much. The model extracts only what is present and
-   never invents detail.
+   never invents detail. `wp_client` + `extractor` are wrapped by
+   `extract/adapters/wordpress_scrape.py` behind the generic *write-source*
+   contract (`adapters/base.Unit`): a source yields units of work, the sync loop
+   never knows where a record came from. This is the seam that makes the tool a
+   forkable template (see `docs/multi-tenant-reshape.md`).
 3. `extract/templates.py` — renders one crawlable HTML page per person plus a
    `sitemap.xml`. **This is the SEO layer.** Each page has the name in the title
    and H1, schema.org `Obituary` structured data, canonical, and OG tags.
@@ -32,11 +37,13 @@ Source of truth → static output → embedded widget:
    `{posts, records}`). This is the source of truth that lets pages outlive the
    fetch window. It is committed to the repo and grows over time.
 5. `extract/main.py` — two phases:
-   - **Sync** (skipped by `--render-only`): fetch the window, extract only *new
-     or changed* batch posts (`posts` map tracks each processed post id by its
-     `modified_gmt`), and upsert them into the master. Per-post failures are
-     quarantined to `data/failures.json` and exit the run non-zero, but the
-     master is still saved first — no silent gaps, no lost catalogue.
+   - **Sync** (skipped by `--render-only`): loop over every enabled write-source
+     and extract only *new or changed* units (the `posts` map tracks each
+     processed unit by its `modified_gmt`, keyed `<source>:<unit_id>` so two
+     sources can't collide; v1 bare-id files migrate on load). Upsert them into
+     the master. Per-unit failures are quarantined to `data/failures.json` and
+     exit the run non-zero, but the master is still saved first — no silent gaps,
+     no lost catalogue.
    - **Render** (always): rebuild `web/public/data/obituaries.json` (light
      index), every `web/public/o/<slug>.html`, and `web/public/sitemap.xml`
      from the **entire master**. Rendering is free (no API), so the window only
@@ -67,6 +74,14 @@ an iframe cannot rank individual names; the parent WP page absorbs indexing.
 - `CLAUDE.md` stays current in this repo.
 
 ## Configuration
+
+`newsroom.config.json` (repo root) is the **one per-newsroom file** — identity,
+branding (logo, accent, fonts, seal), widget copy, and which `adapters` are
+enabled. Read by both runtimes: Python via `extract/config.py` (validates,
+raises on a missing required key), and the widget via `web/vite.config.js`
+(injected at build, no runtime fetch). A fork rebrands by editing this file — no
+code change. Secrets never live here (they stay in env, below). The static-page
+renderer and the React widget both read it, so the two surfaces stay in lockstep.
 
 Environment (extractor):
 

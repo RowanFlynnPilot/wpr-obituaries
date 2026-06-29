@@ -43,18 +43,33 @@ def test_models():
 
 
 def test_store():
+    src = "wordpress_scrape"
     m = store.Master()
-    m.upsert_post(10, "m1", [mk("A A", 10, "2026-06-10"), mk("B B", 10, "2026-06-10")])
-    m.upsert_post(11, "m1", [])  # person-less post still recorded
-    assert m.is_processed(10, "m1") and not m.is_processed(10, "m2") and m.is_processed(11, "m1")
+    m.upsert_post(src, 10, "m1", [mk("A A", 10, "2026-06-10"), mk("B B", 10, "2026-06-10")])
+    m.upsert_post(src, 11, "m1", [])  # person-less unit still recorded
+    assert m.is_processed(src, 10, "m1") and not m.is_processed(src, 10, "m2")
+    assert m.is_processed(src, 11, "m1")
+    assert not m.is_processed("intake", 10, "m1")  # source namespacing isolates ids
     with tempfile.TemporaryDirectory() as d:
         p = Path(d) / "master.json"
         store.save_master(m, p)
         m2 = store.load_master(p)
-        assert len(m2.records) == 2 and set(m2.posts) == {"10", "11"}
-        m2.upsert_post(10, "m2", [mk("A A", 10, "2026-06-10")])  # correction
+        assert len(m2.records) == 2 and set(m2.posts) == {f"{src}:10", f"{src}:11"}
+        m2.upsert_post(src, 10, "m2", [mk("A A", 10, "2026-06-10")])  # correction
         assert len([r for r in m2.records if r.source_id == 10]) == 1
-    print("ok: store (upsert, person-less, correction, round-trip)")
+    print("ok: store (upsert, person-less, correction, namespacing, round-trip)")
+
+
+def test_store_migration():
+    # A v1 file keyed by bare post ids migrates to source-namespaced keys, so an
+    # already-processed post is still recognized and not re-extracted.
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d) / "master.json"
+        p.write_text('{"version": 1, "posts": {"42": "m1"}, "records": []}', encoding="utf-8")
+        m = store.load_master(p)
+        assert m.posts == {"wordpress_scrape:42": "m1"}
+        assert m.is_processed("wordpress_scrape", 42, "m1")
+    print("ok: store migration (v1 bare ids -> namespaced)")
 
 
 def test_homes():
