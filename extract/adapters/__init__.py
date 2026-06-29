@@ -13,6 +13,7 @@ from anthropic import Anthropic
 from config import Newsroom
 
 from .base import Unit
+from .intake import IntakeManual
 from .wordpress_scrape import WordpressScrape
 
 __all__ = ["Unit", "enabled_sources"]
@@ -23,4 +24,13 @@ def enabled_sources(newsroom: Newsroom, client: Anthropic) -> list:
     sources = []
     if newsroom.adapter("wordpress_scrape").get("enabled"):
         sources.append(WordpressScrape(newsroom.adapter("wordpress_scrape"), client))
+    intake = newsroom.adapter("intake")
+    if intake.get("enabled"):
+        backend = intake.get("backend", "manual")
+        if backend == "manual":
+            sources.append(IntakeManual())
+        else:
+            raise RuntimeError(
+                f"intake backend '{backend}' is not supported yet (Step 5: supabase)."
+            )
     return sources

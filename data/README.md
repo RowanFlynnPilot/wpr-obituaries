@@ -46,3 +46,10 @@ scraped ones. Only `name` and `source_date` are required:
   }
 ]
 ```
+
+## `intake/` — reviewed submissions (the product path)
+One file per submission, `intake/<id>.json`. Approved ones flow through *sync*
+into the master (deduped and photo-vendored like scraped obits), so this is the
+path for obituaries families/funeral homes submit — the widget's "Submit an
+obituary" form starts one. `manual.json` above is the quick one-off hatch; this
+is the reviewed, universal path. Full schema + workflow: `intake/README.md`.

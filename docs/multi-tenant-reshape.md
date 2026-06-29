@@ -56,11 +56,19 @@ adapters   { wordpress_scrape{enabled,apiBase,categorySlug,windowDays},
   come from config. *Verified: render still byte-identical, tests pass (incl.
   migration + namespacing), sync loop smoke-tested without network (extract,
   skip-unchanged, re-extract-on-revision, failure quarantine, enabled_sources).*
-- [ ] **Step 4 — Intake adapter, lightweight backend.** `adapters/intake.py`
-  with a backend abstraction; `backend: "manual"` reads approved local JSON and
-  emits `Obituary` records. Public React intake form → emits a PR / submission
-  file reviewed at merge. CMS-agnostic; the path that generalizes to newsrooms
-  without batch-post obits.
+- [x] **Step 4 — Intake adapter, lightweight backend.** `adapters/intake.py`
+  (`IntakeManual`) reads approved `data/intake/<id>.json`, maps each to an
+  `Obituary` (shared `Obituary.from_submission`, also now used by `load_manual`),
+  and emits via the Step-3 `Unit` contract — so approved submissions flow through
+  sync→master (deduped, vendored, permanent). The unit revision is a content
+  hash (edits auto-re-emit). Registered in `enabled_sources` behind
+  `adapters.intake` (`backend: "manual"`; `supabase` raises until Step 5). WPR
+  runs intake **alongside** wordpress_scrape; the template ships intake-only.
+  Public **SubmitForm** widget composes a prefilled email to the submissions
+  address (the lightweight, no-infra path). *Verified: tests pass (intake emit,
+  pending-skip, hash-revision, enabled_sources); end-to-end submission→sync→
+  master→page proven without network; render still byte-identical with no
+  submissions; widget builds.*
 - [ ] **Step 5 — Supabase upgrade (opt-in tier).** `backend: "supabase"`:
   submissions table (pending/approved/rejected + payload + source), Auth, RLS,
   auth-gated review-queue React surface. Gated behind a newsroom enabling it.
