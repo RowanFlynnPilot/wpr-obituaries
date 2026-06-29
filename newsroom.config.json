@@ -20,6 +20,12 @@
     "lede": "Remembering the lives of Wausau and Marathon County, published free of charge each Monday, Wednesday and Friday.",
     "footerTagline": "nonprofit local journalism for north central Wisconsin."
   },
+  "analytics": {
+    "provider": "",
+    "domain": "",
+    "site": "",
+    "headHtml": ""
+  },
   "adapters": {
     "wordpress_scrape": {
       "enabled": true,

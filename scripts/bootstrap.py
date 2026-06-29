@@ -69,6 +69,12 @@ def make_config(a: dict) -> dict:
             "lede": a.get("lede") or f"Remembering the lives of {coverage}.",
             "footerTagline": a.get("footerTagline") or "local journalism.",
         },
+        "analytics": {
+            "provider": a.get("analytics_provider", ""),
+            "domain": a.get("analytics_domain", ""),
+            "site": a.get("analytics_site", ""),
+            "headHtml": "",
+        },
         "adapters": {
             "wordpress_scrape": {
                 "enabled": bool(a.get("wp_enabled")),

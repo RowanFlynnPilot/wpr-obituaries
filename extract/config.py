@@ -48,6 +48,11 @@ class Newsroom:
         """Settings block for one write-source adapter (empty if unconfigured)."""
         return self.raw.get("adapters", {}).get(key, {})
 
+    @property
+    def analytics(self) -> dict:
+        """Privacy-first analytics settings (empty/disabled if unconfigured)."""
+        return self.raw.get("analytics") or {}
+
 
 def _require(section: dict, key: str, where: str) -> str:
     value = section.get(key)

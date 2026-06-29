@@ -97,6 +97,13 @@ Environment (extractor):
   Currently `https://rowanflynnpilot.github.io/wpr-obituaries` until a custom
   subdomain is in place.
 
+Analytics are optional and config-driven (`analytics` block: `provider` +
+`domain`/`site`/`headHtml`). `extract/analytics.py` and `web/vite.config.js`
+inject the same cookieless provider snippet (plausible/goatcounter/cloudflare/
+custom) into both the static pages and the widget, so pageviews — which double as
+sponsor impressions — and sponsor-logo click events report to one account. Empty
+`provider` renders nothing. See `docs/forking.md`.
+
 Sponsors live in `web/public/data/sponsor.json`:
 `{ "label", "sponsors": [ { "name", "url", "logo" }, ... ] }`. Each sponsor's
 `name` is required; `url` and `logo` (repo-relative path, e.g. `assets/helke.png`,

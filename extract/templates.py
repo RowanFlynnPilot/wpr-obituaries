@@ -17,6 +17,7 @@ import json
 from datetime import datetime, timezone
 from urllib.parse import quote
 
+from analytics import event_script, head_snippet, sponsor_track_attrs
 from config import Newsroom
 from models import Obituary
 
@@ -190,6 +191,7 @@ def render_home_page(
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="{newsroom.fonts_url}" rel="stylesheet" />
+  {head_snippet(newsroom.analytics)}
   <style>{_root_vars_wide(newsroom)}{_SECONDARY_CSS}</style>
 </head>
 <body>
@@ -212,9 +214,10 @@ def render_home_page(
     <ul class="list">
       {links}
     </ul>
-    {_sponsor_section(sponsor, base_url)}
+    {_sponsor_section(sponsor, base_url, newsroom.analytics)}
     <a class="back" href="{base_url}/">&larr; All obituaries</a>
   </main>
+  {event_script(newsroom.analytics)}
 </body>
 </html>
 """
@@ -265,7 +268,7 @@ def _lifespan(ob: Obituary) -> str:
     return ""
 
 
-def _sponsor_lockup(s: dict, base_url: str) -> str:
+def _sponsor_lockup(s: dict, base_url: str, analytics: dict) -> str:
     """A single sponsor's logo (or name), linked to its site when present."""
     name = html.escape(s["name"])
     if s.get("logo"):
@@ -275,15 +278,15 @@ def _sponsor_lockup(s: dict, base_url: str) -> str:
     if s.get("url"):
         return (
             f'<a class="sponsor-card__logo" href="{html.escape(s["url"])}" '
-            f'target="_blank" rel="noopener">{inner}</a>'
+            f'target="_blank" rel="noopener"{sponsor_track_attrs(analytics, s["name"])}>{inner}</a>'
         )
     return f'<span class="sponsor-card__logo">{inner}</span>'
 
 
-def _sponsor_section(sponsor: dict, base_url: str) -> str:
+def _sponsor_section(sponsor: dict, base_url: str, analytics: dict) -> str:
     """Showcase the anchor sponsors: one logo lockup per sponsor."""
     lockups = [
-        _sponsor_lockup(s, base_url)
+        _sponsor_lockup(s, base_url, analytics)
         for s in (sponsor.get("sponsors") or [])
         if s.get("name")
     ]
@@ -391,7 +394,7 @@ def render_person_page(
         funeral_line = f'<p class="arrangements">Arrangements by {home}.</p>'
     else:
         funeral_line = ""
-    sponsor_section = _sponsor_section(sponsor, base_url)
+    sponsor_section = _sponsor_section(sponsor, base_url, newsroom.analytics)
     share_section = _share_section(ob.name, page_url)
     related_section = _related_section(related or [], base_url)
 
@@ -420,6 +423,7 @@ def render_person_page(
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="{newsroom.fonts_url}" rel="stylesheet" />
+  {head_snippet(newsroom.analytics)}
   <style>
     :root {{
       --ink: #1b1a18; --paper: {newsroom.paper}; --paper-2: #fffdf7;
@@ -594,6 +598,7 @@ def render_person_page(
       document.addEventListener('keydown', function (e) {{ if (e.key === 'Escape') {{ lb.hidden = true; }} }});
     }})();
   </script>
+  {event_script(newsroom.analytics)}
 </body>
 </html>
 """
