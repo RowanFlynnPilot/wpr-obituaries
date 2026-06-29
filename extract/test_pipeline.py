@@ -177,6 +177,24 @@ def test_og_cache_hash():
     print("ok: og cache hash (stable, brand- and record-sensitive)")
 
 
+def test_analytics():
+    import analytics
+    assert analytics.head_snippet({}) == ""                          # disabled -> nothing
+    assert analytics.event_script({"provider": ""}) == ""
+    assert analytics.sponsor_track_attrs({}, "Helke") == ""
+    pl = analytics.head_snippet({"provider": "plausible", "domain": "x.org"})
+    assert 'data-domain="x.org"' in pl and "plausible.io/js/script.js" in pl
+    gc = analytics.head_snippet({"provider": "goatcounter", "site": "wpr"})
+    assert "wpr.goatcounter.com/count" in gc
+    cf = analytics.head_snippet({"provider": "cloudflare", "site": "tok123"})
+    assert "cloudflareinsights.com" in cf and "tok123" in cf
+    assert analytics.head_snippet({"provider": "custom", "headHtml": "<b>x</b>"}) == "<b>x</b>"
+    on = {"provider": "plausible", "domain": "x.org"}
+    assert "trackEvent" in analytics.event_script(on)
+    assert 'data-track-event="Sponsor click"' in analytics.sponsor_track_attrs(on, "Helke")
+    print("ok: analytics (providers, events, disabled no-ops)")
+
+
 def test_sitemap_and_feed():
     recs = [mk("A A", 1, "2026-06-10"), mk("B B", 2, "2026-06-09")]
     sm = templates.render_sitemap(recs, "http://b", ["helke"])

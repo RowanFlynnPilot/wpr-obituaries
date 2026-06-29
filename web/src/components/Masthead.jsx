@@ -1,4 +1,5 @@
 import config from "../config.js";
+import { trackEvent } from "../lib/analytics.js";
 
 const BASE = import.meta.env.BASE_URL;
 const { identity, branding, copy } = config;
@@ -60,6 +61,7 @@ function SponsorLogo({ s }) {
       href={s.url}
       target="_blank"
       rel="noopener"
+      onClick={() => trackEvent("Sponsor click", { label: s.name })}
     >
       {img}
     </a>

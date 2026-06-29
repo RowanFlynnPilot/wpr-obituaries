@@ -49,6 +49,26 @@ gh secret set WEBSHARE_PROXY_URL    # only if your site is behind Cloudflare
 
 then seed the back-catalogue once: `python extract/main.py --days 180`.
 
+## Analytics (recommended)
+
+Turning on analytics is what proves the section's value — pageviews are both your
+traffic report *and* your sponsor-impression count (every page shows the
+sponsor), and sponsor-logo clicks are tracked as events. All providers below are
+cookieless, so no consent banner is needed. Set the `analytics` block in
+`newsroom.config.json`:
+
+```json
+"analytics": { "provider": "plausible", "domain": "obituaries.yourpaper.com" }
+```
+
+- **plausible** — set `domain`. Supports sponsor-click events.
+- **goatcounter** — set `site` (the `<code>` in `<code>.goatcounter.com`). Free; supports events.
+- **cloudflare** — set `site` (the beacon token). Free; pageviews only.
+- **custom** — set `headHtml` to your own `<script>` (any other provider).
+
+Both the static obituary pages and the embedded widget report to the same
+account. Leave `provider` empty to disable.
+
 ## Custom domain
 
 Pointing a subdomain (e.g. `obituaries.yourpaper.com`) at Pages keeps SEO equity
