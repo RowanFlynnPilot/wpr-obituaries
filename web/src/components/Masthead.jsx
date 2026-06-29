@@ -1,7 +1,7 @@
-const LOGO =
-  "https://wausaupilotandreview.com/wp-content/uploads/2024/04/WausauPilotandReviewLogo.png";
+import config from "../config.js";
 
 const BASE = import.meta.env.BASE_URL;
+const { identity, branding, copy } = config;
 
 export default function Masthead({ sponsor }) {
   const sponsors = sponsor?.sponsors || [];
@@ -9,15 +9,15 @@ export default function Masthead({ sponsor }) {
     <header className="masthead">
       <a
         className="masthead__logo"
-        href="https://wausaupilotandreview.com"
+        href={identity.url}
         target="_blank"
         rel="noopener"
       >
-        <img src={LOGO} alt="Wausau Pilot & Review" />
+        <img src={branding.logoUrl} alt={identity.name} />
       </a>
       <img
         className="masthead__seal"
-        src={`${BASE}assets/wpr-seal.png`}
+        src={`${BASE}${branding.sealPath}`}
         alt=""
         width="58"
         height="58"
@@ -25,14 +25,11 @@ export default function Masthead({ sponsor }) {
       />
       <p className="masthead__eyebrow">In Memoriam</p>
       <h1 className="masthead__title">Obituaries</h1>
-      <p className="masthead__lede">
-        Remembering the lives of Wausau and Marathon County, published free of
-        charge each Monday, Wednesday and Friday.
-      </p>
+      <p className="masthead__lede">{copy.lede}</p>
       <p className="masthead__submit">
         Email obituaries with photos to{" "}
-        <a href="mailto:darren@wausaupilotandreview.com">
-          darren@wausaupilotandreview.com
+        <a href={`mailto:${identity.submissionsEmail}`}>
+          {identity.submissionsEmail}
         </a>
         , or ask your funeral director for assistance.
       </p>

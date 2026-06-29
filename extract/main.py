@@ -29,14 +29,15 @@ from pathlib import Path
 
 from anthropic import Anthropic
 
-from extractor import extract_obituaries
+from adapters import enabled_sources
+from config import load_newsroom
 from homes import load_homes, resolve_home
 from models import Obituary
 from og import render_card
 from photos import vendor_photos, vendored_slugs
 from store import Master, load_manual, load_master, load_suppressed, save_master
 from templates import render_feed, render_home_page, render_person_page, render_sitemap
-from wp_client import fetch_batch_posts, make_session
+from wp_client import make_session
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "web" / "public" / "data"
@@ -53,9 +54,9 @@ MANUAL_FILE = ROOT / "data" / "manual.json"
 SUPPRESSED_FILE = ROOT / "data" / "suppressed.json"
 HOMES_FILE = ROOT / "data" / "funeral_homes.json"
 FAILURES_FILE = ROOT / "data" / "failures.json"
-WINDOW_DAYS = 14  # days to look back for new/changed posts each run; a safety
-#                   buffer (covers missed crons), not a retention limit — the
-#                   master keeps every published page forever.
+DEFAULT_WINDOW_DAYS = 14  # fallback if the wordpress_scrape adapter omits
+#                           windowDays; a safety buffer (covers missed crons),
+#                           not a retention limit — the master keeps every page.
 
 
 def _load_sponsor() -> dict:
@@ -74,38 +75,29 @@ def _require_base_url() -> str:
     return base_url.rstrip("/")
 
 
-def _post_modified(post: dict) -> str:
-    """Revision stamp for a post; falls back to publish date if absent."""
-    return post.get("modified_gmt") or post.get("modified") or post["date"]
+def sync(master: Master, sources: list, window: int | None) -> list[tuple[str, str]]:
+    """Fold new/changed units from every enabled source into the master.
 
-
-def sync(master: Master, client: Anthropic, window: int | None) -> list[tuple[str, str]]:
-    """Fetch the window and fold new/changed posts into the master.
-
-    Returns the list of (url, error) for posts that failed to extract.
+    Each source yields work-units; we skip those the master already processed at
+    the same revision, extract the rest, and upsert them. Returns the list of
+    (ref, error) for units that failed to extract.
     """
-    posts = fetch_batch_posts(window)
-    print(f"Fetched {len(posts)} batch posts.")
-    if not posts:
-        print("WARNING: 0 posts fetched — possible proxy/Cloudflare block.", file=sys.stderr)
-
     failures: list[tuple[str, str]] = []
     extracted = skipped = 0
-    for post in posts:
-        post_id = int(post["id"])
-        modified = _post_modified(post)
-        if master.is_processed(post_id, modified):
-            skipped += 1
-            continue
-        try:
-            people = extract_obituaries(post, client)
-        except Exception as exc:  # noqa: BLE001 — quarantine and report loudly
-            failures.append((post.get("link", "unknown"), str(exc)))
-            continue
-        master.upsert_post(post_id, modified, people)
-        extracted += len(people)
+    for source in sources:
+        for unit in source.units(window):
+            if master.is_processed(unit.source, unit.unit_id, unit.modified):
+                skipped += 1
+                continue
+            try:
+                people = unit.extract()
+            except Exception as exc:  # noqa: BLE001 — quarantine and report loudly
+                failures.append((unit.ref, str(exc)))
+                continue
+            master.upsert_post(unit.source, unit.unit_id, unit.modified, people)
+            extracted += len(people)
 
-    print(f"Extracted {extracted} obituaries from new/changed posts; {skipped} unchanged.")
+    print(f"Extracted {extracted} obituaries from new/changed units; {skipped} unchanged.")
     return failures
 
 
@@ -182,6 +174,7 @@ def _write_pages(
     vendored: set[str],
     homes: list[dict],
     primary_by_slug: dict[str, Obituary],
+    newsroom,
 ) -> None:
     PAGES_DIR.mkdir(parents=True, exist_ok=True)
     OG_DIR.mkdir(parents=True, exist_ok=True)
@@ -192,7 +185,7 @@ def _write_pages(
     for ob in records:
         related = [r for r in recent if r.slug != ob.slug][:6]
         portrait = PHOTOS_DIR / f"{ob.slug}.jpg" if ob.slug in vendored else None
-        render_card(ob.name, _lifespan_str(ob), portrait, OG_DIR / f"{ob.slug}.png", sponsor_line)
+        render_card(ob.name, _lifespan_str(ob), portrait, OG_DIR / f"{ob.slug}.png", newsroom, sponsor_line)
         og_image = f"{base_url}/assets/og/{ob.slug}.png"
         home = resolve_home(ob.funeral_home, homes)
         home_url = f"{base_url}/funeral-home/{home['slug']}.html" if home else None
@@ -200,7 +193,7 @@ def _write_pages(
         canonical_url = f"{base_url}/o/{primary.slug}.html"
         (PAGES_DIR / f"{ob.slug}.html").write_text(
             render_person_page(
-                ob, sponsor, base_url, related, _page_photo(ob, vendored, base_url),
+                ob, sponsor, base_url, newsroom, related, _page_photo(ob, vendored, base_url),
                 og_image, home_url, canonical_url,
             ),
             encoding="utf-8",
@@ -208,7 +201,7 @@ def _write_pages(
 
 
 def _write_home_pages(
-    records: list[Obituary], sponsor: dict, base_url: str, homes: list[dict]
+    records: list[Obituary], sponsor: dict, base_url: str, homes: list[dict], newsroom
 ) -> list[str]:
     """A landing page per canonical funeral home. Returns the home slugs (sitemap)."""
     HOME_PAGES_DIR.mkdir(parents=True, exist_ok=True)
@@ -226,12 +219,12 @@ def _write_home_pages(
         recs = sorted(recs, key=lambda r: r.name)
         recs = sorted(recs, key=lambda r: r.source_date, reverse=True)
         (HOME_PAGES_DIR / f"{slug}.html").write_text(
-            render_home_page(meta[slug], recs, sponsor, base_url), encoding="utf-8"
+            render_home_page(meta[slug], recs, sponsor, base_url, newsroom), encoding="utf-8"
         )
     return list(groups)
 
 
-def render(master: Master, sponsor: dict, base_url: str, allow_empty: bool) -> None:
+def render(master: Master, sponsor: dict, base_url: str, newsroom, allow_empty: bool) -> None:
     """Rebuild index, pages, and sitemap from the master + manual records.
 
     Manual one-offs are merged in; suppressed slugs (family requests) are removed
@@ -254,12 +247,12 @@ def render(master: Master, sponsor: dict, base_url: str, allow_empty: bool) -> N
     vendored = vendored_slugs(PHOTOS_DIR)
     homes = load_homes(HOMES_FILE)
     _write_index(canonical, vendored, homes)
-    _write_pages(records, sponsor, base_url, vendored, homes, primary_by_slug)
-    home_slugs = _write_home_pages(canonical, sponsor, base_url, homes)
+    _write_pages(records, sponsor, base_url, vendored, homes, primary_by_slug, newsroom)
+    home_slugs = _write_home_pages(canonical, sponsor, base_url, homes, newsroom)
     SITEMAP_FILE.write_text(
         render_sitemap(canonical, base_url, home_slugs), encoding="utf-8"
     )
-    FEED_FILE.write_text(render_feed(canonical, base_url), encoding="utf-8")
+    FEED_FILE.write_text(render_feed(canonical, base_url, newsroom), encoding="utf-8")
     extras = []
     dupes = len(records) - len(canonical)
     if dupes:
@@ -291,25 +284,29 @@ def main() -> int:
     args = parser.parse_args()
 
     sponsor = _load_sponsor()
+    newsroom = load_newsroom()
     base_url = _require_base_url()
     master = load_master(MASTER_FILE)
 
     failures: list[tuple[str, str]] = []
     if not args.render_only:
         client = Anthropic(max_retries=4)
+        sources = enabled_sources(newsroom, client)
         if args.backfill:
             window = None
         elif args.days is not None:
             window = args.days
         else:
-            window = WINDOW_DAYS
-        failures = sync(master, client, window)
+            window = newsroom.adapter("wordpress_scrape").get(
+                "windowDays", DEFAULT_WINDOW_DAYS
+            )
+        failures = sync(master, sources, window)
         save_master(master, MASTER_FILE)  # persist successes before anything can fail
         saved = vendor_photos(master.records, PHOTOS_DIR, make_session())
         if saved:
             print(f"Vendored {saved} new portrait(s).")
 
-    render(master, sponsor, base_url, args.allow_empty)
+    render(master, sponsor, base_url, newsroom, args.allow_empty)
 
     if not args.render_only:
         FAILURES_FILE.parent.mkdir(parents=True, exist_ok=True)

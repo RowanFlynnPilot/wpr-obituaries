@@ -17,6 +17,7 @@ import json
 from datetime import datetime, timezone
 from urllib.parse import quote
 
+from config import Newsroom
 from models import Obituary
 
 
@@ -26,7 +27,9 @@ def _rfc822(date_str: str) -> str:
     return dt.strftime("%a, %d %b %Y %H:%M:%S +0000")
 
 
-def render_feed(obituaries: list[Obituary], base_url: str, limit: int = 50) -> str:
+def render_feed(
+    obituaries: list[Obituary], base_url: str, newsroom: Newsroom, limit: int = 50
+) -> str:
     """RSS 2.0 feed of the most recent obituaries — syndication + auto-discovery."""
     recent = sorted(obituaries, key=lambda o: o.source_date, reverse=True)[:limit]
     items = []
@@ -45,23 +48,28 @@ def render_feed(obituaries: list[Obituary], base_url: str, limit: int = 50) -> s
     return (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<rss version="2.0">\n  <channel>\n'
-        "    <title>Obituaries — Wausau Pilot &amp; Review</title>\n"
+        f"    <title>Obituaries — {html.escape(newsroom.name)}</title>\n"
         f"    <link>{html.escape(base_url)}/</link>\n"
-        "    <description>Recent obituaries from Wausau and Marathon County.</description>\n"
+        f"    <description>Recent obituaries from {html.escape(newsroom.coverage_area)}.</description>\n"
         "    <language>en-us</language>\n"
         f"{body}\n"
         "  </channel>\n</rss>\n"
     )
 
-WPR_LOGO = (
-    "https://wausaupilotandreview.com/wp-content/uploads/2024/04/"
-    "WausauPilotandReviewLogo.png"
-)
-FONTS = (
-    "https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;"
-    "0,400;0,700;1,300;1,400&family=Oswald:wght@400;500;600;700&"
-    "family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap"
-)
+def _root_vars_wide(newsroom: Newsroom) -> str:
+    """The `:root` custom-property block for the funeral-home/home page CSS.
+
+    Brand-distinct values (paper, accent, the three font stacks) come from the
+    newsroom config; the rest of the newsprint palette is shared.
+    """
+    return f"""
+    :root {{
+      --ink: #1b1a18; --paper: {newsroom.paper}; --paper-2: #fffdf7; --muted: #6f6a61;
+      --faint: #9b958a; --rule: #d9d3c6; --hairline: #e7e1d5; --accent: {newsroom.accent};
+      --serif: {newsroom.serif};
+      --nameplate: {newsroom.nameplate};
+      --mono: {newsroom.mono};
+    }}"""
 
 
 def render_sitemap(
@@ -92,13 +100,6 @@ def render_sitemap(
 
 
 _SECONDARY_CSS = """
-    :root {
-      --ink: #1b1a18; --paper: #f6f2ea; --paper-2: #fffdf7; --muted: #6f6a61;
-      --faint: #9b958a; --rule: #d9d3c6; --hairline: #e7e1d5; --accent: #7c2e36;
-      --serif: "Merriweather", Georgia, serif;
-      --nameplate: "Oswald", "Arial Narrow", sans-serif;
-      --mono: "Courier Prime", "Courier New", monospace;
-    }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--paper); color: var(--ink);
       font-family: var(--serif); line-height: 1.7; -webkit-font-smoothing: antialiased; }
@@ -150,7 +151,7 @@ _SECONDARY_CSS = """
 
 
 def render_home_page(
-    home: dict, records: list[Obituary], sponsor: dict, base_url: str
+    home: dict, records: list[Obituary], sponsor: dict, base_url: str, newsroom: Newsroom
 ) -> str:
     """A landing page listing every obituary arranged by one funeral home."""
     page_url = f"{base_url}/funeral-home/{home['slug']}.html"
@@ -170,36 +171,36 @@ def render_home_page(
         else ""
     )
     description = (
-        f"Obituaries arranged by {home['name']}, published by Wausau Pilot & Review."
+        f"Obituaries arranged by {home['name']}, published by {newsroom.name}."
     )
     return f"""<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{name} Obituaries — Wausau Pilot &amp; Review</title>
+  <title>{name} Obituaries — {html.escape(newsroom.name)}</title>
   <meta name="description" content="{html.escape(description)}" />
-  <meta name="theme-color" content="#f6f2ea" />
+  <meta name="theme-color" content="{newsroom.paper}" />
   <link rel="canonical" href="{page_url}" />
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Wausau Pilot &amp; Review" />
+  <meta property="og:site_name" content="{html.escape(newsroom.name)}" />
   <meta property="og:title" content="{name} Obituaries" />
   <meta property="og:description" content="{html.escape(description)}" />
   <meta property="og:url" content="{page_url}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="{FONTS}" rel="stylesheet" />
-  <style>{_SECONDARY_CSS}</style>
+  <link href="{newsroom.fonts_url}" rel="stylesheet" />
+  <style>{_root_vars_wide(newsroom)}{_SECONDARY_CSS}</style>
 </head>
 <body>
   <main class="wrap">
     <a class="topnav" href="{base_url}/">&larr; All obituaries</a>
     <header class="masthead">
-      <a class="masthead__logo" href="https://wausaupilotandreview.com"
+      <a class="masthead__logo" href="{newsroom.url}"
          target="_blank" rel="noopener">
-        <img src="{WPR_LOGO}" alt="Wausau Pilot &amp; Review" />
+        <img src="{newsroom.logo_url}" alt="{html.escape(newsroom.name)}" />
       </a>
-      <img class="masthead__seal" src="{base_url}/assets/wpr-seal.png" alt=""
+      <img class="masthead__seal" src="{base_url}/{newsroom.seal_path}" alt=""
            width="46" height="46" />
       <p class="kicker">Funeral Home</p>
       <hr class="masthead__rule" />
@@ -220,7 +221,8 @@ def render_home_page(
 
 
 def _structured_data(
-    ob: Obituary, page_url: str, sponsor: dict, base_url: str, photo_url: str | None = None
+    ob: Obituary, page_url: str, sponsor: dict, base_url: str, newsroom: Newsroom,
+    photo_url: str | None = None,
 ) -> str:
     image = photo_url or ob.photo_url
     data = {
@@ -229,7 +231,7 @@ def _structured_data(
         "headline": f"{ob.name} obituary",
         "url": page_url,
         "datePublished": ob.source_date,
-        "publisher": {"@type": "NewsMediaOrganization", "name": "Wausau Pilot & Review"},
+        "publisher": {"@type": "NewsMediaOrganization", "name": newsroom.name},
         "about": {
             "@type": "Person",
             "name": ob.name,
@@ -360,6 +362,7 @@ def render_person_page(
     ob: Obituary,
     sponsor: dict,
     base_url: str,
+    newsroom: Newsroom,
     related: list[Obituary] | None = None,
     photo_url: str | None = None,
     og_image: str | None = None,
@@ -397,34 +400,34 @@ def render_person_page(
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{html.escape(ob.name)} Obituary — Wausau Pilot &amp; Review</title>
+  <title>{html.escape(ob.name)} Obituary — {html.escape(newsroom.name)}</title>
   <meta name="description" content="{html.escape(ob.summary)}" />
-  <meta name="theme-color" content="#f6f2ea" />
+  <meta name="theme-color" content="{newsroom.paper}" />
   <link rel="canonical" href="{canonical}" />
   <meta property="og:type" content="article" />
-  <meta property="og:site_name" content="Wausau Pilot &amp; Review" />
+  <meta property="og:site_name" content="{html.escape(newsroom.name)}" />
   <meta property="og:title" content="{html.escape(ob.name)} Obituary" />
   <meta property="og:description" content="{html.escape(ob.summary)}" />
   <meta property="og:url" content="{page_url}" />
   {_image_meta(og_image, pic)}
   <script type="application/ld+json">
-{_structured_data(ob, page_url, sponsor, base_url, pic)}
+{_structured_data(ob, page_url, sponsor, base_url, newsroom, pic)}
   </script>
   <script type="application/ld+json">
 {_breadcrumb_json(ob, page_url, base_url)}
   </script>
-  <link rel="alternate" type="application/rss+xml" title="WPR Obituaries" href="{base_url}/feed.xml" />
+  <link rel="alternate" type="application/rss+xml" title="{html.escape(newsroom.short_name)} Obituaries" href="{base_url}/feed.xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="{FONTS}" rel="stylesheet" />
+  <link href="{newsroom.fonts_url}" rel="stylesheet" />
   <style>
     :root {{
-      --ink: #1b1a18; --paper: #f6f2ea; --paper-2: #fffdf7;
+      --ink: #1b1a18; --paper: {newsroom.paper}; --paper-2: #fffdf7;
       --muted: #6f6a61; --faint: #9b958a; --rule: #d9d3c6;
-      --hairline: #e7e1d5; --accent: #7c2e36;
-      --serif: "Merriweather", Georgia, serif;
-      --nameplate: "Oswald", "Arial Narrow", sans-serif;
-      --mono: "Courier Prime", "Courier New", monospace;
+      --hairline: #e7e1d5; --accent: {newsroom.accent};
+      --serif: {newsroom.serif};
+      --nameplate: {newsroom.nameplate};
+      --mono: {newsroom.mono};
     }}
     * {{ box-sizing: border-box; }}
     body {{
@@ -554,11 +557,11 @@ def render_person_page(
   <main class="wrap">
     <a class="topnav" href="{base_url}/">&larr; All obituaries</a>
     <header class="masthead">
-      <a class="masthead__logo" href="https://wausaupilotandreview.com"
+      <a class="masthead__logo" href="{newsroom.url}"
          target="_blank" rel="noopener">
-        <img src="{WPR_LOGO}" alt="Wausau Pilot &amp; Review" />
+        <img src="{newsroom.logo_url}" alt="{html.escape(newsroom.name)}" />
       </a>
-      <img class="masthead__seal" src="{base_url}/assets/wpr-seal.png" alt=""
+      <img class="masthead__seal" src="{base_url}/{newsroom.seal_path}" alt=""
            width="46" height="46" />
       <p class="kicker">In Memoriam</p>
       <hr class="masthead__rule" />

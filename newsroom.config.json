@@ -1,0 +1,35 @@
+{
+  "identity": {
+    "name": "Wausau Pilot & Review",
+    "shortName": "WPR",
+    "url": "https://wausaupilotandreview.com",
+    "coverageArea": "Wausau and Marathon County",
+    "submissionsEmail": "darren@wausaupilotandreview.com"
+  },
+  "branding": {
+    "logoUrl": "https://wausaupilotandreview.com/wp-content/uploads/2024/04/WausauPilotandReviewLogo.png",
+    "sealPath": "assets/wpr-seal.png",
+    "accent": "#7c2e36",
+    "paper": "#f6f2ea",
+    "fontsUrl": "https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Oswald:wght@400;500;600;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap",
+    "serif": "\"Merriweather\", Georgia, serif",
+    "nameplate": "\"Oswald\", \"Arial Narrow\", sans-serif",
+    "mono": "\"Courier Prime\", \"Courier New\", monospace"
+  },
+  "copy": {
+    "lede": "Remembering the lives of Wausau and Marathon County, published free of charge each Monday, Wednesday and Friday.",
+    "footerTagline": "nonprofit local journalism for north central Wisconsin."
+  },
+  "adapters": {
+    "wordpress_scrape": {
+      "enabled": true,
+      "apiBase": "https://wausaupilotandreview.com/wp-json/wp/v2",
+      "categorySlug": "obituaries",
+      "windowDays": 14
+    },
+    "intake": {
+      "enabled": false,
+      "backend": "manual"
+    }
+  }
+}

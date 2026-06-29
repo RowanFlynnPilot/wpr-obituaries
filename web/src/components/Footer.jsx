@@ -1,4 +1,7 @@
+import config from "../config.js";
+
 const BASE = import.meta.env.BASE_URL;
+const { identity, copy } = config;
 
 export default function Footer({ sponsor }) {
   const sponsors = sponsor?.sponsors || [];
@@ -34,8 +37,7 @@ export default function Footer({ sponsor }) {
 
       <hr className="footer__rule" />
       <p className="footer__fineprint">
-        Wausau Pilot &amp; Review — nonprofit local journalism for north central
-        Wisconsin.
+        {identity.name} — {copy.footerTagline}
       </p>
     </footer>
   );

@@ -14,8 +14,6 @@ import time
 
 from curl_cffi import requests
 
-BASE = "https://wausaupilotandreview.com/wp-json/wp/v2"
-CATEGORY_SLUG = "obituaries"
 TIMEOUT = 30
 RETRIES = 5  # the residential proxy + Cloudflare are flaky (incl. TLS blips); ride them out
 
@@ -64,26 +62,29 @@ def make_session() -> requests.Session:
     return _session()
 
 
-def _category_id(session: requests.Session) -> int:
+def _category_id(session: requests.Session, api_base: str, category_slug: str) -> int:
     """Resolve the obituaries category ID. Raise if it cannot be found."""
     resp = _get(
-        session, f"{BASE}/categories", {"slug": CATEGORY_SLUG, "_fields": "id,slug"}
+        session, f"{api_base}/categories", {"slug": category_slug, "_fields": "id,slug"}
     )
     resp.raise_for_status()
     rows = resp.json()
     if not rows:
-        raise RuntimeError(f"No category found for slug '{CATEGORY_SLUG}'.")
+        raise RuntimeError(f"No category found for slug '{category_slug}'.")
     return int(rows[0]["id"])
 
 
-def fetch_batch_posts(window_days: int | None) -> list[dict]:
+def fetch_batch_posts(
+    window_days: int | None, api_base: str, category_slug: str
+) -> list[dict]:
     """Return raw obituary batch posts, newest first.
 
     window_days bounds the pull for the Mon/Wed/Fri cron (cost control).
-    Pass None for a full backfill.
+    Pass None for a full backfill. api_base/category_slug come from the newsroom
+    config so a fork points at its own WordPress install.
     """
     session = _session()
-    category = _category_id(session)
+    category = _category_id(session, api_base, category_slug)
 
     params = {
         "categories": category,
@@ -101,7 +102,7 @@ def fetch_batch_posts(window_days: int | None) -> list[dict]:
     posts: list[dict] = []
     page = 1
     while True:
-        resp = _get(session, f"{BASE}/posts", {**params, "page": page})
+        resp = _get(session, f"{api_base}/posts", {**params, "page": page})
         if resp.status_code == 400:
             # WordPress returns 400 once page exceeds the available range.
             break
