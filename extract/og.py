@@ -12,13 +12,19 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from config import Newsroom
+
 W, H = 1200, 630
 FONTS_DIR = Path(__file__).resolve().parent / "assets" / "fonts"
-PAPER = (246, 242, 234)
 INK = (27, 26, 24)
 MUTED = (111, 106, 97)
-ACCENT = (124, 46, 54)
 RULE = (217, 211, 198)
+
+
+def _hex_to_rgb(value: str) -> tuple[int, int, int]:
+    """'#7c2e36' -> (124, 46, 54)."""
+    h = value.lstrip("#")
+    return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
 
 _FONT_CACHE: dict[tuple[str, int], ImageFont.FreeTypeFont] = {}
 
@@ -58,11 +64,14 @@ def _wrap(draw: ImageDraw.ImageDraw, text: str, font, max_width: int) -> list[st
 
 
 def render_card(
-    name: str, lifespan: str, photo_path: Path | None, dest: Path, sponsor_line: str = ""
+    name: str, lifespan: str, photo_path: Path | None, dest: Path,
+    newsroom: Newsroom, sponsor_line: str = "",
 ) -> None:
-    img = Image.new("RGB", (W, H), PAPER)
+    paper = _hex_to_rgb(newsroom.paper)
+    accent = _hex_to_rgb(newsroom.accent)
+    img = Image.new("RGB", (W, H), paper)
     draw = ImageDraw.Draw(img)
-    draw.rectangle([0, 0, W, 8], fill=ACCENT)  # top accent bar
+    draw.rectangle([0, 0, W, 8], fill=accent)  # top accent bar
 
     margin = 70
     text_x, text_w = margin, W - 2 * margin
@@ -78,7 +87,7 @@ def render_card(
         except Exception:  # noqa: BLE001 — a bad portrait just yields a text card
             pass
 
-    draw.text((text_x, 116), "I N   M E M O R I A M", font=_font("CourierPrime-Regular.ttf", 26), fill=ACCENT)
+    draw.text((text_x, 116), "I N   M E M O R I A M", font=_font("CourierPrime-Regular.ttf", 26), fill=accent)
 
     name_font = _font("Merriweather-Bold.ttf", 66)
     lines = _wrap(draw, name, name_font, text_w)
@@ -93,7 +102,7 @@ def render_card(
     if lifespan:
         draw.text((text_x, y + 10), lifespan, font=_font("CourierPrime-Regular.ttf", 34), fill=MUTED)
 
-    draw.text((margin, H - 92), "WAUSAU PILOT & REVIEW", font=_font("Oswald-SemiBold.ttf", 30), fill=INK)
+    draw.text((margin, H - 92), newsroom.name.upper(), font=_font("Oswald-SemiBold.ttf", 30), fill=INK)
     footer = sponsor_line or "Obituaries"
     draw.text((margin, H - 52), footer, font=_font("CourierPrime-Regular.ttf", 22), fill=MUTED)
 

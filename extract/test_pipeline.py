@@ -13,12 +13,15 @@ import tempfile
 import xml.dom.minidom
 from pathlib import Path
 
+import config
 import extractor
 import homes
 import main
 import store
 import templates
 from models import Obituary
+
+NEWSROOM = config.load_newsroom()
 
 
 def mk(name, sid, date, *, body="body text here", death_date=None, death_year=2026,
@@ -92,7 +95,7 @@ def test_sitemap_and_feed():
     sm = templates.render_sitemap(recs, "http://b", ["helke"])
     xml.dom.minidom.parseString(sm)
     assert sm.count("<loc>") == 4 and "/funeral-home/helke.html" in sm  # index + 2 + 1 home
-    feed = templates.render_feed(recs, "http://b")
+    feed = templates.render_feed(recs, "http://b", NEWSROOM)
     xml.dom.minidom.parseString(feed)
     assert feed.count("<item>") == 2 and "<pubDate>" in feed
     print("ok: sitemap + feed (well-formed, correct counts)")

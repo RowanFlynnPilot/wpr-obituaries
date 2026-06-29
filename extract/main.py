@@ -29,6 +29,7 @@ from pathlib import Path
 
 from anthropic import Anthropic
 
+from config import load_newsroom
 from extractor import extract_obituaries
 from homes import load_homes, resolve_home
 from models import Obituary
@@ -182,6 +183,7 @@ def _write_pages(
     vendored: set[str],
     homes: list[dict],
     primary_by_slug: dict[str, Obituary],
+    newsroom,
 ) -> None:
     PAGES_DIR.mkdir(parents=True, exist_ok=True)
     OG_DIR.mkdir(parents=True, exist_ok=True)
@@ -192,7 +194,7 @@ def _write_pages(
     for ob in records:
         related = [r for r in recent if r.slug != ob.slug][:6]
         portrait = PHOTOS_DIR / f"{ob.slug}.jpg" if ob.slug in vendored else None
-        render_card(ob.name, _lifespan_str(ob), portrait, OG_DIR / f"{ob.slug}.png", sponsor_line)
+        render_card(ob.name, _lifespan_str(ob), portrait, OG_DIR / f"{ob.slug}.png", newsroom, sponsor_line)
         og_image = f"{base_url}/assets/og/{ob.slug}.png"
         home = resolve_home(ob.funeral_home, homes)
         home_url = f"{base_url}/funeral-home/{home['slug']}.html" if home else None
@@ -200,7 +202,7 @@ def _write_pages(
         canonical_url = f"{base_url}/o/{primary.slug}.html"
         (PAGES_DIR / f"{ob.slug}.html").write_text(
             render_person_page(
-                ob, sponsor, base_url, related, _page_photo(ob, vendored, base_url),
+                ob, sponsor, base_url, newsroom, related, _page_photo(ob, vendored, base_url),
                 og_image, home_url, canonical_url,
             ),
             encoding="utf-8",
@@ -208,7 +210,7 @@ def _write_pages(
 
 
 def _write_home_pages(
-    records: list[Obituary], sponsor: dict, base_url: str, homes: list[dict]
+    records: list[Obituary], sponsor: dict, base_url: str, homes: list[dict], newsroom
 ) -> list[str]:
     """A landing page per canonical funeral home. Returns the home slugs (sitemap)."""
     HOME_PAGES_DIR.mkdir(parents=True, exist_ok=True)
@@ -226,12 +228,12 @@ def _write_home_pages(
         recs = sorted(recs, key=lambda r: r.name)
         recs = sorted(recs, key=lambda r: r.source_date, reverse=True)
         (HOME_PAGES_DIR / f"{slug}.html").write_text(
-            render_home_page(meta[slug], recs, sponsor, base_url), encoding="utf-8"
+            render_home_page(meta[slug], recs, sponsor, base_url, newsroom), encoding="utf-8"
         )
     return list(groups)
 
 
-def render(master: Master, sponsor: dict, base_url: str, allow_empty: bool) -> None:
+def render(master: Master, sponsor: dict, base_url: str, newsroom, allow_empty: bool) -> None:
     """Rebuild index, pages, and sitemap from the master + manual records.
 
     Manual one-offs are merged in; suppressed slugs (family requests) are removed
@@ -254,12 +256,12 @@ def render(master: Master, sponsor: dict, base_url: str, allow_empty: bool) -> N
     vendored = vendored_slugs(PHOTOS_DIR)
     homes = load_homes(HOMES_FILE)
     _write_index(canonical, vendored, homes)
-    _write_pages(records, sponsor, base_url, vendored, homes, primary_by_slug)
-    home_slugs = _write_home_pages(canonical, sponsor, base_url, homes)
+    _write_pages(records, sponsor, base_url, vendored, homes, primary_by_slug, newsroom)
+    home_slugs = _write_home_pages(canonical, sponsor, base_url, homes, newsroom)
     SITEMAP_FILE.write_text(
         render_sitemap(canonical, base_url, home_slugs), encoding="utf-8"
     )
-    FEED_FILE.write_text(render_feed(canonical, base_url), encoding="utf-8")
+    FEED_FILE.write_text(render_feed(canonical, base_url, newsroom), encoding="utf-8")
     extras = []
     dupes = len(records) - len(canonical)
     if dupes:
@@ -291,6 +293,7 @@ def main() -> int:
     args = parser.parse_args()
 
     sponsor = _load_sponsor()
+    newsroom = load_newsroom()
     base_url = _require_base_url()
     master = load_master(MASTER_FILE)
 
@@ -309,7 +312,7 @@ def main() -> int:
         if saved:
             print(f"Vendored {saved} new portrait(s).")
 
-    render(master, sponsor, base_url, args.allow_empty)
+    render(master, sponsor, base_url, newsroom, args.allow_empty)
 
     if not args.render_only:
         FAILURES_FILE.parent.mkdir(parents=True, exist_ok=True)
