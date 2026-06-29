@@ -20,6 +20,9 @@ web/public/funeral-home/
 web/public/assets/og/
 data/failures.json
 
+# Build caches (not committed; CI restores these via actions/cache)
+.cache/
+
 # Local env
 .env
 

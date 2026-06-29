@@ -22,6 +22,7 @@ single bad post never costs us the rest of the catalogue.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -43,6 +44,10 @@ PAGES_DIR = ROOT / "web" / "public" / "o"
 HOME_PAGES_DIR = ROOT / "web" / "public" / "funeral-home"
 PHOTOS_DIR = ROOT / "web" / "public" / "assets" / "photos"
 OG_DIR = ROOT / "web" / "public" / "assets" / "og"
+# slug -> input hash; lets render skip unchanged cards. Kept outside the deployed
+# public/ tree (it's build state, not site output) but cached in CI alongside og/.
+OG_CACHE_FILE = ROOT / ".cache" / "og-cards.json"
+OG_CARD_VERSION = "1"  # bump when og.render_card's output changes, to force regen
 SITEMAP_FILE = ROOT / "web" / "public" / "sitemap.xml"
 FEED_FILE = ROOT / "web" / "public" / "feed.xml"
 SPONSOR_FILE = DATA_DIR / "sponsor.json"
@@ -165,6 +170,44 @@ def _dedupe_people(
     return canonical, primary_by_slug
 
 
+def _og_brand_fingerprint(newsroom, sponsor_line: str) -> str:
+    """Everything global to a share-card — change it and every card regenerates."""
+    return "|".join([OG_CARD_VERSION, newsroom.name, newsroom.accent, newsroom.paper, sponsor_line])
+
+
+def _og_input_hash(ob: Obituary, portrait: Path | None, brand_fp: str) -> str:
+    """Content hash of a card's inputs (brand, name, dates, portrait bytes)."""
+    parts = [brand_fp, ob.name, _lifespan_str(ob)]
+    if portrait and portrait.exists():
+        parts.append(hashlib.sha1(portrait.read_bytes()).hexdigest())
+    else:
+        parts.append("no-portrait")
+    return hashlib.sha1("\x00".join(parts).encode()).hexdigest()
+
+
+def _load_og_cache() -> dict[str, str]:
+    if not OG_CACHE_FILE.exists():
+        return {}
+    try:
+        return json.loads(OG_CACHE_FILE.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}  # a corrupt cache just means a cold render, never a failure
+
+
+def _save_og_cache(cache: dict[str, str]) -> None:
+    OG_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    OG_CACHE_FILE.write_text(
+        json.dumps(dict(sorted(cache.items())), indent=0), encoding="utf-8"
+    )
+
+
+def _prune_og_orphans(live_slugs: set[str]) -> None:
+    """Delete cards for obituaries no longer rendered (suppressed/removed)."""
+    for png in OG_DIR.glob("*.png"):
+        if png.stem not in live_slugs:
+            png.unlink()
+
+
 def _write_pages(
     records: list[Obituary],
     sponsor: dict,
@@ -179,11 +222,26 @@ def _write_pages(
     for stale in PAGES_DIR.glob("*.html"):
         stale.unlink()  # render is authoritative: never leave an orphaned page
     sponsor_line = _sponsor_line(sponsor)
+    # Composing the branded share-card (PIL) is the expensive part of a render, so
+    # memoize it: a card is regenerated only when its inputs change (name, dates,
+    # portrait bytes, or the brand). The HTML is cheap and always rewritten — that
+    # sidesteps the "recent obituaries" cross-link making every page interdependent.
+    brand_fp = _og_brand_fingerprint(newsroom, sponsor_line)
+    og_cache = _load_og_cache()
+    fresh_cache: dict[str, str] = {}
+    og_made = og_kept = 0
     recent = sorted(records, key=lambda r: r.source_date, reverse=True)[:7]
     for ob in records:
         related = [r for r in recent if r.slug != ob.slug][:6]
         portrait = PHOTOS_DIR / f"{ob.slug}.jpg" if ob.slug in vendored else None
-        render_card(ob.name, _lifespan_str(ob), portrait, OG_DIR / f"{ob.slug}.png", newsroom, sponsor_line)
+        og_path = OG_DIR / f"{ob.slug}.png"
+        digest = _og_input_hash(ob, portrait, brand_fp)
+        if og_cache.get(ob.slug) == digest and og_path.exists():
+            og_kept += 1
+        else:
+            render_card(ob.name, _lifespan_str(ob), portrait, og_path, newsroom, sponsor_line)
+            og_made += 1
+        fresh_cache[ob.slug] = digest
         og_image = f"{base_url}/assets/og/{ob.slug}.png"
         home = resolve_home(ob.funeral_home, homes)
         home_url = f"{base_url}/funeral-home/{home['slug']}.html" if home else None
@@ -196,6 +254,9 @@ def _write_pages(
             ),
             encoding="utf-8",
         )
+    _prune_og_orphans({ob.slug for ob in records})
+    _save_og_cache(fresh_cache)
+    print(f"OG cards: {og_made} generated, {og_kept} reused from cache.")
 
 
 def _write_home_pages(
