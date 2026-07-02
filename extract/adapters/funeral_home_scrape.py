@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import sys
 from collections.abc import Iterator
 from datetime import date, datetime, timedelta, timezone
@@ -140,12 +141,27 @@ def _age(birth_date: str | None, death_date: str | None) -> int | None:
     return years if 0 <= years <= 120 else None
 
 
-def _tribute_summary(name: str, age: int | None, death_str: str | None) -> str:
-    """One respectful line. No town: Tribute has no structured city, and the
-    prose opener is too varied to parse a town from without false positives."""
+# Tribute has no structured city, but the opening line reads "…, <age>, of
+# <Town>, …", so the town is the capitalized run right after the age. Anchoring
+# on that age is what keeps a prose opener ("In loving memory of Elizabeth…")
+# from yielding the name as the town.
+_CITY_RE = re.compile(r",\s*(?:age\s+)?\d{1,3},?\s+of\s+([A-Z][\w.'-]*(?:\s+[A-Z][\w.'-]*){0,2})")
+
+
+def _city_from_body(body: str) -> str | None:
+    """Best-effort town from a Tribute obituary's opening line, else None."""
+    m = _CITY_RE.search(body or "")
+    return m.group(1).strip(" ,.") if m else None
+
+
+def _tribute_summary(name: str, age: int | None, city: str | None, death_str: str | None) -> str:
+    """One respectful line, shaped like the Tukios summary so the town facet
+    (_derive_town) reads "of <City>" when we could recover the town."""
     parts = [name]
     if age is not None:
         parts.append(f", age {age}")
+    if city:
+        parts.append(f", of {city}")
     if death_str:
         parts.append(f" passed away on {death_str.strip()}")
     return "".join(parts) + "."
@@ -162,6 +178,7 @@ def tribute_to_obituary(rec: dict, home_name: str) -> Obituary | None:
         return None
     birth_date = tribute.parse_date(rec.get("birthDate"))
     age = _age(birth_date, death_date)
+    body = tribute.body_text(rec.get("description", ""))
     return Obituary(
         name=name,
         source_id=int(oid),
@@ -173,8 +190,8 @@ def tribute_to_obituary(rec: dict, home_name: str) -> Obituary | None:
         age=age,
         funeral_home=home_name,
         photo_url=rec.get("image"),
-        summary=_tribute_summary(name, age, rec.get("deathDate")),
-        body=tribute.body_text(rec.get("description", "")),
+        summary=_tribute_summary(name, age, _city_from_body(body), rec.get("deathDate")),
+        body=body,
     )
 
 
