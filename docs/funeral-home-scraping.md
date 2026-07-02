@@ -56,11 +56,27 @@ keys:
 { "name": "…", "url": "…", "match": ["…"], "platform": "tukios", "siteAlias": "7aacd58f" }
 ```
 
-The **siteAlias** is an 8-hex-char key printed in the home's `/obituaries` page
-source as `siteAlias = '…'` or `SiteAlias: '…'` (it is *not* the
-`login?site_id=` value). `tukios.find_site_alias()` extracts it from page HTML.
-A home without `platform` is name-canonicalized only, never scraped. Verified
-aliases are committed; the current set is the seven Tukios homes above.
+The easiest way to add one is the onboarding CLI, which does the detection,
+extraction, verification, and (with `--write`) the edit for you:
+
+```
+python scripts/add_home.py https://www.example-fh.com          # detect + verify + print
+python scripts/add_home.py https://www.example-fh.com --write  # also insert the entry
+```
+
+It fetches the home's obituaries page (in Python, because the fetch is
+cross-origin and often Cloudflare-fronted — a browser can't make it), detects
+the platform, pulls the `siteAlias`, confirms it returns obituaries against the
+live API, and inserts a config line preserving the one-home-per-line format.
+Review the derived `match` token — it must be a lowercase substring of how the
+home names itself on its obituaries so scraped records link to the canonical
+home. A Tribute Technology site is reported as recognized-but-not-yet-scrapable.
+
+By hand: the **siteAlias** is an 8-hex-char key printed in the home's
+`/obituaries` page source as `siteAlias = '…'` or `SiteAlias: '…'` (it is *not*
+the `login?site_id=` value); `tukios.find_site_alias()` extracts it. A home
+without `platform` is name-canonicalized only, never scraped. Verified aliases
+are committed; the current set is the seven Tukios homes above.
 
 The list of scraped homes doubles as the **republication permission list** —
 only add a home the newsroom has an arrangement with.

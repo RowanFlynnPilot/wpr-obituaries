@@ -218,6 +218,41 @@ def test_tukios_client():
     print("ok: tukios client (alias regex, windowed stop, unpublished skipped)")
 
 
+def _load_add_home():
+    import importlib.util
+    root = Path(main.__file__).resolve().parent.parent
+    spec = importlib.util.spec_from_file_location("add_home", root / "scripts" / "add_home.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_add_home():
+    ah = _load_add_home()
+
+    # platform detection from page HTML (no network)
+    assert ah.detect_platform("... siteAlias = '7aacd58f'; ...") == ("tukios", "7aacd58f")
+    assert ah.detect_platform("powered by Tukios") == ("tukios", None)
+    assert ah.detect_platform("api.secure.tributecenteronline.com") == ("tribute", None)
+    assert ah.detect_platform("<html>plain site</html>") == ("unknown", None)
+
+    # match token derived from the domain, junk stripped
+    assert ah.derive_match("Brainard Funeral Home", "www.brainardfuneral.com") == ["brainard"]
+    assert ah.derive_match("Beste Funeral Home", "www.bestefh.com") == ["beste"]
+
+    # the entry line matches the file's style, and inserting keeps other lines intact
+    entry = {"name": "Test FH", "url": "https://t.example", "match": ["test"],
+             "platform": "tukios", "siteAlias": "abc123ef"}
+    line = ah.format_home_line(entry)
+    assert line == '    { "name": "Test FH", "url": "https://t.example", "match": ["test"], "platform": "tukios", "siteAlias": "abc123ef" }'
+    src = '{\n  "homes": [\n    { "name": "A", "url": null, "match": ["a"] }\n  ]\n}'
+    out = ah.insert_home(src, entry)
+    assert '"name": "A", "url": null, "match": ["a"] },' in out  # prior last gains a comma
+    assert out.count(line) == 1
+    assert json.loads(out)  # still valid JSON
+    print("ok: add_home (platform detect, match derive, entry format, clean insert)")
+
+
 def test_bootstrap_config():
     import importlib.util
     root = Path(main.__file__).resolve().parent.parent

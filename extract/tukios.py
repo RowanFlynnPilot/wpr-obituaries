@@ -72,6 +72,19 @@ def _get_page(session, site_alias: str, page: int) -> dict:
     raise last_error
 
 
+def site_summary(site_alias: str) -> dict:
+    """Verify an alias against the live API: {total, location_name}.
+
+    A wrong alias resolves to an empty parent site (total 0, a corporate
+    location_name), so the caller can tell a real home from a bad key.
+    """
+    payload = _get_page(make_session(), site_alias, 1)
+    return {
+        "total": int(payload.get("total") or 0),
+        "location_name": payload.get("location_name"),
+    }
+
+
 def fetch_obituaries(site_alias: str, cutoff: str | None) -> Iterator[dict]:
     """Yield published obituary records for one site, newest death date first.
 
