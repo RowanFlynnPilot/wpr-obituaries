@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 // The one per-newsroom config, shared with the Python render side. Read at build
 // time so identity/branding reach both the bundled JS (via `define`) and the
@@ -59,6 +60,16 @@ export default defineConfig({
   ],
   define: {
     __NEWSROOM__: JSON.stringify(newsroom),
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        // Two embeds from one app: the full register (index.html) and the
+        // compact article/sidebar carousel (mini.html). See docs/embedding.md.
+        main: fileURLToPath(new URL("./index.html", import.meta.url)),
+        mini: fileURLToPath(new URL("./mini.html", import.meta.url)),
+      },
+    },
   },
   base: "/wpr-obituaries/",
 });

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>Embed test — WPR Obituaries</title>
+  <style>
+    body { margin: 0; font-family: Georgia, serif; background: #fff; color: #222; }
+    .fakepage { max-width: 1080px; margin: 0 auto; padding: 24px; display: grid;
+                grid-template-columns: 1fr 340px; gap: 32px; }
+    .fakepage h1 { font-size: 1.5rem; }
+    .note { background: #f5f2ea; border: 1px solid #ddd; padding: 10px 14px;
+            font-size: 0.85rem; margin-bottom: 18px; }
+    iframe { display: block; width: 100%; border: 0; }
+    @media (max-width: 800px) { .fakepage { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="fakepage">
+    <main>
+      <h1>Embed test — full tool (auto-height)</h1>
+      <p class="note">This page simulates the WordPress page. The iframe below
+        should stretch to fit its content with <strong>no inner scrollbar</strong>
+        and grow/shrink as you use the filters. The sidebar shows the miniature
+        widget.</p>
+
+      <!-- ===== FULL TOOL EMBED (same snippet as docs/embedding.md) ===== -->
+      <iframe id="wpr-obits-embed" src="./" title="Wausau area obituaries"
+              style="min-height:800px" loading="lazy"></iframe>
+      <script>
+        (function () {
+          var frame = document.getElementById("wpr-obits-embed");
+          window.addEventListener("message", function (e) {
+            if (
+              frame && e.source === frame.contentWindow &&
+              e.data && e.data.type === "wpr-obituaries:height"
+            ) {
+              frame.style.height = e.data.height + "px";
+              frame.style.minHeight = "0";
+            }
+          });
+        })();
+      </script>
+    </main>
+
+    <aside>
+      <h1>Sidebar — mini widget</h1>
+      <!-- ===== MINI WIDGET EMBED (same snippet as docs/embedding.md) ===== -->
+      <iframe id="wpr-obits-mini" title="Recent obituaries"
+              src="./mini.html?link=https%3A%2F%2Fwausaupilotandreview.com%2Fobituaries%2F"
+              style="min-height:340px" loading="lazy"></iframe>
+      <script>
+        (function () {
+          var frame = document.getElementById("wpr-obits-mini");
+          window.addEventListener("message", function (e) {
+            if (
+              frame && e.source === frame.contentWindow &&
+              e.data && e.data.type === "wpr-obituaries:height"
+            ) {
+              frame.style.height = e.data.height + "px";
+              frame.style.minHeight = "0";
+            }
+          });
+        })();
+      </script>
+    </aside>
+  </div>
+</body>
+</html>
