@@ -218,6 +218,71 @@ def test_tukios_client():
     print("ok: tukios client (alias regex, windowed stop, unpublished skipped)")
 
 
+_PERSON_LD = """
+<html><head>
+<script type="application/ld+json">{"@type":"Event","name":"Service"}</script>
+<script type="application/ld+json">{ bad json }</script>
+<script type="application/ld+json">{"@type":"Person","name":"Diane V. Dombeck",
+ "birthDate":" October 11, 1952","deathDate":"June 24, 2026",
+ "image":"https://cdn/Obituaries/48850499/Thumbnail.jpg",
+ "description":"&lt;p&gt;Diane V. Dombeck, 73, of Eland, passed away.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;She loved gardening.&lt;/p&gt;"}</script>
+</head></html>
+"""
+
+
+def test_tribute_client():
+    import tribute
+
+    assert tribute.obid("https://x/obituaries/Jane-Doe?obId=48850499") == "48850499"
+    assert tribute.parse_date(" October 11, 1952") == "1952-10-11"
+    assert tribute.parse_date("June 24, 2026") == "2026-06-24"
+    assert tribute.parse_date("2026") is None  # partial dates don't guess
+    assert tribute.body_text("&lt;p&gt;One.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Two.&lt;/p&gt;") == "One.\n\nTwo."
+
+    # Person JSON-LD is pulled out past sibling/broken blocks
+    person = tribute._parse_person_ld(_PERSON_LD)
+    assert person["name"] == "Diane V. Dombeck" and person["deathDate"] == "June 24, 2026"
+
+    # RSS discovery yields newest-first and stops at the cutoff — no network
+    rss = (b'<?xml version="1.0"?><rss><channel>'
+           b'<item><link>https://x/obituaries/A?obId=101</link><pubDate>Fri, 26 Jun 2026 08:00:00 -0500</pubDate></item>'
+           b'<item><link>https://x/obituaries/B?obId=102</link><pubDate>Wed, 10 Jun 2026 08:00:00 -0500</pubDate></item>'
+           b'<item><link>https://x/obituaries/C?obId=103</link><pubDate>Sun, 01 May 2026 08:00:00 -0500</pubDate></item>'
+           b'</channel></rss>')
+    orig = tribute._get
+    tribute._get = lambda session, url: type("R", (), {"content": rss, "text": ""})()
+    try:
+        got = [tribute.obid(u) for u, _ in tribute.recent_urls(None, "https://x", cutoff="2026-06-01")]
+    finally:
+        tribute._get = orig
+    assert got == ["101", "102"], got  # stops before the May item
+    print("ok: tribute client (obid, date parse, body unescape, JSON-LD, RSS window)")
+
+
+def test_tribute_mapping():
+    from adapters import funeral_home_scrape as fhs
+
+    rec = {
+        "name": "Diane V. Dombeck", "birthDate": " October 11, 1952", "deathDate": "June 24, 2026",
+        "description": "&lt;p&gt;Diane V. Dombeck, 73, of Eland, passed away.&lt;/p&gt;",
+        "image": "https://cdn/Obituaries/48850499/Thumbnail.jpg",
+        "url": "https://www.schmidtschulta.com/obituaries/Diane-Veronica-Dombeck?obId=48850499",
+        "obId": "48850499",
+    }
+    ob = fhs.tribute_to_obituary(rec, "Schmidt & Schulta Funeral Home")
+    assert ob.name == "Diane V. Dombeck"
+    assert ob.birth_date == "1952-10-11" and ob.death_date == "2026-06-24"
+    assert ob.source_date == "2026-06-24" and ob.death_year == 2026
+    assert ob.age == 73  # computed from the dates (born Oct, died Jun -> not yet 74)
+    assert ob.source_id == 48850499 and ob.funeral_home.startswith("Schmidt")
+    assert ob.body == "Diane V. Dombeck, 73, of Eland, passed away."
+    assert ob.summary == "Diane V. Dombeck, age 73 passed away on June 24, 2026."
+    assert fhs.tribute_to_obituary({**rec, "deathDate": None}, "X") is None  # needs a death date
+    assert fhs._age("1952-10-11", "2026-06-24") == 73
+    assert fhs._age(None, "2026-06-24") is None
+    print("ok: tribute mapping (dates parsed, age computed, body unescaped, skip incomplete)")
+
+
 def _load_add_home():
     import importlib.util
     root = Path(main.__file__).resolve().parent.parent
@@ -245,6 +310,9 @@ def test_add_home():
              "platform": "tukios", "siteAlias": "abc123ef"}
     line = ah.format_home_line(entry)
     assert line == '    { "name": "Test FH", "url": "https://t.example", "match": ["test"], "platform": "tukios", "siteAlias": "abc123ef" }'
+    # a Tribute entry has no siteAlias — the key is omitted, not emitted null
+    trib = ah.format_home_line({"name": "T", "url": "https://t", "match": ["t"], "platform": "tribute"})
+    assert trib == '    { "name": "T", "url": "https://t", "match": ["t"], "platform": "tribute" }'
     src = '{\n  "homes": [\n    { "name": "A", "url": null, "match": ["a"] }\n  ]\n}'
     out = ah.insert_home(src, entry)
     assert '"name": "A", "url": null, "match": ["a"] },' in out  # prior last gains a comma

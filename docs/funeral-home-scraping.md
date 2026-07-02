@@ -16,12 +16,19 @@ scraping characteristics:
 | **Tukios** | Brainard, Helke, Peterson/Kraemer, Ascend, Beste, Rembs, Taylor-Stine-Waid | JS-rendered listing, but a public JSON API enumerates everything | Fully structured in the API response |
 | **Tribute Technology** (Frazer) | Schmidt & Schulta, Buettgen (honorone.com), Mid-Wisconsin, Carlson | Server-rendered listing + obituary sitemaps/RSS | Embedded JSON / JSON-LD in the person-page HTML |
 
-**Only Tukios is implemented.** It covers the core Wausau-area homes and returns
-records already shaped like our contract (name, both dates, age, city, full
-text, portrait, permanent URL), so there is *no model extraction* — one API
-record maps straight to one `Obituary` in `adapters/funeral_home_scrape.py`.
-Tribute Technology is a separate, HTML-shaped job; a home configured with any
-other `platform` raises loudly rather than half-working.
+**Both platforms are implemented**, and both serve fully structured records, so
+there is *no model extraction* — one source record maps straight to one
+`Obituary` in `adapters/funeral_home_scrape.py`. A home configured with any other
+`platform` raises loudly rather than half-working.
+
+- **Tukios** (keyed by `siteAlias`): discovery and records come from one JSON
+  API — name, both dates, age, city, full text, portrait, permanent URL.
+- **Tribute Technology** (keyed by the site `url`): discovery is the home's
+  Recent-Obituaries RSS (`/rss.xml`), windowed by pubDate, or the obituary
+  sitemaps for a `--backfill`; each person page carries a schema.org `Person`
+  JSON-LD with the full obituary, both dates, and the portrait. Tribute has no
+  structured city, so those records carry no town facet (summary is name + age +
+  death date), and age is computed from the two dates.
 
 Gunderson (Madison) and Conroe (Texas) appear in WPR only as one-off
 out-of-town arrangements — they are **not** scraped; the manual `data/intake/`
@@ -49,15 +56,18 @@ Accept: application/json
 
 ## Adding / maintaining a scraped home
 
-Homes live in `data/funeral_homes.json`. A scraped Tukios home needs two extra
-keys:
+Homes live in `data/funeral_homes.json`. A scraped home carries a `platform`
+plus that platform's key:
 
 ```json
 { "name": "…", "url": "…", "match": ["…"], "platform": "tukios", "siteAlias": "7aacd58f" }
+{ "name": "…", "url": "…", "match": ["…"], "platform": "tribute" }
 ```
 
+Tukios needs the `siteAlias`; Tribute is keyed by the site `url` alone.
+
 The easiest way to add one is the onboarding CLI, which does the detection,
-extraction, verification, and (with `--write`) the edit for you:
+verification, and (with `--write`) the edit for you:
 
 ```
 python scripts/add_home.py https://www.example-fh.com          # detect + verify + print
@@ -66,11 +76,11 @@ python scripts/add_home.py https://www.example-fh.com --write  # also insert the
 
 It fetches the home's obituaries page (in Python, because the fetch is
 cross-origin and often Cloudflare-fronted — a browser can't make it), detects
-the platform, pulls the `siteAlias`, confirms it returns obituaries against the
-live API, and inserts a config line preserving the one-home-per-line format.
-Review the derived `match` token — it must be a lowercase substring of how the
-home names itself on its obituaries so scraped records link to the canonical
-home. A Tribute Technology site is reported as recognized-but-not-yet-scrapable.
+the platform, verifies it (Tukios: the `siteAlias` returns obituaries from the
+live API; Tribute: the RSS lists obituaries), and inserts a config line
+preserving the one-home-per-line format. Review the derived `match` token — it
+must be a lowercase substring of how the home names itself on its obituaries so
+scraped records link to the canonical home.
 
 From the browser (staff): `web/public/admin.html` (served at
 `<base>/admin.html`, unlinked/`noindex`) is a staff page that runs the same
@@ -83,9 +93,11 @@ and `add-home.yml` must be on the default branch for the dispatch API to see it.
 
 By hand: the **siteAlias** is an 8-hex-char key printed in the home's
 `/obituaries` page source as `siteAlias = '…'` or `SiteAlias: '…'` (it is *not*
-the `login?site_id=` value); `tukios.find_site_alias()` extracts it. A home
-without `platform` is name-canonicalized only, never scraped. Verified aliases
-are committed; the current set is the seven Tukios homes above.
+the `login?site_id=` value); `tukios.find_site_alias()` extracts it. A Tribute
+home just needs `platform: "tribute"` and its `url`. A home without `platform` is
+name-canonicalized only, never scraped. The current scraped set is the seven
+Tukios homes plus four Tribute homes (Schmidt & Schulta, Buettgen, Mid-Wisconsin,
+Carlson).
 
 The list of scraped homes doubles as the **republication permission list** —
 only add a home the newsroom has an arrangement with.

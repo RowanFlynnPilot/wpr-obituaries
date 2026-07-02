@@ -6,16 +6,20 @@ enabled home in `data/funeral_homes.json` carries a `platform` + the key that
 platform needs; the source enumerates that home's recent obituaries and maps
 each onto the record contract.
 
-Only the **Tukios** platform is implemented here — it covers the core
-Wausau-area homes (Brainard, Helke, Peterson/Kraemer, Ascend, and the outer-ring
-Beste, Rembs, Taylor-Stine-Waid) and serves fully structured records, so there
-is no model extraction: one API record maps directly to one `Obituary`. The
-Tribute Technology homes (Schmidt & Schulta, Buettgen, Mid-Wisconsin, Carlson)
-are a separate, HTML-shaped platform and raise until built — see
-docs/funeral-home-scraping.md.
+Two platforms are implemented, both serving fully structured records (no model
+extraction — one source record maps directly to one `Obituary`):
 
-A configured home is a trusted source, so scraped records publish like the WPR
-batch scrape; `data/suppressed.json` remains the per-slug removal hatch.
+- **Tukios** — the core Wausau-area homes (Brainard, Helke, Peterson/Kraemer,
+  Ascend) plus outer-ring Beste, Rembs, Taylor-Stine-Waid. Discovery + records
+  come from one JSON API keyed by a per-site `siteAlias`.
+- **Tribute Technology** — Schmidt & Schulta, Buettgen, Mid-Wisconsin, Carlson.
+  Discovery is the site's Recent-Obituaries RSS (or the obituary sitemaps on a
+  backfill); each person page carries a schema.org `Person` JSON-LD with the full
+  record. Keyed by the home's own site `url`.
+
+See docs/funeral-home-scraping.md. A configured home is a trusted source, so
+scraped records publish like the WPR batch scrape; `data/suppressed.json`
+remains the per-slug removal hatch.
 """
 
 from __future__ import annotations
@@ -24,14 +28,16 @@ import hashlib
 import json
 import sys
 from collections.abc import Iterator
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from bs4 import BeautifulSoup
 
+import tribute
 import tukios
 from homes import load_homes
 from models import Obituary
+from wp_client import make_session
 
 from .base import Unit
 
@@ -125,11 +131,57 @@ def to_obituary(row: dict, home_name: str) -> Obituary | None:
     )
 
 
+def _age(birth_date: str | None, death_date: str | None) -> int | None:
+    """Age at death from ISO dates — derived from stated dates, not invented."""
+    if not birth_date or not death_date:
+        return None
+    b, d = date.fromisoformat(birth_date), date.fromisoformat(death_date)
+    years = d.year - b.year - ((d.month, d.day) < (b.month, b.day))
+    return years if 0 <= years <= 120 else None
+
+
+def _tribute_summary(name: str, age: int | None, death_str: str | None) -> str:
+    """One respectful line. No town: Tribute has no structured city, and the
+    prose opener is too varied to parse a town from without false positives."""
+    parts = [name]
+    if age is not None:
+        parts.append(f", age {age}")
+    if death_str:
+        parts.append(f" passed away on {death_str.strip()}")
+    return "".join(parts) + "."
+
+
+def tribute_to_obituary(rec: dict, home_name: str) -> Obituary | None:
+    """Map one Tribute person record (parsed JSON-LD) to an Obituary, or None."""
+    name = (rec.get("name") or "").strip()
+    death_date = tribute.parse_date(rec.get("deathDate"))
+    url = rec.get("url")
+    oid = rec.get("obId") or (tribute.obid(url) if url else None)
+    if not name or not death_date or not url or not oid:
+        print(f"  {NAME}: skipping incomplete record {url!r}", file=sys.stderr)
+        return None
+    birth_date = tribute.parse_date(rec.get("birthDate"))
+    age = _age(birth_date, death_date)
+    return Obituary(
+        name=name,
+        source_id=int(oid),
+        source_url=url,
+        source_date=death_date,  # order the register by date of death
+        death_year=int(death_date[:4]),
+        birth_date=birth_date,
+        death_date=death_date,
+        age=age,
+        funeral_home=home_name,
+        photo_url=rec.get("image"),
+        summary=_tribute_summary(name, age, rec.get("deathDate")),
+        body=tribute.body_text(rec.get("description", "")),
+    )
+
+
 class FuneralHomeScrape:
     """Enabled funeral-home sites, read from `data/funeral_homes.json`."""
 
     name = NAME
-    _SUPPORTED = {"tukios"}
 
     def __init__(self, cfg: dict, homes_file: Path = HOMES_FILE) -> None:
         self.cfg = cfg
@@ -145,27 +197,70 @@ class FuneralHomeScrape:
         cutoff = self._cutoff(window)
         for home in self.homes:
             platform = home["platform"]
-            if platform not in self._SUPPORTED:
+            if platform == "tukios":
+                yield from self._tukios_units(home, cutoff)
+            elif platform == "tribute":
+                yield from self._tribute_units(home, cutoff, backfill=window is None)
+            else:
                 raise RuntimeError(
                     f"{NAME}: home '{home['name']}' has unsupported platform "
-                    f"'{platform}' (implemented: {sorted(self._SUPPORTED)})."
+                    f"'{platform}' (implemented: tukios, tribute)."
                 )
-            alias = home.get("siteAlias")
-            if not alias:
-                raise RuntimeError(
-                    f"{NAME}: home '{home['name']}' is platform tukios but has no siteAlias."
-                )
-            count = 0
-            for row in tukios.fetch_obituaries(alias, cutoff):
-                ob = to_obituary(row, home["name"])
-                if ob is None:
-                    continue
-                count += 1
-                yield Unit(
-                    source=self.name,
-                    unit_id=ob.source_id,
-                    modified=_revision(row),
-                    ref=ob.source_url,
-                    extract=lambda o=ob: [o],
-                )
-            print(f"  {NAME}: {home['name']} — {count} obituaries in window.")
+
+    def _tukios_units(self, home: dict, cutoff: str | None) -> Iterator[Unit]:
+        alias = home.get("siteAlias")
+        if not alias:
+            raise RuntimeError(
+                f"{NAME}: home '{home['name']}' is platform tukios but has no siteAlias."
+            )
+        count = 0
+        for row in tukios.fetch_obituaries(alias, cutoff):
+            ob = to_obituary(row, home["name"])
+            if ob is None:
+                continue
+            count += 1
+            yield Unit(
+                source=self.name,
+                unit_id=ob.source_id,
+                modified=_revision(row),
+                ref=ob.source_url,
+                extract=lambda o=ob: [o],
+            )
+        print(f"  {NAME}: {home['name']} — {count} obituaries in window.")
+
+    def _tribute_units(self, home: dict, cutoff: str | None, backfill: bool) -> Iterator[Unit]:
+        url = home.get("url")
+        if not url:
+            raise RuntimeError(
+                f"{NAME}: home '{home['name']}' is platform tribute but has no url."
+            )
+        session = make_session()
+        found = tribute.all_urls(session, url) if backfill else tribute.recent_urls(session, url, cutoff)
+        count = 0
+        for page_url, stamp in found:
+            oid = tribute.obid(page_url)
+            if not oid:
+                continue
+            count += 1
+            # The revision (RSS pubDate / sitemap lastmod) comes from discovery, so
+            # is_processed skips unchanged obituaries without fetching the page; the
+            # person page is fetched only when the unit is new or changed.
+            yield Unit(
+                source=self.name,
+                unit_id=int(oid),
+                modified=stamp or "",
+                ref=page_url,
+                extract=lambda s=session, u=page_url, hn=home["name"]: _tribute_extract(s, u, hn),
+            )
+        print(f"  {NAME}: {home['name']} — {count} obituaries in window.")
+
+
+def _tribute_extract(session, url: str, home_name: str) -> list[Obituary]:
+    """Fetch + map one Tribute person page. Raises so a bad page is quarantined."""
+    rec = tribute.person_record(session, url)
+    if rec is None:
+        raise ValueError(f"no Person data at {url}")
+    ob = tribute_to_obituary(rec, home_name)
+    if ob is None:
+        raise ValueError(f"incomplete obituary at {url}")
+    return [ob]

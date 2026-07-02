@@ -1,5 +1,31 @@
 # STATUS
 
+## 2026-07-01 — Tribute Technology platform (second scraper)
+
+**What moved.** `funeral_home_scrape` now supports the second platform, Tribute
+Technology (Frazer/TCO), covering Schmidt & Schulta, Buettgen (honorone.com),
+Mid-Wisconsin Cremation Society, and Carlson. New `extract/tribute.py`:
+discovery via each home's Recent-Obituaries RSS (windowed by pubDate; obituary
+sitemaps for `--backfill`), and per-person extraction from the schema.org
+`Person` JSON-LD (full text, both dates, portrait) — no model extraction, same
+as Tukios. The adapter now dispatches per `platform`; the Tribute revision is the
+RSS pubDate / sitemap lastmod, so `is_processed` skips unchanged obituaries
+without fetching the page (the person page is fetched only for new/changed
+units). Tribute records carry no town facet (no structured city) and age is
+computed from the two dates. The four homes are wired in `funeral_homes.json`
+(`platform: "tribute"`, keyed by url). The onboarding CLI + admin workflow now
+detect and onboard Tribute homes too (verified via RSS; name from the site's
+business JSON-LD / og:site_name / title). Tests extended (Tribute client +
+mapping, optional-siteAlias entry format); live-verified end-to-end against
+Schmidt & Schulta (9 obituaries mapped, dates/age/body correct, UTF-8 clean) and
+the CLI against all four homes. All pass.
+
+**What's next.** With both platforms live, the scraper covers 11 in-area homes.
+Gunderson/Conroe stay on the manual intake path (out-of-area one-offs). Remaining
+open items are unchanged: the go-live merge decision (PR #28), confirming the
+home list with Shereen, and — longer term — retiring `wordpress_scrape` once
+scraping fully covers a home.
+
 ## 2026-07-01 — Home onboarding CLI (`scripts/add_home.py`)
 
 **What moved.** Added a self-service onboarding tool so a new newsroom can add a

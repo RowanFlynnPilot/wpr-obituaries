@@ -123,10 +123,12 @@ arrangement metadata on each record.
 
 Funeral-home scraping (`adapters.funeral_home_scrape`, `windowDays` in config)
 reads the homes' own sites directly. Per-home scrape config lives in
-`data/funeral_homes.json` (`platform` + `siteAlias`); the seven Tukios homes are
-wired, Tribute Technology homes are the next platform. The scraped-home list is
-also the republication permission list — full details, the Tukios API, and the
-cross-source dedupe/overlap note are in `docs/funeral-home-scraping.md`.
+`data/funeral_homes.json` (`platform` + its key). Two platforms are wired:
+**Tukios** (seven homes, keyed by `siteAlias`, JSON API) and **Tribute
+Technology** (four homes, keyed by `url`, RSS discovery + `Person` JSON-LD). The
+scraped-home list is also the republication permission list — full details, both
+platforms' mechanics, and the cross-source dedupe/overlap note are in
+`docs/funeral-home-scraping.md`.
 
 ## Known decisions and open items
 

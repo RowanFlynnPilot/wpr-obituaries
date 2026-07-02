@@ -19,13 +19,15 @@ derived `match` token is a best guess — review it; it must be a lowercase
 substring of how the home names itself on its obituaries, so records link to the
 canonical home.
 
-Only Tukios is auto-detected (the implemented scrape platform); a Tribute
-Technology site is reported as recognized-but-not-yet-scrapable.
+Both implemented platforms are auto-detected: Tukios (keyed by the extracted
+siteAlias, verified against the live API) and Tribute Technology (keyed by the
+site url, verified via its Recent-Obituaries RSS).
 """
 
 from __future__ import annotations
 
 import argparse
+import itertools
 import json
 import sys
 from pathlib import Path
@@ -33,6 +35,7 @@ from urllib.parse import urlsplit
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "extract"))
 
+import tribute  # noqa: E402
 import tukios  # noqa: E402
 from wp_client import make_session  # noqa: E402
 
@@ -67,8 +70,12 @@ def derive_match(name: str, host: str) -> list[str]:
 
 
 def format_home_line(entry: dict) -> str:
-    """One home as a single JSON line matching the file's existing style."""
-    keys = ("name", "url", "match", "platform", "siteAlias")
+    """One home as a single JSON line matching the file's existing style.
+
+    siteAlias is emitted only for platforms that use one (Tukios); Tribute homes
+    are keyed by url alone.
+    """
+    keys = [k for k in ("name", "url", "match", "platform", "siteAlias") if k in entry]
     body = ", ".join(f"{json.dumps(k)}: {json.dumps(entry[k])}" for k in keys)
     return "    { " + body + " }"
 
@@ -105,12 +112,12 @@ def _fetch_listing(session, base: str) -> tuple[str, str] | None:
     return None
 
 
-def _existing_alias(alias: str) -> str | None:
-    """The name of an already-configured home with this alias, if any."""
+def _existing(**criteria: str) -> str | None:
+    """Name of an already-configured home matching all given fields, if any."""
     if not HOMES_FILE.exists():
         return None
     for home in json.loads(HOMES_FILE.read_text(encoding="utf-8")).get("homes", []):
-        if home.get("siteAlias") == alias:
+        if all(home.get(k) == v for k, v in criteria.items()):
             return home.get("name")
     return None
 
@@ -130,39 +137,49 @@ def main() -> int:
         return 1
     page_url, html = found
     platform, alias = detect_platform(html)
-
-    if platform == "tribute":
-        print(f"Recognized {args.url} as Tribute Technology — not yet scrapable "
-              f"(only Tukios is implemented). Use the manual intake path for now.")
-        return 2
-    if platform != "tukios":
-        print(f"Could not recognize the platform at {page_url}. Supported: Tukios.", file=sys.stderr)
-        return 1
-    if not alias:
-        print(f"Tukios detected at {page_url} but no siteAlias in the page source.", file=sys.stderr)
-        return 1
-
-    summary = tukios.site_summary(alias)
-    if summary["total"] < 1:
-        print(f"Alias {alias!r} resolved to '{summary['location_name']}' with 0 "
-              f"obituaries — likely the wrong key.", file=sys.stderr)
-        return 1
-
-    dup = _existing_alias(alias)
-    if dup:
-        print(f"Already configured: '{dup}' uses siteAlias {alias}. Nothing to do.")
-        return 0
-
     host = urlsplit(page_url).netloc
-    name = args.name or summary["location_name"]
-    entry = {
-        "name": name,
-        "url": f"{urlsplit(page_url).scheme}://{host}",
-        "match": [args.match] if args.match else derive_match(name, host),
-        "platform": "tukios",
-        "siteAlias": alias,
-    }
-    print(f"Verified Tukios home: {name} — {summary['total']} obituaries, alias {alias}.")
+    root = f"{urlsplit(page_url).scheme}://{host}"
+
+    if platform == "tukios":
+        if not alias:
+            print(f"Tukios detected at {page_url} but no siteAlias in the page source.", file=sys.stderr)
+            return 1
+        dup = _existing(siteAlias=alias)
+        if dup:
+            print(f"Already configured: '{dup}' uses siteAlias {alias}. Nothing to do.")
+            return 0
+        summary = tukios.site_summary(alias)
+        if summary["total"] < 1:
+            print(f"Alias {alias!r} resolved to '{summary['location_name']}' with 0 "
+                  f"obituaries — likely the wrong key.", file=sys.stderr)
+            return 1
+        name = args.name or summary["location_name"]
+        entry = {"name": name, "url": root,
+                 "match": [args.match] if args.match else derive_match(name, host),
+                 "platform": "tukios", "siteAlias": alias}
+        print(f"Verified Tukios home: {name} — {summary['total']} obituaries, alias {alias}.")
+
+    elif platform == "tribute":
+        session = make_session()
+        recent = [u for u, _ in itertools.islice(tribute.recent_urls(session, root, None), 1)]
+        if not recent:
+            print(f"Tribute Technology detected at {page_url} but its RSS lists no "
+                  f"obituaries.", file=sys.stderr)
+            return 1
+        dup = _existing(url=root)
+        if dup:
+            print(f"Already configured: '{dup}' at {root}. Nothing to do.")
+            return 0
+        name = args.name or tribute.firm_name(session, root) or host
+        entry = {"name": name, "url": root,
+                 "match": [args.match] if args.match else derive_match(name, host),
+                 "platform": "tribute"}
+        print(f"Verified Tribute Technology home: {name} at {root}.")
+
+    else:
+        print(f"Could not recognize the platform at {page_url}. Supported: Tukios, Tribute.", file=sys.stderr)
+        return 1
+
     print(format_home_line(entry).strip())
 
     if args.write:
