@@ -109,7 +109,18 @@ def test_dedupe():
     c = mk("Mary Q. Adams", 6, "2026-06-10", death_date="2026-06-08")
     d = mk("Mary Z. Baker", 7, "2026-06-10", death_date="2026-06-08")
     assert len(main._dedupe_people([c, d])[0]) == 2
-    print("ok: dedupe (name-variant collapse, fuller body primary, distinct kept apart)")
+
+    # a WPR record with only a death year folds into the funeral-home record that
+    # has the full date (same person, same year)
+    yr = mk("Kay Solberg", 8, "2026-06-01", death_date=None, death_year=2026)
+    dated = mk("Kay Solberg", 9, "2026-05-27", death_date="2026-05-27", death_year=2026)
+    assert len(main._dedupe_people([yr, dated])[0]) == 1
+    # but if two same-named people died that year, the ambiguous year-only stays apart
+    d1 = mk("Lee Park", 10, "2026-03-02", death_date="2026-03-01", death_year=2026)
+    d2 = mk("Lee Park", 11, "2026-09-02", death_date="2026-09-01", death_year=2026)
+    yr2 = mk("Lee Park", 12, "2026-06-01", death_date=None, death_year=2026)
+    assert len(main._dedupe_people([d1, d2, yr2])[0]) == 3  # not merged into either
+    print("ok: dedupe (name-variant + year-only collapse, ambiguous kept apart)")
 
 
 def test_photo_resolution():
