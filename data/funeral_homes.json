@@ -1,19 +1,19 @@
 {
-  "_comment": "Canonical funeral homes. The newsroom's names vary wildly (chapels, abbreviations), so each record's funeral_home is matched to a canonical home by the lowercase substrings in `match` (first hit wins). `url` links the name on pages and in the register; null = no link. Add homes/URLs as you learn them.",
+  "_comment": "Canonical funeral homes. The newsroom's names vary wildly (chapels, abbreviations), so each record's funeral_home is matched to a canonical home by the lowercase substrings in `match` (first hit wins). `url` links the name on pages and in the register; null = no link. `platform` + `siteAlias` mark a home the funeral_home_scrape adapter pulls directly (platform tukios = the JSON obituary API, siteAlias is the 8-hex key from the home's /obituaries page source). Homes without `platform` are name-canonicalized only, not scraped. Add homes/URLs/aliases as you learn them.",
   "homes": [
-    { "name": "Brainard Funeral Home & Cremation Center", "url": "https://www.brainardfuneral.com", "match": ["brainard"] },
-    { "name": "Helke Funeral Home & Cremation Service", "url": "https://www.helke.com", "match": ["helke"] },
-    { "name": "Peterson/Kraemer Funeral Homes & Crematory", "url": "https://www.petersonkraemer.com", "match": ["peterson"] },
-    { "name": "Mid-Wisconsin Cremation Society", "url": null, "match": ["mid wisconsin", "mid-wisconsin"] },
-    { "name": "Ascend Funeral Home & Cremation Care", "url": null, "match": ["ascend"] },
-    { "name": "Schmidt & Schulta Funeral Home", "url": null, "match": ["schmidt"] },
-    { "name": "John J. Buettgen Funeral Home", "url": null, "match": ["buettgen"] },
-    { "name": "Taylor-Stine Funeral Home", "url": null, "match": ["taylor-stine", "taylor stine"] },
-    { "name": "Beste Funeral Home", "url": null, "match": ["beste"] },
-    { "name": "Rembs Funeral Home", "url": null, "match": ["rembs"] },
+    { "name": "Brainard Funeral Home & Cremation Center", "url": "https://www.brainardfuneral.com", "match": ["brainard"], "platform": "tukios", "siteAlias": "7aacd58f" },
+    { "name": "Helke Funeral Home & Cremation Service", "url": "https://www.helke.com", "match": ["helke"], "platform": "tukios", "siteAlias": "102eba57" },
+    { "name": "Peterson/Kraemer Funeral Homes & Crematory", "url": "https://www.petersonkraemer.com", "match": ["peterson"], "platform": "tukios", "siteAlias": "8a542bac" },
+    { "name": "Mid-Wisconsin Cremation Society", "url": "https://www.midwisconsincremationsociety.com", "match": ["mid wisconsin", "mid-wisconsin"], "platform": "tribute" },
+    { "name": "Ascend Funeral Home & Cremation Care", "url": "https://www.ascendweston.org", "match": ["ascend"], "platform": "tukios", "siteAlias": "e3d9b8fa" },
+    { "name": "Schmidt & Schulta Funeral Home", "url": "https://www.schmidtschulta.com", "match": ["schmidt"], "platform": "tribute" },
+    { "name": "John J. Buettgen Funeral Home", "url": "https://www.honorone.com", "match": ["buettgen"], "platform": "tribute" },
+    { "name": "Taylor-Stine-Waid Funeral Home", "url": "https://www.taylorstinewaid.com", "match": ["taylor-stine", "taylor stine", "taylor-stine-waid"], "platform": "tukios", "siteAlias": "cc8364ed" },
+    { "name": "Beste Funeral Home", "url": "https://www.bestefh.com", "match": ["beste"], "platform": "tukios", "siteAlias": "44eaaa9e" },
+    { "name": "Rembs Funeral Home", "url": "https://www.rembsfh.com", "match": ["rembs"], "platform": "tukios", "siteAlias": "65347c6c" },
     { "name": "Gunderson Funeral & Cremation Care", "url": null, "match": ["gunderson"] },
     { "name": "Hildebrand Funeral Home", "url": null, "match": ["hildebrand"] },
-    { "name": "Carlson Funeral Home", "url": null, "match": ["carlson"] },
+    { "name": "Carlson Funeral Home", "url": "https://www.carlsonfh.com", "match": ["carlson"], "platform": "tribute" },
     { "name": "Conroe Funeral Directors", "url": null, "match": ["conroe"] }
   ]
 }

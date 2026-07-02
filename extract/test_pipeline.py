@@ -139,8 +139,186 @@ def test_enabled_sources():
     import config
     from adapters import enabled_sources
     names = [s.name for s in enabled_sources(config.load_newsroom())]
-    assert names == ["wordpress_scrape", "intake"], names  # WPR runs both
-    print("ok: enabled_sources (wordpress + intake per WPR config)")
+    assert names == ["wordpress_scrape", "funeral_home_scrape", "intake"], names
+    print("ok: enabled_sources (wordpress + funeral_home_scrape + intake per WPR config)")
+
+
+def _tukios_row(**over):
+    row = {
+        "id": "5e036d4e-776f-4e3f-a9bc-afef025b4523",
+        "display_name": "Naomi C. Hardman",
+        "date_of_birth": "1943-12-13",
+        "date_of_death": "2026-06-26",
+        "formatted_date_of_death": "Jun 26, 2026",
+        "age": 82,
+        "city": "Ringle",
+        "branch": "Brainard Funeral Home and Cremation Center- Everest Chapel",
+        "is_published": True,
+        "public_url": "https://www.brainardfuneral.com/obituaries/naomi-hardman",
+        "obituary_text": "<p>Naomi was a redeemed child of God.</p><p>She loved her family.</p>",
+        "default_image": "https://cdn.tukioswebsites.com/uuid/md",
+        "default_image_sizes": {"lg": "https://cdn.tukioswebsites.com/uuid/lg"},
+    }
+    row.update(over)
+    return row
+
+
+def test_funeral_home_scrape():
+    from adapters import funeral_home_scrape as fhs
+
+    ob = fhs.to_obituary(_tukios_row(), "Brainard Funeral Home & Cremation Center")
+    assert ob.name == "Naomi C. Hardman"
+    assert ob.death_date == "2026-06-26" and ob.death_year == 2026
+    assert ob.source_date == "2026-06-26"  # register orders by date of death
+    assert ob.birth_date == "1943-12-13" and ob.age == 82
+    assert ob.funeral_home.startswith("Brainard")  # branch preferred
+    assert ob.photo_url.endswith("/lg")  # larger size for downscaling
+    assert ob.body == "Naomi was a redeemed child of God.\n\nShe loved her family."
+    assert main._derive_town(ob.summary) == "Ringle"  # summary shaped for the facet
+    # id + slug are stable and derived from the permanent person-page URL
+    assert ob.source_id == fhs._unit_id(ob.source_url)
+    assert fhs.to_obituary(_tukios_row(), "X").slug == ob.slug
+
+    # branch falls back to the home name; a record missing name/dod is skipped
+    assert fhs.to_obituary(_tukios_row(branch=None), "Helke Funeral Home").funeral_home == "Helke Funeral Home"
+    assert fhs.to_obituary(_tukios_row(date_of_death=None), "X") is None
+    assert fhs.to_obituary(_tukios_row(display_name="  "), "X") is None
+
+    # content-hash revision changes when a published field is edited
+    before = fhs._revision(_tukios_row())
+    assert fhs._revision(_tukios_row()) == before
+    assert fhs._revision(_tukios_row(obituary_text="<p>New.</p>")) != before
+    print("ok: funeral_home_scrape (maps Tukios record, town facet, stable id, hash revision)")
+
+
+def test_tukios_client():
+    import tukios
+
+    assert tukios.find_site_alias("var x; siteAlias = '7aacd58f'; more") == "7aacd58f"
+    assert tukios.find_site_alias("'SiteAlias': 'cc8364ed'") == "cc8364ed"
+    assert tukios.find_site_alias("no alias here") is None
+
+    # Paging stops at the death-date cutoff (records are sorted death-date desc),
+    # and unpublished rows are dropped — proven without network.
+    pages = {
+        1: {"last_page": 2, "data": [
+            {"date_of_death": "2026-06-26", "display_name": "New One", "is_published": True},
+            {"date_of_death": "2026-06-20", "display_name": "Hidden", "is_published": False},
+            {"date_of_death": "2026-05-01", "display_name": "Too Old", "is_published": True},
+        ]},
+        2: {"last_page": 2, "data": [{"date_of_death": "2026-04-01", "display_name": "Older"}]},
+    }
+    orig = tukios._get_page
+    tukios._get_page = lambda session, alias, page: pages[page]
+    try:
+        got = [r["display_name"] for r in tukios.fetch_obituaries("alias", cutoff="2026-06-01")]
+    finally:
+        tukios._get_page = orig
+    assert got == ["New One"], got  # unpublished skipped, stops before "Too Old"
+    print("ok: tukios client (alias regex, windowed stop, unpublished skipped)")
+
+
+_PERSON_LD = """
+<html><head>
+<script type="application/ld+json">{"@type":"Event","name":"Service"}</script>
+<script type="application/ld+json">{ bad json }</script>
+<script type="application/ld+json">{"@type":"Person","name":"Diane V. Dombeck",
+ "birthDate":" October 11, 1952","deathDate":"June 24, 2026",
+ "image":"https://cdn/Obituaries/48850499/Thumbnail.jpg",
+ "description":"&lt;p&gt;Diane V. Dombeck, 73, of Eland, passed away.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;She loved gardening.&lt;/p&gt;"}</script>
+</head></html>
+"""
+
+
+def test_tribute_client():
+    import tribute
+
+    assert tribute.obid("https://x/obituaries/Jane-Doe?obId=48850499") == "48850499"
+    assert tribute.parse_date(" October 11, 1952") == "1952-10-11"
+    assert tribute.parse_date("June 24, 2026") == "2026-06-24"
+    assert tribute.parse_date("2026") is None  # partial dates don't guess
+    assert tribute.body_text("&lt;p&gt;One.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Two.&lt;/p&gt;") == "One.\n\nTwo."
+
+    # Person JSON-LD is pulled out past sibling/broken blocks
+    person = tribute._parse_person_ld(_PERSON_LD)
+    assert person["name"] == "Diane V. Dombeck" and person["deathDate"] == "June 24, 2026"
+
+    # RSS discovery yields newest-first and stops at the cutoff — no network
+    rss = (b'<?xml version="1.0"?><rss><channel>'
+           b'<item><link>https://x/obituaries/A?obId=101</link><pubDate>Fri, 26 Jun 2026 08:00:00 -0500</pubDate></item>'
+           b'<item><link>https://x/obituaries/B?obId=102</link><pubDate>Wed, 10 Jun 2026 08:00:00 -0500</pubDate></item>'
+           b'<item><link>https://x/obituaries/C?obId=103</link><pubDate>Sun, 01 May 2026 08:00:00 -0500</pubDate></item>'
+           b'</channel></rss>')
+    orig = tribute._get
+    tribute._get = lambda session, url: type("R", (), {"content": rss, "text": ""})()
+    try:
+        got = [tribute.obid(u) for u, _ in tribute.recent_urls(None, "https://x", cutoff="2026-06-01")]
+    finally:
+        tribute._get = orig
+    assert got == ["101", "102"], got  # stops before the May item
+    print("ok: tribute client (obid, date parse, body unescape, JSON-LD, RSS window)")
+
+
+def test_tribute_mapping():
+    from adapters import funeral_home_scrape as fhs
+
+    rec = {
+        "name": "Diane V. Dombeck", "birthDate": " October 11, 1952", "deathDate": "June 24, 2026",
+        "description": "&lt;p&gt;Diane V. Dombeck, 73, of Eland, passed away.&lt;/p&gt;",
+        "image": "https://cdn/Obituaries/48850499/Thumbnail.jpg",
+        "url": "https://www.schmidtschulta.com/obituaries/Diane-Veronica-Dombeck?obId=48850499",
+        "obId": "48850499",
+    }
+    ob = fhs.tribute_to_obituary(rec, "Schmidt & Schulta Funeral Home")
+    assert ob.name == "Diane V. Dombeck"
+    assert ob.birth_date == "1952-10-11" and ob.death_date == "2026-06-24"
+    assert ob.source_date == "2026-06-24" and ob.death_year == 2026
+    assert ob.age == 73  # computed from the dates (born Oct, died Jun -> not yet 74)
+    assert ob.source_id == 48850499 and ob.funeral_home.startswith("Schmidt")
+    assert ob.body == "Diane V. Dombeck, 73, of Eland, passed away."
+    assert ob.summary == "Diane V. Dombeck, age 73 passed away on June 24, 2026."
+    assert fhs.tribute_to_obituary({**rec, "deathDate": None}, "X") is None  # needs a death date
+    assert fhs._age("1952-10-11", "2026-06-24") == 73
+    assert fhs._age(None, "2026-06-24") is None
+    print("ok: tribute mapping (dates parsed, age computed, body unescaped, skip incomplete)")
+
+
+def _load_add_home():
+    import importlib.util
+    root = Path(main.__file__).resolve().parent.parent
+    spec = importlib.util.spec_from_file_location("add_home", root / "scripts" / "add_home.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_add_home():
+    ah = _load_add_home()
+
+    # platform detection from page HTML (no network)
+    assert ah.detect_platform("... siteAlias = '7aacd58f'; ...") == ("tukios", "7aacd58f")
+    assert ah.detect_platform("powered by Tukios") == ("tukios", None)
+    assert ah.detect_platform("api.secure.tributecenteronline.com") == ("tribute", None)
+    assert ah.detect_platform("<html>plain site</html>") == ("unknown", None)
+
+    # match token derived from the domain, junk stripped
+    assert ah.derive_match("Brainard Funeral Home", "www.brainardfuneral.com") == ["brainard"]
+    assert ah.derive_match("Beste Funeral Home", "www.bestefh.com") == ["beste"]
+
+    # the entry line matches the file's style, and inserting keeps other lines intact
+    entry = {"name": "Test FH", "url": "https://t.example", "match": ["test"],
+             "platform": "tukios", "siteAlias": "abc123ef"}
+    line = ah.format_home_line(entry)
+    assert line == '    { "name": "Test FH", "url": "https://t.example", "match": ["test"], "platform": "tukios", "siteAlias": "abc123ef" }'
+    # a Tribute entry has no siteAlias — the key is omitted, not emitted null
+    trib = ah.format_home_line({"name": "T", "url": "https://t", "match": ["t"], "platform": "tribute"})
+    assert trib == '    { "name": "T", "url": "https://t", "match": ["t"], "platform": "tribute" }'
+    src = '{\n  "homes": [\n    { "name": "A", "url": null, "match": ["a"] }\n  ]\n}'
+    out = ah.insert_home(src, entry)
+    assert '"name": "A", "url": null, "match": ["a"] },' in out  # prior last gains a comma
+    assert out.count(line) == 1
+    assert json.loads(out)  # still valid JSON
+    print("ok: add_home (platform detect, match derive, entry format, clean insert)")
 
 
 def test_bootstrap_config():

@@ -11,6 +11,7 @@ from __future__ import annotations
 from config import Newsroom
 
 from .base import Unit
+from .funeral_home_scrape import FuneralHomeScrape
 from .intake import IntakeManual
 from .wordpress_scrape import WordpressScrape
 
@@ -26,6 +27,8 @@ def enabled_sources(newsroom: Newsroom) -> list:
     sources = []
     if newsroom.adapter("wordpress_scrape").get("enabled"):
         sources.append(WordpressScrape(newsroom.adapter("wordpress_scrape")))
+    if newsroom.adapter("funeral_home_scrape").get("enabled"):
+        sources.append(FuneralHomeScrape(newsroom.adapter("funeral_home_scrape")))
     intake = newsroom.adapter("intake")
     if intake.get("enabled"):
         backend = intake.get("backend", "manual")

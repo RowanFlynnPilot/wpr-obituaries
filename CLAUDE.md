@@ -29,7 +29,11 @@ Source of truth → static output → embedded widget:
    `extract/adapters/wordpress_scrape.py` behind the generic *write-source*
    contract (`adapters/base.Unit`): a source yields units of work, the sync loop
    never knows where a record came from. This is the seam that makes the tool a
-   forkable template (see `docs/multi-tenant-reshape.md`).
+   forkable template (see `docs/multi-tenant-reshape.md`). Two other write-sources
+   ride the same seam: `extract/adapters/funeral_home_scrape.py` reads the area
+   funeral homes' own sites *upstream* of WPR's batches (Tukios JSON API — already
+   structured, no model extraction; see `docs/funeral-home-scraping.md`), and
+   `extract/adapters/intake.py` folds in reviewed manual submissions.
 3. `extract/templates.py` — renders one crawlable HTML page per person plus a
    `sitemap.xml`. **This is the SEO layer.** Each page has the name in the title
    and H1, schema.org `Obituary` structured data, canonical, and OG tags.
@@ -116,6 +120,15 @@ arrangement metadata on each record.
 
 `web/vite.config.js` `base` must match the serving path
 (`/wpr-obituaries/` for a Pages project site, `/` for a custom domain root).
+
+Funeral-home scraping (`adapters.funeral_home_scrape`, `windowDays` in config)
+reads the homes' own sites directly. Per-home scrape config lives in
+`data/funeral_homes.json` (`platform` + its key). Two platforms are wired:
+**Tukios** (seven homes, keyed by `siteAlias`, JSON API) and **Tribute
+Technology** (four homes, keyed by `url`, RSS discovery + `Person` JSON-LD). The
+scraped-home list is also the republication permission list — full details, both
+platforms' mechanics, and the cross-source dedupe/overlap note are in
+`docs/funeral-home-scraping.md`.
 
 ## Known decisions and open items
 
