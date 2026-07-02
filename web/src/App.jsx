@@ -17,6 +17,9 @@ export default function App() {
   const [error, setError] = useState(null);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState(NO_FILTER);
+  // Has the reader touched search/browse yet? Until they do, we show the
+  // featured carousel even though the register defaults to the latest month.
+  const [touched, setTouched] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -26,16 +29,23 @@ export default function App() {
       .then(([index, sponsorConfig]) => {
         setData(index);
         setSponsor(sponsorConfig);
+        // Default the register to the most recent month so the embed opens at a
+        // readable height instead of listing the whole catalogue. The index is
+        // sorted newest-first, so the first record's month is the latest.
+        const latest = index.obituaries[0];
+        if (latest) setFilter({ kind: "month", value: monthKey(latest.sourceDate) });
       })
       .catch((e) => setError(e.message));
   }, []);
 
   // Search and browse are independent narrowings; activating one clears the other.
   const onSearch = (v) => {
+    setTouched(true);
     setQuery(v);
     if (v) setFilter(NO_FILTER);
   };
   const onFilter = (f) => {
+    setTouched(true);
     setFilter(f);
     setQuery("");
   };
@@ -79,7 +89,7 @@ export default function App() {
     );
   }
 
-  const isDefault = !query && filter.kind === "none";
+  const isDefault = !query && !touched;
 
   return (
     <main className="page">
