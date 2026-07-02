@@ -30,6 +30,7 @@ class WordpressScrape:
         # Loud KeyError if a fork enables this source without an apiBase.
         self.api_base = cfg["apiBase"]
         self.category_slug = cfg.get("categorySlug", "obituaries")
+        self.default_window = cfg.get("windowDays", 14)  # poll window (days) for this source
         self._client = None
 
     @property

@@ -348,6 +348,38 @@ def test_add_home():
     print("ok: add_home (platform detect, match derive, entry format, clean insert)")
 
 
+def test_per_source_window():
+    import store
+    from adapters.funeral_home_scrape import FuneralHomeScrape
+    from adapters.wordpress_scrape import WordpressScrape
+
+    # each source carries its own configured poll window
+    assert WordpressScrape({"apiBase": "x", "windowDays": 14}).default_window == 14
+    assert FuneralHomeScrape({"windowDays": 45}).default_window == 45
+    assert FuneralHomeScrape({}).default_window == 45  # sensible default when unset
+
+    # sync gives each source ITS window normally, --days overrides all, --backfill=all
+    seen: dict = {}
+
+    class FakeSrc:
+        def __init__(self, name, dw):
+            self.name, self.default_window = name, dw
+
+        def units(self, window):
+            seen[self.name] = window
+            return iter(())
+
+    def run(**kw):
+        seen.clear()
+        main.sync(store.Master(), [FakeSrc("wp", 14), FakeSrc("fh", 45)], **kw)
+        return dict(seen)
+
+    assert run(backfill=False, days=None) == {"wp": 14, "fh": 45}   # own defaults
+    assert run(backfill=False, days=7) == {"wp": 7, "fh": 7}         # --days overrides both
+    assert run(backfill=True, days=None) == {"wp": None, "fh": None}  # --backfill = all
+    print("ok: per-source window (own default, --days overrides, --backfill=all)")
+
+
 def test_bootstrap_config():
     import importlib.util
     root = Path(main.__file__).resolve().parent.parent

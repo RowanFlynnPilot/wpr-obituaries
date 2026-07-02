@@ -79,16 +79,29 @@ def _require_base_url() -> str:
     return base_url.rstrip("/")
 
 
-def sync(master: Master, sources: list, window: int | None) -> list[tuple[str, str]]:
+def sync(
+    master: Master, sources: list, *, backfill: bool, days: int | None
+) -> list[tuple[str, str]]:
     """Fold new/changed units from every enabled source into the master.
 
     Each source yields work-units; we skip those the master already processed at
     the same revision, extract the rest, and upsert them. Returns the list of
     (ref, error) for units that failed to extract.
+
+    Window per source: `--backfill` fetches all history, `--days N` overrides
+    every source to N, otherwise each source polls its own configured window
+    (`default_window`) — so a 14-day WordPress poll and a 45-day funeral-home
+    poll coexist without one clobbering the other.
     """
     failures: list[tuple[str, str]] = []
     extracted = skipped = 0
     for source in sources:
+        if backfill:
+            window = None
+        elif days is not None:
+            window = days
+        else:
+            window = getattr(source, "default_window", DEFAULT_WINDOW_DAYS)
         for unit in source.units(window):
             if master.is_processed(unit.source, unit.unit_id, unit.modified):
                 skipped += 1
@@ -393,19 +406,7 @@ def main() -> int:
     failures: list[tuple[str, str]] = []
     if not args.render_only:
         sources = enabled_sources(newsroom)
-        if args.backfill:
-            window = None
-        elif args.days is not None:
-            window = args.days
-        else:
-            # Normal cron: one poll window shared by every scraping source. Any
-            # scraping adapter may set windowDays; intake ignores it.
-            window = (
-                newsroom.adapter("wordpress_scrape").get("windowDays")
-                or newsroom.adapter("funeral_home_scrape").get("windowDays")
-                or DEFAULT_WINDOW_DAYS
-            )
-        failures = sync(master, sources, window)
+        failures = sync(master, sources, backfill=args.backfill, days=args.days)
         save_master(master, MASTER_FILE)  # persist successes before anything can fail
         saved = vendor_photos(master.records, PHOTOS_DIR, make_session())
         if saved:
