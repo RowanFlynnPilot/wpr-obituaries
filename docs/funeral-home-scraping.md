@@ -72,6 +72,15 @@ Review the derived `match` token — it must be a lowercase substring of how the
 home names itself on its obituaries so scraped records link to the canonical
 home. A Tribute Technology site is reported as recognized-but-not-yet-scrapable.
 
+From the browser (staff): `web/public/admin.html` (served at
+`<base>/admin.html`, unlinked/`noindex`) is a staff page that runs the same
+detection through the **`add-home.yml`** GitHub workflow and opens a PR. Sign-in
+is the staff member's own GitHub fine-grained PAT with **Actions: read and
+write** on the repo (a static site can't hold a shared credential, and the
+detection fetch can't run client-side). Opening the PR needs "Allow GitHub
+Actions to create and approve pull requests" enabled in repo Settings → Actions,
+and `add-home.yml` must be on the default branch for the dispatch API to see it.
+
 By hand: the **siteAlias** is an 8-hex-char key printed in the home's
 `/obituaries` page source as `siteAlias = '…'` or `SiteAlias: '…'` (it is *not*
 the `login?site_id=` value); `tukios.find_site_alias()` extracts it. A home

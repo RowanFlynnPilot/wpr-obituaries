@@ -1,0 +1,84 @@
+name: Add funeral home
+
+# Staff-triggered onboarding: detect a funeral home's platform, verify its
+# scrape key, and open a PR adding it to data/funeral_homes.json. Runs the same
+# scripts/add_home.py the CLI uses. Triggered from the staff admin page
+# (web/public/admin.html) via the workflow-dispatch API, or from the Actions tab.
+#
+# Note: opening the PR needs "Allow GitHub Actions to create and approve pull
+# requests" enabled in repo Settings → Actions → General.
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "The funeral home's website (root or obituaries page)."
+        type: string
+        required: true
+      name:
+        description: "Override the home name (blank = use the name from the live API)."
+        type: string
+        default: ""
+      match:
+        description: "Override the match token (blank = derive from the domain)."
+        type: string
+        default: ""
+
+permissions:
+  contents: write        # push the branch with the new config entry
+  pull-requests: write   # open the PR
+
+jobs:
+  add-home:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Detect, verify, and stage the home
+        id: detect
+        run: |
+          set +e
+          python scripts/add_home.py "${{ inputs.url }}" \
+            ${{ inputs.name && format('--name "{0}"', inputs.name) || '' }} \
+            ${{ inputs.match && format('--match "{0}"', inputs.match) || '' }} \
+            --write | tee out.txt
+          code=${PIPESTATUS[0]}
+          set -e
+          {
+            echo "## Add funeral home"
+            echo '```'
+            cat out.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$code" = "1" ]; then
+            echo "::error::add_home failed for ${{ inputs.url }}"
+            exit 1
+          fi
+          if git diff --quiet data/funeral_homes.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"   # already configured, or not scrapable
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open a pull request
+        if: steps.detect.outputs.changed == 'true'
+        run: |
+          branch="add-home/${{ github.run_id }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add data/funeral_homes.json
+          git commit -m "data: add funeral home from ${{ inputs.url }}"
+          git push -u origin "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "Add funeral home: ${{ inputs.url }}" \
+            --body "$(printf 'Onboarded via the Add funeral home workflow.\n\n```\n%s\n```\n\nReview the `match` token before merging — it must be a lowercase substring of the home name on its obituaries so scraped records link to the canonical home.' "$(cat out.txt)")"

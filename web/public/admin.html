@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>Add a funeral home · staff</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Oswald:wght@500;600&display=swap" />
+  <style>
+    :root { --accent: #7c2e36; --paper: #f6f2ea; --ink: #23201c; --rule: #d8cfbf; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: var(--paper); color: var(--ink);
+      font-family: "Merriweather", Georgia, serif; line-height: 1.55;
+      display: flex; justify-content: center; padding: 3rem 1.25rem;
+    }
+    main { width: 100%; max-width: 34rem; }
+    .kicker {
+      font-family: "Oswald", "Arial Narrow", sans-serif; letter-spacing: .14em;
+      text-transform: uppercase; font-size: .72rem; color: var(--accent); margin: 0 0 .3rem;
+    }
+    h1 { font-family: "Oswald", sans-serif; font-weight: 600; font-size: 1.7rem; margin: 0 0 .4rem; }
+    p.lede { margin: 0 0 1.6rem; font-size: .95rem; color: #4a453d; }
+    label { display: block; font-family: "Oswald", sans-serif; font-size: .8rem; letter-spacing: .04em;
+            text-transform: uppercase; margin: 1rem 0 .3rem; color: #4a453d; }
+    input {
+      width: 100%; padding: .6rem .7rem; font-family: "Merriweather", serif; font-size: .95rem;
+      border: 1px solid var(--rule); border-radius: 3px; background: #fff; color: var(--ink);
+    }
+    input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .hint { font-size: .78rem; color: #7a736a; margin: .25rem 0 0; }
+    .row { display: flex; gap: .8rem; }
+    .row > div { flex: 1; }
+    .remember { display: flex; align-items: center; gap: .4rem; margin-top: .5rem; font-size: .82rem; }
+    .remember input { width: auto; }
+    button {
+      margin-top: 1.6rem; width: 100%; padding: .75rem; border: none; border-radius: 3px;
+      background: var(--accent); color: #fff; font-family: "Oswald", sans-serif; font-size: .95rem;
+      letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
+    }
+    button:disabled { opacity: .55; cursor: default; }
+    #status { margin-top: 1.3rem; padding: .85rem 1rem; border-radius: 3px; font-size: .9rem; display: none; }
+    #status.show { display: block; }
+    #status.ok { background: #eaf1ea; border: 1px solid #b9d3b9; }
+    #status.err { background: #f6e7e7; border: 1px solid #dcb3b3; }
+    #status a { color: var(--accent); }
+    footer { margin-top: 2rem; font-size: .78rem; color: #8a8377; border-top: 1px solid var(--rule); padding-top: 1rem; }
+    code { font-family: "Courier New", monospace; font-size: .85em; background: #efe9dd; padding: .1em .3em; border-radius: 2px; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="kicker">Staff tool</p>
+    <h1>Add a funeral home</h1>
+    <p class="lede">Paste a funeral home's website. This detects its platform, verifies it
+      publishes obituaries, and opens a pull request adding it to the scrape config for review.
+      Only homes the newsroom has a republication arrangement with should be added.</p>
+
+    <form id="form">
+      <div class="row">
+        <div>
+          <label for="repo">GitHub repo</label>
+          <input id="repo" placeholder="owner/name" autocomplete="off" spellcheck="false" />
+        </div>
+        <div>
+          <label for="token">Access token</label>
+          <input id="token" type="password" placeholder="fine-grained PAT" autocomplete="off" />
+        </div>
+      </div>
+      <p class="hint">The token is your own GitHub fine-grained PAT with <strong>Actions: read and write</strong>
+        on this repo. It stays in your browser and is never committed.</p>
+
+      <label for="url">Funeral home website</label>
+      <input id="url" placeholder="https://www.example-fh.com" autocomplete="off" spellcheck="false" />
+
+      <div class="row">
+        <div>
+          <label for="name">Name override <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input id="name" placeholder="from the site if blank" autocomplete="off" />
+        </div>
+        <div>
+          <label for="match">Match token <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input id="match" placeholder="derived if blank" autocomplete="off" spellcheck="false" />
+        </div>
+      </div>
+
+      <label class="remember"><input type="checkbox" id="remember" /> Remember repo &amp; token on this device</label>
+
+      <button type="submit" id="submit">Detect &amp; open a pull request</button>
+    </form>
+
+    <div id="status"></div>
+
+    <footer>
+      This triggers the <code>add-home.yml</code> workflow. Detection runs server-side (the fetch is
+      cross-origin and can't run in a browser). Watch progress and review the resulting PR on GitHub.
+    </footer>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const KEYS = { repo: "wpr_admin_repo", token: "wpr_admin_token" };
+
+    // Restore any remembered values.
+    for (const k of ["repo", "token"]) {
+      const v = localStorage.getItem(KEYS[k]);
+      if (v) { $(k).value = v; $("remember").checked = true; }
+    }
+
+    function setStatus(kind, html) {
+      const el = $("status");
+      el.className = "show " + kind;
+      el.innerHTML = html;
+    }
+
+    $("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const repo = $("repo").value.trim().replace(/^https?:\/\/github\.com\//, "").replace(/\/$/, "");
+      const token = $("token").value.trim();
+      const url = $("url").value.trim();
+      const name = $("name").value.trim();
+      const match = $("match").value.trim();
+      if (!repo || !token || !url) {
+        setStatus("err", "Repo, token, and website are all required.");
+        return;
+      }
+      if ($("remember").checked) {
+        localStorage.setItem(KEYS.repo, repo);
+        localStorage.setItem(KEYS.token, token);
+      } else {
+        localStorage.removeItem(KEYS.repo);
+        localStorage.removeItem(KEYS.token);
+      }
+
+      $("submit").disabled = true;
+      setStatus("ok", "Dispatching…");
+      try {
+        const res = await fetch(
+          `https://api.github.com/repos/${repo}/actions/workflows/add-home.yml/dispatches`,
+          {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Accept": "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+            },
+            body: JSON.stringify({ ref: "main", inputs: { url, name, match } }),
+          }
+        );
+        if (res.status === 204) {
+          const actions = `https://github.com/${repo}/actions/workflows/add-home.yml`;
+          setStatus("ok",
+            `Started. The workflow will detect <strong>${url}</strong>, and if it's scrapable, ` +
+            `open a pull request for review. ` +
+            `<a href="${actions}" target="_blank" rel="noopener">Watch it on GitHub →</a>`);
+          $("url").value = $("name").value = $("match").value = "";
+        } else {
+          const body = await res.text();
+          setStatus("err", `GitHub returned ${res.status}. ${res.status === 404
+            ? "Check the repo slug, that the token has Actions write access, and that add-home.yml is on the default branch."
+            : "Check the token's permissions."} <br><small>${body.slice(0, 300)}</small>`);
+        }
+      } catch (err) {
+        setStatus("err", `Request failed: ${err.message}`);
+      } finally {
+        $("submit").disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

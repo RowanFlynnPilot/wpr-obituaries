@@ -14,12 +14,26 @@ Added `tukios.site_summary` for the verify step. Tests cover the pure helpers
 against Helke (verified + dedup) and Schmidt & Schulta (Tribute). This is the
 engine the planned in-browser admin panel will call server-side.
 
-**What's next (admin panel).** The requested in-browser "add a home" UI needs a
-server-side path for the same detection (CORS blocks it client-side) plus a
-place to persist requests — i.e. the deferred Supabase/hosted-backend tier.
-Design to be confirmed before building: likely a small form → serverless
-function running `add_home`'s detection → a review queue → a committed config
-edit. Sequenced after the scraper itself is confirmed live.
+## 2026-07-01 — Staff admin page + add-home workflow
+
+**What moved.** Built the in-browser "add a home" surface as the staff-only,
+git-native design (no Supabase). `.github/workflows/add-home.yml` is a
+`workflow_dispatch` (inputs: url, optional name/match) that runs
+`scripts/add_home.py --write` and, if the config changed, opens a PR for review;
+already-configured / not-scrapable outcomes report to the run summary without a
+PR. `web/public/admin.html` is a self-contained, brand-styled staff page (no
+build step, fork-portable) that dispatches that workflow via the GitHub API
+using the staff member's own fine-grained PAT (Actions: read+write) — the token
+stays in the browser, since a static site can't safely hold a repo credential
+and the detection fetch can't run client-side (CORS/Cloudflare). Verified: page
+renders with correct brand styling and no JS errors; workflow YAML valid; tests
+pass. **Requires** "Allow GitHub Actions to create and approve pull requests"
+(repo Settings → Actions), and the workflow must be on `main` before the API can
+dispatch it — so this activates when PR #28 merges.
+
+**Possible follow-ups.** GitHub OAuth device flow instead of a pasted PAT
+(nicer sign-in, still no backend); folding the admin page into the Vite build so
+the repo slug comes from config rather than being entered.
 
 ## 2026-07-01 — Funeral-home scraper (`funeral_home_scrape` adapter)
 
