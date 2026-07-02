@@ -1,0 +1,190 @@
+/* Miniature obituaries widget — compact card for article/sidebar embeds.
+   Shares :root brand variables with index.css; everything here is scoped to
+   .mini so the two surfaces can't bleed into each other. */
+
+body {
+  /* The embed should sit flush in the article column. */
+  background: transparent;
+}
+
+.mini {
+  max-width: 380px;
+  margin: 0 auto;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--accent);
+  border-radius: 2px;
+  padding: 16px 16px 14px;
+  font-family: var(--serif);
+  color: var(--ink);
+}
+
+.mini--loading {
+  min-height: 240px;
+}
+
+.mini__error {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.mini__kicker {
+  margin: 0 0 12px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--accent);
+}
+
+.mini__card {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  text-decoration: none;
+  color: inherit;
+  animation: mini-fade 0.45s ease;
+}
+
+.mini__photo {
+  flex: 0 0 72px;
+  width: 72px;
+  height: 90px;
+  object-fit: cover;
+  border: 1px solid var(--rule);
+  background: var(--paper-2);
+  filter: grayscale(0.1);
+}
+
+.mini__photo--blank {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--accent);
+  background: var(--paper-2);
+}
+
+.mini__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.mini__name {
+  font-weight: 700;
+  font-size: 1.08rem;
+  line-height: 1.2;
+}
+
+.mini__card:hover .mini__name {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.mini__span {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.mini__summary {
+  font-size: 0.88rem;
+  font-weight: 300;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mini__dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.mini__dot {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--rule);
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.mini__dot.is-active {
+  background: var(--accent);
+  transform: scale(1.35);
+}
+
+.mini__all {
+  display: block;
+  margin-top: 12px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.mini__all:hover {
+  text-decoration: underline;
+}
+
+.mini__sponsors {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hairline);
+}
+
+.mini__sponsor-label {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.mini__sponsor-logos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 22px;
+}
+
+.mini__sponsor-logos img {
+  height: 26px;
+  width: auto;
+  display: block;
+}
+
+@keyframes mini-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mini__card {
+    animation: none;
+  }
+}

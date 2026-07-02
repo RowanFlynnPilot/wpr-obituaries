@@ -57,7 +57,13 @@ Source of truth → static output → embedded widget:
    committed. `python extract/main.py --render-only` regenerates them locally
    (and reaches every existing page after a template/brand change).
 6. `web/` — React 18 / Vite memorial register. The **browse + search** layer
-   only. It fetches the JSON index and links each card to the static page.
+   only. It fetches the JSON index and links each card to the static page. Vite
+   builds **two embeds** from this one app: `index.html` (the full register) and
+   `mini.html` (a compact article/sidebar carousel — `MiniWidget.jsx`, flips
+   through recent obituaries, carries the sponsor logos, links back to the full
+   page via `?link=`). Both post their height to the parent (`lib/frame.js`) so
+   the WordPress iframes self-size; copy-paste snippets + a live `embed-test.html`
+   harness are in `docs/embedding.md`.
 7. `.github/workflows/extract.yml` — cron Mon/Wed/Fri 6 AM Central. Runs sync +
    render, commits the updated master back (`contents: write`), then builds the
    widget and deploys to Pages. A failed extract skips the deploy (the last good
