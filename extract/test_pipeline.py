@@ -139,8 +139,83 @@ def test_enabled_sources():
     import config
     from adapters import enabled_sources
     names = [s.name for s in enabled_sources(config.load_newsroom())]
-    assert names == ["wordpress_scrape", "intake"], names  # WPR runs both
-    print("ok: enabled_sources (wordpress + intake per WPR config)")
+    assert names == ["wordpress_scrape", "funeral_home_scrape", "intake"], names
+    print("ok: enabled_sources (wordpress + funeral_home_scrape + intake per WPR config)")
+
+
+def _tukios_row(**over):
+    row = {
+        "id": "5e036d4e-776f-4e3f-a9bc-afef025b4523",
+        "display_name": "Naomi C. Hardman",
+        "date_of_birth": "1943-12-13",
+        "date_of_death": "2026-06-26",
+        "formatted_date_of_death": "Jun 26, 2026",
+        "age": 82,
+        "city": "Ringle",
+        "branch": "Brainard Funeral Home and Cremation Center- Everest Chapel",
+        "is_published": True,
+        "public_url": "https://www.brainardfuneral.com/obituaries/naomi-hardman",
+        "obituary_text": "<p>Naomi was a redeemed child of God.</p><p>She loved her family.</p>",
+        "default_image": "https://cdn.tukioswebsites.com/uuid/md",
+        "default_image_sizes": {"lg": "https://cdn.tukioswebsites.com/uuid/lg"},
+    }
+    row.update(over)
+    return row
+
+
+def test_funeral_home_scrape():
+    from adapters import funeral_home_scrape as fhs
+
+    ob = fhs.to_obituary(_tukios_row(), "Brainard Funeral Home & Cremation Center")
+    assert ob.name == "Naomi C. Hardman"
+    assert ob.death_date == "2026-06-26" and ob.death_year == 2026
+    assert ob.source_date == "2026-06-26"  # register orders by date of death
+    assert ob.birth_date == "1943-12-13" and ob.age == 82
+    assert ob.funeral_home.startswith("Brainard")  # branch preferred
+    assert ob.photo_url.endswith("/lg")  # larger size for downscaling
+    assert ob.body == "Naomi was a redeemed child of God.\n\nShe loved her family."
+    assert main._derive_town(ob.summary) == "Ringle"  # summary shaped for the facet
+    # id + slug are stable and derived from the permanent person-page URL
+    assert ob.source_id == fhs._unit_id(ob.source_url)
+    assert fhs.to_obituary(_tukios_row(), "X").slug == ob.slug
+
+    # branch falls back to the home name; a record missing name/dod is skipped
+    assert fhs.to_obituary(_tukios_row(branch=None), "Helke Funeral Home").funeral_home == "Helke Funeral Home"
+    assert fhs.to_obituary(_tukios_row(date_of_death=None), "X") is None
+    assert fhs.to_obituary(_tukios_row(display_name="  "), "X") is None
+
+    # content-hash revision changes when a published field is edited
+    before = fhs._revision(_tukios_row())
+    assert fhs._revision(_tukios_row()) == before
+    assert fhs._revision(_tukios_row(obituary_text="<p>New.</p>")) != before
+    print("ok: funeral_home_scrape (maps Tukios record, town facet, stable id, hash revision)")
+
+
+def test_tukios_client():
+    import tukios
+
+    assert tukios.find_site_alias("var x; siteAlias = '7aacd58f'; more") == "7aacd58f"
+    assert tukios.find_site_alias("'SiteAlias': 'cc8364ed'") == "cc8364ed"
+    assert tukios.find_site_alias("no alias here") is None
+
+    # Paging stops at the death-date cutoff (records are sorted death-date desc),
+    # and unpublished rows are dropped — proven without network.
+    pages = {
+        1: {"last_page": 2, "data": [
+            {"date_of_death": "2026-06-26", "display_name": "New One", "is_published": True},
+            {"date_of_death": "2026-06-20", "display_name": "Hidden", "is_published": False},
+            {"date_of_death": "2026-05-01", "display_name": "Too Old", "is_published": True},
+        ]},
+        2: {"last_page": 2, "data": [{"date_of_death": "2026-04-01", "display_name": "Older"}]},
+    }
+    orig = tukios._get_page
+    tukios._get_page = lambda session, alias, page: pages[page]
+    try:
+        got = [r["display_name"] for r in tukios.fetch_obituaries("alias", cutoff="2026-06-01")]
+    finally:
+        tukios._get_page = orig
+    assert got == ["New One"], got  # unpublished skipped, stops before "Too Old"
+    print("ok: tukios client (alias regex, windowed stop, unpublished skipped)")
 
 
 def test_bootstrap_config():

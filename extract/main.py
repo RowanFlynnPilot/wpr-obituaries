@@ -376,8 +376,12 @@ def main() -> int:
         elif args.days is not None:
             window = args.days
         else:
-            window = newsroom.adapter("wordpress_scrape").get(
-                "windowDays", DEFAULT_WINDOW_DAYS
+            # Normal cron: one poll window shared by every scraping source. Any
+            # scraping adapter may set windowDays; intake ignores it.
+            window = (
+                newsroom.adapter("wordpress_scrape").get("windowDays")
+                or newsroom.adapter("funeral_home_scrape").get("windowDays")
+                or DEFAULT_WINDOW_DAYS
             )
         failures = sync(master, sources, window)
         save_master(master, MASTER_FILE)  # persist successes before anything can fail

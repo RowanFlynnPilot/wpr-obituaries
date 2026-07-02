@@ -33,6 +33,10 @@
       "categorySlug": "obituaries",
       "windowDays": 14
     },
+    "funeral_home_scrape": {
+      "enabled": true,
+      "windowDays": 45
+    },
     "intake": {
       "enabled": true,
       "backend": "manual"

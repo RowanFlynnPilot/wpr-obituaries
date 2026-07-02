@@ -23,6 +23,10 @@ def load_homes(path: Path) -> list[dict]:
             "url": h.get("url"),
             "slug": slugify(h["name"]),
             "match": [m.lower() for m in h.get("match", [])],
+            # Optional scrape target for funeral_home_scrape; absent on homes we
+            # only canonicalize names for (not scraped).
+            "platform": h.get("platform"),
+            "siteAlias": h.get("siteAlias"),
         }
         for h in raw
     ]
