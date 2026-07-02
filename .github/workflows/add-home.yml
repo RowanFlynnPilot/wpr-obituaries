@@ -53,10 +53,13 @@ jobs:
         id: detect
         run: |
           set +e
+          # Merge stderr into the capture: add_home prints its "why it couldn't
+          # add" diagnostics to stderr, and that text is what makes the review
+          # issue actionable.
           python scripts/add_home.py "${{ inputs.url }}" \
             ${{ inputs.name && format('--name "{0}"', inputs.name) || '' }} \
             ${{ inputs.match && format('--match "{0}"', inputs.match) || '' }} \
-            --write | tee out.txt
+            --write 2>&1 | tee out.txt
           code=${PIPESTATUS[0]}
           set -e
           {
