@@ -166,10 +166,32 @@ def _sponsor_line(sponsor: dict) -> str:
     return "Obituaries  ·  " + " + ".join(names) if names else "Obituaries"
 
 
+_NAME_SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
+
+
+def _name_key(name: str) -> str:
+    """First + last name, lowercased, stripping middles, initials, suffixes, and
+    punctuation.
+
+    The same person reaches us from two sources under slightly different names —
+    a WPR batch may say "Ryan Johnson" where the funeral home says "Ryan Paul
+    Johnson", or one carries a middle initial, suffix, or quoted nickname the
+    other drops. Keying on first + last collapses those to one person; the death
+    date in the dedupe key keeps two different same-named people apart.
+    """
+    tokens = re.sub(r"[^\w\s]", " ", name.lower()).split()
+    tokens = [t for t in tokens if t not in _NAME_SUFFIXES]
+    if not tokens:
+        return name.lower().strip()
+    if len(tokens) == 1:
+        return tokens[0]
+    return f"{tokens[0]} {tokens[-1]}"
+
+
 def _dedupe_people(
     records: list[Obituary],
 ) -> tuple[list[Obituary], dict[str, Obituary]]:
-    """Collapse one person (name + death date) appearing in two batch posts.
+    """Collapse one person (name + death date) appearing in more than one source.
 
     Returns (canonical, primary_by_slug): `canonical` has one record per person
     for the index/feed/home pages; `primary_by_slug` maps every record's slug to
@@ -179,7 +201,7 @@ def _dedupe_people(
     groups: dict[tuple, list[Obituary]] = {}
     for r in records:
         stamp = r.death_date or (str(r.death_year) if r.death_year else r.source_date)
-        groups.setdefault((r.name.lower().strip(), stamp), []).append(r)
+        groups.setdefault((_name_key(r.name), stamp), []).append(r)
     canonical: list[Obituary] = []
     primary_by_slug: dict[str, Obituary] = {}
     for group in groups.values():

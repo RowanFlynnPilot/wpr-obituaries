@@ -92,7 +92,24 @@ def test_dedupe():
     assert len(canonical) == 2  # Sam Lee collapses
     assert primary_by_slug[short.slug].slug == full.slug  # fuller record wins
     assert primary_by_slug[full.slug].slug == full.slug
-    print("ok: dedupe (same person collapses, fuller body is primary)")
+
+    # name normalization for cross-source dedupe
+    assert main._name_key("Ryan Paul Johnson") == "ryan johnson"        # middle dropped
+    assert main._name_key("James Erdman Sr.") == "james erdman"          # suffix dropped
+    assert main._name_key('Mildred "Milly" Mary Anne Pries') == "mildred pries"  # nickname dropped
+    assert main._name_key("Cher") == "cher"
+
+    # a WPR "Ryan Johnson" and a funeral-home "Ryan Paul Johnson" (same death
+    # date) collapse to one; the fuller record wins
+    a = mk("Ryan Johnson", 4, "2026-06-10", body="x", death_date="2026-06-08")
+    b = mk("Ryan Paul Johnson", 5, "2026-06-11", body="fuller " * 20, death_date="2026-06-08")
+    canon2, prim2 = main._dedupe_people([a, b])
+    assert len(canon2) == 1 and prim2[a.slug].slug == b.slug
+    # but two different people who share a first+last and a death date stay apart
+    c = mk("Mary Q. Adams", 6, "2026-06-10", death_date="2026-06-08")
+    d = mk("Mary Z. Baker", 7, "2026-06-10", death_date="2026-06-08")
+    assert len(main._dedupe_people([c, d])[0]) == 2
+    print("ok: dedupe (name-variant collapse, fuller body primary, distinct kept apart)")
 
 
 def test_photo_resolution():
