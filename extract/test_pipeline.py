@@ -215,15 +215,19 @@ def test_tukios_client():
     assert tukios.find_site_alias("'SiteAlias': 'cc8364ed'") == "cc8364ed"
     assert tukios.find_site_alias("no alias here") is None
 
-    # Paging stops at the death-date cutoff (records are sorted death-date desc),
-    # and unpublished rows are dropped — proven without network.
+    # Windowing tolerates a pinned out-of-order old record (some homes feature one
+    # at the top), drops unpublished rows, and stops only on an all-old page.
     pages = {
-        1: {"last_page": 2, "data": [
+        1: {"last_page": 3, "data": [
+            {"date_of_death": "2026-04-10", "display_name": "Pinned Old", "is_published": True},
             {"date_of_death": "2026-06-26", "display_name": "New One", "is_published": True},
             {"date_of_death": "2026-06-20", "display_name": "Hidden", "is_published": False},
+        ]},
+        2: {"last_page": 3, "data": [
+            {"date_of_death": "2026-06-05", "display_name": "Also Recent", "is_published": True},
             {"date_of_death": "2026-05-01", "display_name": "Too Old", "is_published": True},
         ]},
-        2: {"last_page": 2, "data": [{"date_of_death": "2026-04-01", "display_name": "Older"}]},
+        3: {"last_page": 3, "data": [{"date_of_death": "2026-04-01", "display_name": "Older", "is_published": True}]},
     }
     orig = tukios._get_page
     tukios._get_page = lambda session, alias, page: pages[page]
@@ -231,8 +235,9 @@ def test_tukios_client():
         got = [r["display_name"] for r in tukios.fetch_obituaries("alias", cutoff="2026-06-01")]
     finally:
         tukios._get_page = orig
-    assert got == ["New One"], got  # unpublished skipped, stops before "Too Old"
-    print("ok: tukios client (alias regex, windowed stop, unpublished skipped)")
+    # Pinned Old filtered (not a stop trigger), Hidden skipped, page 3 all-old -> stop
+    assert got == ["New One", "Also Recent"], got
+    print("ok: tukios client (alias regex, pinned-record windowing, unpublished skipped)")
 
 
 _PERSON_LD = """
@@ -293,7 +298,12 @@ def test_tribute_mapping():
     assert ob.age == 73  # computed from the dates (born Oct, died Jun -> not yet 74)
     assert ob.source_id == 48850499 and ob.funeral_home.startswith("Schmidt")
     assert ob.body == "Diane V. Dombeck, 73, of Eland, passed away."
-    assert ob.summary == "Diane V. Dombeck, age 73 passed away on June 24, 2026."
+    # town recovered from the opening line (age-anchored) flows into the summary
+    assert ob.summary == "Diane V. Dombeck, age 73, of Eland passed away on June 24, 2026."
+    assert main._derive_town(ob.summary) == "Eland"
+    # a prose opener without an age before "of" yields no false town
+    assert fhs._city_from_body("In loving memory of Elizabeth, who was 44.") is None
+    assert fhs._city_from_body("Someone, 70, of Rib Mountain, WI, died.") == "Rib Mountain"
     assert fhs.tribute_to_obituary({**rec, "deathDate": None}, "X") is None  # needs a death date
     assert fhs._age("1952-10-11", "2026-06-24") == 73
     assert fhs._age(None, "2026-06-24") is None

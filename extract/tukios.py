@@ -12,8 +12,9 @@ than in the environment. If it ever stops working, re-read it from a site's
 `/obituaries` page source (the value after `Authorization: Bearer` in the
 widget's requests) — see docs/funeral-home-scraping.md.
 
-Results are sorted by date of death, newest first, so a windowed poll stops as
-soon as it pages past the cutoff.
+Results are sorted by date of death, newest first — except some homes pin one
+older "featured" obituary at the very top — so a windowed poll can't stop on the
+first old record; it stops once a whole page holds nothing in the window.
 """
 
 from __future__ import annotations
@@ -100,13 +101,20 @@ def fetch_obituaries(site_alias: str, cutoff: str | None) -> Iterator[dict]:
         rows = payload.get("data") or []
         if not rows:
             return
+        page_has_recent = False
         for row in rows:
-            if not row.get("is_published", True):
-                continue
             dod = row.get("date_of_death")
             if cutoff and dod and dod < cutoff:
-                return  # sorted by death date desc — everything after is older
-            yield row
+                continue  # older than the window, or a pinned out-of-order obit
+            page_has_recent = True  # counts even if unpublished, to not stop early
+            if row.get("is_published", True):
+                yield row
+        # After the (possibly pinned) top record, results are death-date desc, so
+        # a page with nothing in the window means we've paged past it — stop. Not
+        # stopping on a single old record is what keeps a pinned obituary from
+        # zeroing out a whole home.
+        if cutoff and not page_has_recent:
+            return
         if page >= (payload.get("last_page") or page):
             return
         page += 1
