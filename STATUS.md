@@ -1,5 +1,39 @@
 # STATUS
 
+## 2026-07-01 — Go-live + refinement pass (both scrapers live on main)
+
+**What moved.** Merged the scraper (PR #28) and went live; the extract workflow
+now runs `wordpress_scrape` + `funeral_home_scrape`. Verifying the first live
+scrape under observation (rather than waiting for the cron) caught two real
+coverage bugs, both fixed: (1) some Tukios homes pin an older "featured"
+obituary at the top, which the windowing treated as end-of-window and returned
+zero — Helke/Beste came back empty (PR #30); (2) the shared poll window let
+WordPress's 14 days override the funeral homes' configured 45, so every home
+under-collected — now each source polls its own window (PR #31). Also hardened
+cross-source dedupe: normalized first+last name matching (PR #29) and folding
+WPR year-only records into the same person's full-date group (PR #32); and added
+a town facet for Tribute records (PR #30). With the 45-day window, the live scrape
+pulls ~192 obituaries across the 11 homes; the hardened dedupe collapses ~125
+WPR↔funeral-home duplicates that would otherwise have shown twice.
+
+**wordpress_scrape retirement analysis.** Within the overlapping 45-day window,
+**~93% of WPR's obituaries are now covered directly by funeral-home scraping**
+(~96% counting records the year-only dedupe fix reconciles). The genuine
+WPR-only residual is ~3–4%: obituaries with no funeral home on record (can't be
+attributed — e.g. an out-of-town family) and ones a scraped home hadn't posted
+yet when WPR did (publish-timing). **Recommendation: keep `wordpress_scrape` as
+the safety net for now** — it is clearly secondary (funeral-home scraping is
+primary), but retiring it would drop that residual. Path to retirement: watch the
+residual over a few weeks; if it is consistently just publish-timing (the home
+posts a day later) plus intake-coverable unattributable ones, WPR can be dropped
+— which removes Shereen's manual batch-compilation step, the end goal.
+
+**Still open.** Admin sign-in polish (OAuth device flow instead of a pasted PAT)
+needs a GitHub OAuth app registered on the WPR account first — owner action.
+Folding the admin page into the Vite build (config-driven repo slug) is optional.
+The repo setting "Allow GitHub Actions to create and approve pull requests" is
+still needed for the add-home workflow to open its PR — owner action.
+
 ## 2026-07-01 — Tribute Technology platform (second scraper)
 
 **What moved.** `funeral_home_scrape` now supports the second platform, Tribute
