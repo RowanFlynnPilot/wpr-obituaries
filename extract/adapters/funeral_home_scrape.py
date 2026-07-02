@@ -202,6 +202,7 @@ class FuneralHomeScrape:
 
     def __init__(self, cfg: dict, homes_file: Path = HOMES_FILE) -> None:
         self.cfg = cfg
+        self.default_window = cfg.get("windowDays", 45)  # poll window (days) for this source
         self.homes = [h for h in load_homes(homes_file) if h.get("platform")]
 
     def _cutoff(self, window: int | None) -> str | None:
