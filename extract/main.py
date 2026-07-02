@@ -201,6 +201,26 @@ def _name_key(name: str) -> str:
     return f"{tokens[0]} {tokens[-1]}"
 
 
+def _reconcile_year_only(groups: dict[tuple, list[Obituary]]) -> None:
+    """Fold a year-only group into the same person's full-date group, in place.
+
+    WPR sometimes yields only a death *year* while the funeral-home scrape has
+    the full date, so the same person lands in two groups — ("jane doe", "2026")
+    and ("jane doe", "2026-05-27") — and shows up twice. When a bare-year group
+    has exactly one dated group sharing its name and year, merge them. The
+    exactly-one guard keeps two same-named people who died the same year apart.
+    """
+    dated: dict[tuple, list[tuple]] = {}
+    for (name_key, stamp) in groups:
+        if len(stamp) == 10:  # YYYY-MM-DD
+            dated.setdefault((name_key, stamp[:4]), []).append((name_key, stamp))
+    for (name_key, stamp) in list(groups):
+        if len(stamp) == 4 and stamp.isdigit():  # bare year
+            targets = dated.get((name_key, stamp), [])
+            if len(targets) == 1:
+                groups[targets[0]].extend(groups.pop((name_key, stamp)))
+
+
 def _dedupe_people(
     records: list[Obituary],
 ) -> tuple[list[Obituary], dict[str, Obituary]]:
@@ -215,6 +235,7 @@ def _dedupe_people(
     for r in records:
         stamp = r.death_date or (str(r.death_year) if r.death_year else r.source_date)
         groups.setdefault((_name_key(r.name), stamp), []).append(r)
+    _reconcile_year_only(groups)
     canonical: list[Obituary] = []
     primary_by_slug: dict[str, Obituary] = {}
     for group in groups.values():
