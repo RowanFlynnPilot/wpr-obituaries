@@ -1,9 +1,14 @@
 name: Add funeral home
 
-# Staff-triggered onboarding: detect a funeral home's platform, verify its
-# scrape key, and open a PR adding it to data/funeral_homes.json. Runs the same
+# Staff-triggered onboarding: detect a funeral home's platform, verify it, and
+# open a PR adding it to data/funeral_homes.json. Runs the same
 # scripts/add_home.py the CLI uses. Triggered from the staff admin page
 # (web/public/admin.html) via the workflow-dispatch API, or from the Actions tab.
+#
+# No submission dead-ends: if the home can't be auto-added (a platform we don't
+# support yet, or a fetch/verify failure), the workflow opens a GitHub issue
+# assigned to the repo owner so the team is alerted to look into it — then
+# re-run this workflow with the same URL once it's resolved.
 #
 # Note: opening the PR needs "Allow GitHub Actions to create and approve pull
 # requests" enabled in repo Settings → Actions → General.
@@ -27,6 +32,7 @@ on:
 permissions:
   contents: write        # push the branch with the new config entry
   pull-requests: write   # open the PR
+  issues: write          # open a review issue when a home can't be auto-added
 
 jobs:
   add-home:
@@ -59,12 +65,11 @@ jobs:
             cat out.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          if [ "$code" = "1" ]; then
-            echo "::error::add_home failed for ${{ inputs.url }}"
-            exit 1
-          fi
+          # Don't fail the run: an unrecognized home is flagged for review below,
+          # not a build failure. Pass the outcome to the next steps.
+          echo "code=$code" >> "$GITHUB_OUTPUT"
           if git diff --quiet data/funeral_homes.json; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"   # already configured, or not scrapable
+            echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
@@ -82,3 +87,22 @@ jobs:
           gh pr create --base main --head "$branch" \
             --title "Add funeral home: ${{ inputs.url }}" \
             --body "$(printf 'Onboarded via the Add funeral home workflow.\n\n```\n%s\n```\n\nReview the `match` token before merging — it must be a lowercase substring of the home name on its obituaries so scraped records link to the canonical home.' "$(cat out.txt)")"
+
+      - name: Flag unrecognized home for review
+        if: steps.detect.outputs.code != '0'
+        run: |
+          url="${{ inputs.url }}"
+          out="$(cat out.txt)"
+          # De-dupe: if an open review issue for this URL already exists, comment on it.
+          existing=$(gh issue list --state open --search "in:title \"$url\"" --json number --jq '.[0].number // empty' 2>/dev/null || true)
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$(printf 'Re-submitted; still could not auto-add.\n\n```\n%s\n```' "$out")"
+            echo "Commented on existing review issue #$existing." >> "$GITHUB_STEP_SUMMARY"
+          else
+            body=$(printf 'A funeral home submitted through the **Add funeral home** workflow could not be added automatically — it needs a look.\n\n**Website:** %s\n\n**What the detector said:**\n```\n%s\n```\n\n**To resolve:**\n1. Check whether the home is on a platform we support (Tukios or Tribute Technology). If it is and detection failed, the site may have been down — re-run the workflow with this URL.\n2. If it is a *new* platform, add support in `extract/` (see `docs/funeral-home-scraping.md`), then re-run the workflow.\n3. Otherwise, add the obituary through the manual intake path (`data/intake/`).\n\nClose this issue once the home is onboarded.' "$url" "$out")
+            gh issue create \
+              --title "Funeral home needs review: $url" \
+              --body "$body" \
+              --assignee "${{ github.actor }}"
+            echo "Opened a review issue for $url." >> "$GITHUB_STEP_SUMMARY"
+          fi

@@ -91,6 +91,12 @@ detection fetch can't run client-side). Opening the PR needs "Allow GitHub
 Actions to create and approve pull requests" enabled in repo Settings → Actions,
 and `add-home.yml` must be on the default branch for the dispatch API to see it.
 
+**No submission dead-ends.** If a home can't be auto-added — a platform we don't
+support yet, or a fetch/verify failure — the workflow opens a GitHub issue
+(assigned to the person who triggered it, de-duped per URL) instead of failing.
+The team investigates, adds platform support or handles it via manual intake,
+then re-runs the workflow with the same URL.
+
 By hand: the **siteAlias** is an 8-hex-char key printed in the home's
 `/obituaries` page source as `siteAlias = '…'` or `SiteAlias: '…'` (it is *not*
 the `login?site_id=` value); `tukios.find_site_alias()` extracts it. A Tribute
