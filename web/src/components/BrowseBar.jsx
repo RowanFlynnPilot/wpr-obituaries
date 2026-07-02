@@ -97,7 +97,7 @@ export default function BrowseBar({ obituaries, filter, onFilter }) {
         )}
         {homes.length > 0 && (
           <label className="browse__select">
-            <span className="browse__label">Funeral home</span>
+            <span className="browse__label browse__label--inline">Funeral home</span>
             <select
               value={filter.kind === "home" ? filter.value : ""}
               onChange={onSelect("home")}

@@ -385,10 +385,14 @@ body {
 
 /* ---------- Browse ---------- */
 .browse {
-  margin: 16px 0 0;
+  margin: 14px 0 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
+  padding: 13px 15px;
+  background: var(--paper-2);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
 }
 
 .browse__row {
@@ -398,30 +402,54 @@ body {
   gap: 6px;
 }
 
+/* The A–Z row keeps a hairline above it so the two dense rows read apart. */
+.browse__row--az {
+  padding-top: 9px;
+  border-top: 1px solid var(--hairline);
+}
+
+.browse__row--selects {
+  gap: 8px 14px;
+  padding-top: 9px;
+  border-top: 1px solid var(--hairline);
+}
+
+/* Fixed gutter so the Month / A–Z / Town labels line up on one left column. */
 .browse__label {
   font-family: var(--mono);
   font-size: 10.5px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--faint);
-  margin-right: 4px;
-  min-width: 44px;
+  flex: 0 0 48px;
+  width: 48px;
+}
+
+/* The Funeral-home label sits mid-row after the Town select, not in the gutter. */
+.browse__label--inline {
+  flex: 0 0 auto;
+  width: auto;
+  margin-left: 8px;
 }
 
 .browse__chip {
+  display: inline-flex;
+  align-items: center;
   font-family: var(--mono);
   font-size: 12px;
+  line-height: 1;
   color: var(--ink);
-  background: var(--paper-2);
+  background: var(--paper);
   border: 1px solid var(--rule);
   border-radius: 2px;
-  padding: 4px 9px;
+  padding: 6px 9px;
   cursor: pointer;
-  transition: background-color 0.12s ease, border-color 0.12s ease;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
 }
 
 .browse__chip:hover {
   background: var(--hover);
+  border-color: var(--muted);
 }
 
 .browse__chip.is-active {
@@ -430,33 +458,44 @@ body {
   color: #fff;
 }
 
+/* Hairline divider sets the count off from the month name: "June 2026 | 134". */
 .browse__count {
-  opacity: 0.6;
+  margin-left: 6px;
+  padding-left: 6px;
+  border-left: 1px solid var(--rule);
+  opacity: 0.7;
   font-size: 11px;
+}
+
+.browse__chip:hover .browse__count {
+  border-left-color: var(--faint);
 }
 
 .browse__chip.is-active .browse__count {
   opacity: 0.85;
+  border-left-color: rgba(255, 255, 255, 0.4);
 }
 
 .browse__letter {
   font-family: var(--mono);
   font-size: 12px;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   border: 0;
   background: none;
-  color: var(--accent);
+  color: var(--muted);
   cursor: pointer;
   border-radius: 2px;
+  transition: background-color 0.12s ease, color 0.12s ease;
 }
 
 .browse__letter:hover {
   background: var(--hover);
+  color: var(--accent);
 }
 
 .browse__letter.is-active {
@@ -465,12 +504,8 @@ body {
 }
 
 .browse__letter.is-disabled {
-  color: var(--rule);
+  color: var(--hairline);
   cursor: default;
-}
-
-.browse__row--selects {
-  gap: 18px;
 }
 
 .browse__select {
@@ -483,12 +518,23 @@ body {
   font-family: var(--mono);
   font-size: 12px;
   color: var(--ink);
-  background: var(--paper-2);
+  background-color: var(--paper);
   border: 1px solid var(--rule);
   border-radius: 2px;
-  padding: 5px 9px;
+  padding: 6px 26px 6px 10px;
   max-width: 240px;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='6' viewBox='0 0 8 6'%3E%3Cpath d='M0 0l4 6 4-6z' fill='%237c2e36'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  background-size: 8px 6px;
+  transition: border-color 0.12s ease;
+}
+
+.browse__select select:hover {
+  border-color: var(--muted);
 }
 
 .browse__select select:focus {
