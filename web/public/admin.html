@@ -54,7 +54,9 @@
     <h1>Add a funeral home</h1>
     <p class="lede">Paste a funeral home's website. This detects its platform, verifies it
       publishes obituaries, and opens a pull request adding it to the scrape config for review.
-      Only homes the newsroom has a republication arrangement with should be added.</p>
+      If the platform isn't one we support yet, it opens a tracked issue for the team to look
+      into instead — no submission is a dead-end. Only homes the newsroom has a republication
+      arrangement with should be added.</p>
 
     <form id="form">
       <div class="row">
@@ -150,8 +152,8 @@
         if (res.status === 204) {
           const actions = `https://github.com/${repo}/actions/workflows/add-home.yml`;
           setStatus("ok",
-            `Started. The workflow will detect <strong>${url}</strong>, and if it's scrapable, ` +
-            `open a pull request for review. ` +
+            `Started. The workflow will detect <strong>${url}</strong> and open a pull request ` +
+            `to add it — or, if its platform isn't supported yet, a tracked issue for the team. ` +
             `<a href="${actions}" target="_blank" rel="noopener">Watch it on GitHub →</a>`);
           $("url").value = $("name").value = $("match").value = "";
         } else {
