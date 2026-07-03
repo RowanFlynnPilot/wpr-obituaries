@@ -13,16 +13,15 @@ block — script tags are allowed for admin/editor users, same as the existing
 gas-prices widget). A live preview of both, exactly as embedded, is at
 `<tool-url>/embed-test.html`.
 
-> **When the custom subdomain lands** (docs/custom-subdomain.md), replace
-> `https://rowanflynnpilot.github.io/wpr-obituaries/` in these snippets with the
-> new URL. Nothing else changes.
+> The tool is served from `https://obituaries.wausaupilotandreview.com/` (the
+> brand subdomain). The snippets below point there.
 
 ## 1 — Full tool (dedicated page)
 
 ```html
 <!-- Wausau Pilot & Review — Obituaries -->
 <iframe id="wpr-obits-embed"
-        src="https://rowanflynnpilot.github.io/wpr-obituaries/"
+        src="https://obituaries.wausaupilotandreview.com/"
         title="Wausau area obituaries"
         style="display:block;width:100%;border:0;min-height:800px"
         loading="lazy"></iframe>
@@ -53,7 +52,7 @@ unchanged when the tool moves to the custom subdomain.
 ```html
 <!-- Wausau Pilot & Review — Recent obituaries (mini) -->
 <iframe id="wpr-obits-mini"
-        src="https://rowanflynnpilot.github.io/wpr-obituaries/mini.html?link=https%3A%2F%2Fwausaupilotandreview.com%2Fobituaries%2F"
+        src="https://obituaries.wausaupilotandreview.com/mini.html?link=https%3A%2F%2Fwausaupilotandreview.com%2Fobituaries%2F"
         title="Recent obituaries"
         style="display:block;width:100%;max-width:380px;margin:0 auto;border:0;min-height:340px"
         loading="lazy"></iframe>
