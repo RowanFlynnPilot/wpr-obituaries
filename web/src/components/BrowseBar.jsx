@@ -3,7 +3,7 @@ import { monthKey, monthLabel, lastNameInitial } from "../lib/format.js";
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-export default function BrowseBar({ obituaries, filter, onFilter }) {
+export default function BrowseBar({ obituaries, filter, onFilter, recentMonths = 3 }) {
   const months = useMemo(() => {
     const counts = new Map();
     for (const o of obituaries) {
@@ -39,6 +39,14 @@ export default function BrowseBar({ obituaries, filter, onFilter }) {
     <div className="browse">
       <div className="browse__row">
         <span className="browse__label">Month</span>
+        <button
+          type="button"
+          className={`browse__chip${filter.kind === "recent" ? " is-active" : ""}`}
+          onClick={() => onFilter({ kind: "recent", value: recentMonths })}
+          title={`The last ${recentMonths} months`}
+        >
+          Recent
+        </button>
         <button
           type="button"
           className={`browse__chip${filter.kind === "none" ? " is-active" : ""}`}

@@ -10,6 +10,21 @@ import { monthKey, lastNameInitial } from "./lib/format.js";
 
 const BASE = import.meta.env.BASE_URL;
 const NO_FILTER = { kind: "none" };
+const RECENT_MONTHS = 3; // default view: the current month plus the prior two
+
+// The N most recent distinct months present, newest first (the index is sorted
+// newest-first, so distinct months appear in descending order).
+function recentMonthKeys(obituaries, n) {
+  const keys = [];
+  for (const o of obituaries) {
+    const k = monthKey(o.sourceDate);
+    if (!keys.includes(k)) {
+      keys.push(k);
+      if (keys.length >= n) break;
+    }
+  }
+  return keys;
+}
 
 export default function App() {
   const [data, setData] = useState(null);
@@ -29,11 +44,10 @@ export default function App() {
       .then(([index, sponsorConfig]) => {
         setData(index);
         setSponsor(sponsorConfig);
-        // Default the register to the most recent month so the embed opens at a
-        // readable height instead of listing the whole catalogue. The index is
-        // sorted newest-first, so the first record's month is the latest.
-        const latest = index.obituaries[0];
-        if (latest) setFilter({ kind: "month", value: monthKey(latest.sourceDate) });
+        // Default the register to the most recent few months so the embed opens
+        // at a readable height instead of listing the whole catalogue, while still
+        // showing more than a sparse just-started month.
+        if (index.obituaries.length) setFilter({ kind: "recent", value: RECENT_MONTHS });
       })
       .catch((e) => setError(e.message));
   }, []);
@@ -63,6 +77,10 @@ export default function App() {
           .toLowerCase()
           .includes(q)
       );
+    }
+    if (filter.kind === "recent") {
+      const set = new Set(recentMonthKeys(data.obituaries, filter.value));
+      return data.obituaries.filter((o) => set.has(monthKey(o.sourceDate)));
     }
     if (filter.kind === "month") {
       return data.obituaries.filter((o) => monthKey(o.sourceDate) === filter.value);
@@ -104,6 +122,7 @@ export default function App() {
               obituaries={data.obituaries}
               filter={filter}
               onFilter={onFilter}
+              recentMonths={RECENT_MONTHS}
             />
           )}
           <Register obituaries={displayed} query={query} />
