@@ -104,8 +104,9 @@ Environment (extractor):
 - `WEBSHARE_PROXY_URL` — e.g. `http://user:pass@proxy.webshare.io:80`.
 - `PUBLIC_BASE_URL` — where pages are served and indexed. **Required, no
   default**, because the canonical URL must point at the real location.
-  Currently `https://rowanflynnpilot.github.io/wpr-obituaries` until a custom
-  subdomain is in place.
+  `https://obituaries.wausaupilotandreview.com` (the brand subdomain; set as an
+  Actions variable). The old `rowanflynnpilot.github.io/wpr-obituaries` URLs
+  301-redirect here.
 
 Analytics are optional and config-driven (`analytics` block: `provider` +
 `domain`/`site`/`headHtml`). `extract/analytics.py` and `web/vite.config.js`
@@ -124,8 +125,9 @@ than hotlinking. Current sponsors: **Helke** and **Brainard** (co-owned). Swap
 them all there — no code change. Per-funeral-home attribution still appears as
 arrangement metadata on each record.
 
-`web/vite.config.js` `base` must match the serving path
-(`/wpr-obituaries/` for a Pages project site, `/` for a custom domain root).
+`web/vite.config.js` `base` must match the serving path — it is `/`, since the
+site serves from the custom-domain root (`obituaries.wausaupilotandreview.com`).
+A Pages project sub-path would instead need `/wpr-obituaries/`.
 
 Funeral-home scraping (`adapters.funeral_home_scrape`, `windowDays` in config)
 reads the homes' own sites directly. Per-home scrape config lives in
@@ -143,10 +145,12 @@ platforms' mechanics, and the cross-source dedupe/overlap note are in
   title/H1/URL + schema, so it should win on specificity; the WordPress-side
   playbook (sitemap, batch-post linking, when to trim batch posts) is in
   `docs/seo-batch-posts.md`.
-- **SEO domain**: pointing `obituaries.wausaupilotandreview.com` at Pages keeps
-  ranking equity on the brand domain. Recommended before heavy promotion — the
-  exact DNS + repo steps are prepped in `docs/custom-subdomain.md` (apply after
-  DNS resolves; don't merge the `base: "/"` change before then).
+- **SEO domain (done)**: the site serves from `obituaries.wausaupilotandreview.com`
+  (Cloudflare `CNAME obituaries → rowanflynnpilot.github.io`, DNS-only; Pages custom
+  domain + enforced HTTPS; `base: "/"`; `PUBLIC_BASE_URL` variable set to the
+  subdomain). Ranking equity now accrues to the brand domain and the old
+  `github.io/wpr-obituaries` URLs 301-redirect here. Runbook: `docs/custom-subdomain.md`.
+  Follow-up: re-submit the sitemap in Search Console under the new domain.
 - **Seeding the master**: the chosen migration is a one-time **6-month seed**,
   `python extract/main.py --days 180` (or workflow dispatch with `seed_days=180`)
   — ~73 posts, ~15-20 min, a few dollars. The full `--backfill` (every post since
