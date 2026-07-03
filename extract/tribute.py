@@ -180,12 +180,16 @@ def person_record(session, url: str) -> dict | None:
 
     Keys mirror the JSON-LD: name, birthDate/deathDate (human-readable strings),
     description (HTML-entity-encoded obituary), image. Adds url + obId.
+
+    The name is HTML-unescaped here: these sites embed entity-encoded values in
+    their JSON-LD (a nickname reads `Stanley &quot;Stan&quot; Szymanski`), so the
+    raw parse keeps the entity. body_text already unescapes the description.
     """
     person = _parse_person_ld(_get(session, url).text)
     if not person:
         return None
     return {
-        "name": (person.get("name") or "").strip(),
+        "name": html.unescape((person.get("name") or "").strip()),
         "birthDate": person.get("birthDate"),
         "deathDate": person.get("deathDate"),
         "description": person.get("description") or "",
