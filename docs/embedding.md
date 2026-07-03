@@ -53,7 +53,7 @@ unchanged when the tool moves to the custom subdomain.
 ```html
 <!-- Wausau Pilot & Review — Recent obituaries (mini) -->
 <iframe id="wpr-obits-mini"
-        src="https://rowanflynnpilot.github.io/wpr-obituaries/mini.html?link=OBITUARIES_PAGE_URL"
+        src="https://rowanflynnpilot.github.io/wpr-obituaries/mini.html?link=https%3A%2F%2Fwausaupilotandreview.com%2Fobituaries%2F"
         title="Recent obituaries"
         style="display:block;width:100%;max-width:380px;margin:0 auto;border:0;min-height:340px"
         loading="lazy"></iframe>
@@ -73,13 +73,12 @@ unchanged when the tool moves to the custom subdomain.
 </script>
 ```
 
-Replace **`OBITUARIES_PAGE_URL`** with the URL-encoded address of the WordPress
-page hosting the full tool once it exists — e.g. for
-`https://wausaupilotandreview.com/obituaries/` use
-`https%3A%2F%2Fwausaupilotandreview.com%2Fobituaries%2F`. That's where the
-widget's "View all obituaries →" link sends readers. Until the page exists, the
-`?link=` part can be left off entirely and the link falls back to the tool's own
-register.
+The `?link=` value is the URL-encoded address of the full-tool page —
+`https://wausaupilotandreview.com/obituaries/` encodes to
+`https%3A%2F%2Fwausaupilotandreview.com%2Fobituaries%2F` (already filled in
+above). That's where the widget's "View all obituaries →" link sends readers.
+To point it somewhere else, re-encode the new URL and swap it in; drop the
+`?link=…` entirely and the link falls back to the tool's own register.
 
 Details: shows 10 of the 20 most recent obituaries, shuffled per page load;
 auto-advances every 6 s (pauses on hover); each person links to their full

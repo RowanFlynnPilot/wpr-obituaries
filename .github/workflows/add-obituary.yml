@@ -1,0 +1,109 @@
+name: Add obituary
+
+# Staff-triggered manual obituary entry. Appends one hand-entered obituary to
+# data/manual.json, then renders and deploys — so an out-of-area notice an editor
+# is handed directly goes live in a couple of minutes without a scrape or any API
+# call (manual.json is merged at render, not sync). Triggered from the staff page
+# web/public/submit-obituary.html via the workflow-dispatch API, or the Actions tab.
+#
+# This is the quick, trusted editor hatch. The reviewed, universal submission path
+# is data/intake/ (see data/intake/README.md).
+
+on:
+  workflow_dispatch:
+    inputs:
+      record:
+        description: "JSON obituary record (from the staff submit form)."
+        type: string
+        required: true
+
+permissions:
+  contents: write   # commit the appended manual.json back
+  pages: write
+  id-token: write
+
+concurrency:
+  # Share the Pages group with the extract workflow so deploys serialise; queue
+  # rather than cancel, so a manual add is never lost to a concurrent build.
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      # Pass the record through an env var + stdin (never interpolated into the
+      # shell) so quotes and newlines in the obituary body can't break the command.
+      - name: Append obituary to manual.json
+        env:
+          RECORD: ${{ inputs.record }}
+        run: |
+          printf '%s' "$RECORD" | python scripts/add_obituary.py | tee out.txt
+          {
+            echo "## Add obituary"
+            echo '```'
+            cat out.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit the added obituary
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/manual.json
+          if git diff --cached --quiet; then
+            echo "No change (duplicate submission) — nothing to commit."
+          else
+            git commit -m "data: add manual obituary [skip ci]"
+            git push
+          fi
+
+      # Same OG share-card cache as the extract workflow, so render only composes
+      # the new record's card instead of regenerating every card on a clean checkout.
+      - name: Restore OG share-card cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            web/public/assets/og
+            .cache/og-cards.json
+          key: og-cards-${{ hashFiles('newsroom.config.json', 'data/obituaries_master.json') }}
+          restore-keys: |
+            og-cards-
+
+      - name: Render the site (no scrape — render only)
+        run: python extract/main.py --render-only
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build widget
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

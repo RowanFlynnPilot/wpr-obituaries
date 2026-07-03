@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>Add an obituary · staff</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Oswald:wght@500;600&display=swap" />
+  <style>
+    :root { --accent: #7c2e36; --paper: #f6f2ea; --ink: #23201c; --rule: #d8cfbf; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: var(--paper); color: var(--ink);
+      font-family: "Merriweather", Georgia, serif; line-height: 1.55;
+      display: flex; justify-content: center; padding: 3rem 1.25rem;
+    }
+    main { width: 100%; max-width: 40rem; }
+    .kicker {
+      font-family: "Oswald", "Arial Narrow", sans-serif; letter-spacing: .14em;
+      text-transform: uppercase; font-size: .72rem; color: var(--accent); margin: 0 0 .3rem;
+    }
+    h1 { font-family: "Oswald", sans-serif; font-weight: 600; font-size: 1.7rem; margin: 0 0 .4rem; }
+    p.lede { margin: 0 0 1.6rem; font-size: .95rem; color: #4a453d; }
+    h2 { font-family: "Oswald", sans-serif; font-weight: 500; font-size: .82rem; letter-spacing: .1em;
+         text-transform: uppercase; color: var(--accent); margin: 1.8rem 0 .2rem;
+         border-bottom: 1px solid var(--rule); padding-bottom: .35rem; }
+    label { display: block; font-family: "Oswald", sans-serif; font-size: .8rem; letter-spacing: .04em;
+            text-transform: uppercase; margin: .9rem 0 .3rem; color: #4a453d; }
+    label .opt { text-transform: none; letter-spacing: 0; color: #8a8377; font-size: .82em; }
+    input, textarea {
+      width: 100%; padding: .6rem .7rem; font-family: "Merriweather", serif; font-size: .95rem;
+      border: 1px solid var(--rule); border-radius: 3px; background: #fff; color: var(--ink);
+    }
+    textarea { min-height: 9rem; resize: vertical; line-height: 1.6; }
+    input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .hint { font-size: .78rem; color: #7a736a; margin: .25rem 0 0; }
+    .row { display: flex; gap: .8rem; flex-wrap: wrap; }
+    .row > div { flex: 1; min-width: 8rem; }
+    .remember { display: flex; align-items: center; gap: .4rem; margin-top: .5rem; font-size: .82rem;
+                text-transform: none; letter-spacing: 0; font-family: "Merriweather", serif; }
+    .remember input { width: auto; }
+    button {
+      margin-top: 1.8rem; width: 100%; padding: .75rem; border: none; border-radius: 3px;
+      background: var(--accent); color: #fff; font-family: "Oswald", sans-serif; font-size: .95rem;
+      letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
+    }
+    button:disabled { opacity: .55; cursor: default; }
+    #status { margin-top: 1.3rem; padding: .85rem 1rem; border-radius: 3px; font-size: .9rem; display: none; }
+    #status.show { display: block; }
+    #status.ok { background: #eaf1ea; border: 1px solid #b9d3b9; }
+    #status.err { background: #f6e7e7; border: 1px solid #dcb3b3; }
+    #status a { color: var(--accent); }
+    footer { margin-top: 2rem; font-size: .78rem; color: #8a8377; border-top: 1px solid var(--rule); padding-top: 1rem; }
+    code { font-family: "Courier New", monospace; font-size: .85em; background: #efe9dd; padding: .1em .3em; border-radius: 2px; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="kicker">Staff tool</p>
+    <h1>Add an obituary</h1>
+    <p class="lede">For a notice that doesn't come through the funeral-home feeds — an
+      out-of-area obituary you've been sent directly. It publishes to the live register
+      in a couple of minutes; no email, no code. Only the name and a date are required.</p>
+
+    <form id="form">
+      <h2>Access</h2>
+      <div class="row">
+        <div>
+          <label for="repo">GitHub repo</label>
+          <input id="repo" placeholder="owner/name" autocomplete="off" spellcheck="false" />
+        </div>
+        <div>
+          <label for="token">Access token</label>
+          <input id="token" type="password" placeholder="fine-grained PAT" autocomplete="off" />
+        </div>
+      </div>
+      <p class="hint">Your own GitHub fine-grained PAT with <strong>Actions: read and write</strong> on
+        this repo. It stays in your browser and is never committed. Same token as the Add-a-home page.</p>
+      <label class="remember"><input type="checkbox" id="remember" /> Remember repo &amp; token on this device</label>
+
+      <h2>The person</h2>
+      <label for="name">Full name</label>
+      <input id="name" placeholder="Jane Q. Public" autocomplete="off" />
+
+      <div class="row">
+        <div>
+          <label for="source_date">Date published <span class="opt">(orders the register)</span></label>
+          <input id="source_date" type="date" autocomplete="off" />
+        </div>
+        <div>
+          <label for="age">Age <span class="opt">(optional)</span></label>
+          <input id="age" inputmode="numeric" placeholder="e.g. 81" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="birth_date">Date of birth <span class="opt">(optional)</span></label>
+          <input id="birth_date" type="date" autocomplete="off" />
+        </div>
+        <div>
+          <label for="death_date">Date of death <span class="opt">(optional)</span></label>
+          <input id="death_date" type="date" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="town">Town <span class="opt">(optional)</span></label>
+          <input id="town" placeholder="Rhinelander" autocomplete="off" />
+        </div>
+        <div>
+          <label for="funeral_home">Funeral home <span class="opt">(optional)</span></label>
+          <input id="funeral_home" placeholder="Name of the home" autocomplete="off" />
+        </div>
+      </div>
+
+      <label for="photo_url">Photo URL <span class="opt">(optional)</span></label>
+      <input id="photo_url" placeholder="https://…/portrait.jpg" autocomplete="off" spellcheck="false" />
+      <p class="hint">A direct link to a portrait image. Leave blank for a name-only card.</p>
+
+      <h2>The obituary</h2>
+      <label for="body">Obituary text <span class="opt">(optional but recommended)</span></label>
+      <textarea id="body" placeholder="Paste the full obituary. Separate paragraphs with a blank line."></textarea>
+      <p class="hint">A one-line summary is composed automatically from the name, age, town, and date of
+        death. The text above becomes the body of the person's page.</p>
+
+      <button type="submit" id="submit">Publish obituary</button>
+    </form>
+
+    <div id="status"></div>
+
+    <footer>
+      This triggers the <code>add-obituary.yml</code> workflow, which appends the entry to
+      <code>data/manual.json</code>, then rebuilds and deploys the site. Watch progress on the Actions tab.
+      To take a published notice back down, remove its entry from <code>manual.json</code> (or add its slug
+      to <code>data/suppressed.json</code>).
+    </footer>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const KEYS = { repo: "wpr_admin_repo", token: "wpr_admin_token" };
+
+    // Share the remembered repo + token with the Add-a-home staff page.
+    for (const k of ["repo", "token"]) {
+      const v = localStorage.getItem(KEYS[k]);
+      if (v) { $(k).value = v; $("remember").checked = true; }
+    }
+    // Default the publish date to today.
+    $("source_date").value = new Date().toISOString().slice(0, 10);
+
+    function setStatus(kind, html) {
+      const el = $("status");
+      el.className = "show " + kind;
+      el.innerHTML = html;
+    }
+
+    $("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const repo = $("repo").value.trim().replace(/^https?:\/\/github\.com\//, "").replace(/\/$/, "");
+      const token = $("token").value.trim();
+      const name = $("name").value.trim();
+      const source_date = $("source_date").value.trim();
+
+      if (!repo || !token) { setStatus("err", "Repo and token are required."); return; }
+      if (!name) { setStatus("err", "The person's full name is required."); return; }
+      if (!source_date) { setStatus("err", "A publish date is required — it orders the register."); return; }
+
+      if ($("remember").checked) {
+        localStorage.setItem(KEYS.repo, repo);
+        localStorage.setItem(KEYS.token, token);
+      } else {
+        localStorage.removeItem(KEYS.repo);
+        localStorage.removeItem(KEYS.token);
+      }
+
+      // Only send fields the editor actually filled in — blanks stay null.
+      const record = { name, source_date };
+      for (const f of ["birth_date", "death_date", "age", "town", "funeral_home", "photo_url", "body"]) {
+        const v = $(f).value.trim();
+        if (v) record[f] = v;
+      }
+
+      $("submit").disabled = true;
+      setStatus("ok", "Publishing…");
+      try {
+        const res = await fetch(
+          `https://api.github.com/repos/${repo}/actions/workflows/add-obituary.yml/dispatches`,
+          {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Accept": "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+            },
+            body: JSON.stringify({ ref: "main", inputs: { record: JSON.stringify(record) } }),
+          }
+        );
+        if (res.status === 204) {
+          const actions = `https://github.com/${repo}/actions/workflows/add-obituary.yml`;
+          setStatus("ok",
+            `Publishing <strong>${name}</strong>. It appears on the register once the build finishes ` +
+            `(about two minutes). <a href="${actions}" target="_blank" rel="noopener">Watch it on GitHub →</a>`);
+          for (const f of ["name", "birth_date", "death_date", "age", "town", "funeral_home", "photo_url", "body"]) {
+            $(f).value = "";
+          }
+          $("source_date").value = new Date().toISOString().slice(0, 10);
+        } else {
+          const body = await res.text();
+          setStatus("err", `GitHub returned ${res.status}. ${res.status === 404
+            ? "Check the repo slug, that the token has Actions write access, and that add-obituary.yml is on the default branch."
+            : "Check the token's permissions."} <br><small>${body.slice(0, 300)}</small>`);
+        }
+      } catch (err) {
+        setStatus("err", `Request failed: ${err.message}`);
+      } finally {
+        $("submit").disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
