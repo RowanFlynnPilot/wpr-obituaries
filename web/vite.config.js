@@ -71,5 +71,6 @@ export default defineConfig({
       },
     },
   },
-  base: "/wpr-obituaries/",
+  // Custom subdomain serves at the domain root. See docs/custom-subdomain.md.
+  base: "/",
 });
