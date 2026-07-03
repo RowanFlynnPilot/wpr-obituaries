@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "name": "Zzztest Doe",
+    "source_date": "2026-07-02",
+    "death_year": 2026,
+    "birth_date": null,
+    "death_date": "2026-06-29",
+    "age": 90,
+    "funeral_home": "Verification FH",
+    "photo_url": null,
+    "summary": "Zzztest Doe, age 90, of Testville passed away on June 29, 2026.",
+    "body": "This is a end-to-end test entry and will be removed."
+  }
+]
