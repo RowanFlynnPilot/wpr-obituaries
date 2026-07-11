@@ -91,6 +91,7 @@ export default function BrowseBar({ obituaries, filter, onFilter, recentMonths =
           <label className="browse__select">
             <span className="browse__label">Town</span>
             <select
+              className={filter.kind === "town" ? "is-active" : ""}
               value={filter.kind === "town" ? filter.value : ""}
               onChange={onSelect("town")}
             >
@@ -107,6 +108,7 @@ export default function BrowseBar({ obituaries, filter, onFilter, recentMonths =
           <label className="browse__select">
             <span className="browse__label browse__label--inline">Funeral home</span>
             <select
+              className={filter.kind === "home" ? "is-active" : ""}
               value={filter.kind === "home" ? filter.value : ""}
               onChange={onSelect("home")}
             >

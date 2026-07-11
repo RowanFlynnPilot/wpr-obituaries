@@ -63,6 +63,8 @@ export default function MiniWidget() {
 
   useEffect(() => {
     if (paused || picks.length < 2) return undefined;
+    // Honour reduced-motion: no auto-advance (the dots still let you step through).
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
     timer.current = setInterval(
       () => setIndex((i) => (i + 1) % picks.length),
       ADVANCE_MS
@@ -71,10 +73,19 @@ export default function MiniWidget() {
   }, [paused, picks.length]);
 
   if (error) {
-    return <p className="mini__error">Obituaries are unavailable right now.</p>;
+    return (
+      <aside className="mini mini--message" aria-label={`Recent obituaries from ${identity.name}`}>
+        <p className="mini__kicker">In Memoriam · {identity.shortName}</p>
+        <p className="mini__error">Obituaries are unavailable right now.</p>
+      </aside>
+    );
   }
   if (!picks.length) {
-    return <div className="mini mini--loading" aria-hidden="true" />;
+    return (
+      <aside className="mini mini--loading" aria-busy="true" aria-label="Loading obituaries">
+        <p className="mini__kicker">In Memoriam · {identity.shortName}</p>
+      </aside>
+    );
   }
 
   const ob = picks[index];
@@ -87,6 +98,8 @@ export default function MiniWidget() {
       className="mini"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={() => setPaused(false)}
       aria-label={`Recent obituaries from ${identity.name}`}
     >
       <p className="mini__kicker">In Memoriam · {identity.shortName}</p>
@@ -111,13 +124,14 @@ export default function MiniWidget() {
         </span>
       </a>
 
-      <div className="mini__dots" role="tablist" aria-label="More obituaries">
+      <div className="mini__dots" role="group" aria-label="More obituaries">
         {picks.map((p, i) => (
           <button
             key={p.slug}
             type="button"
             className={`mini__dot${i === index ? " is-active" : ""}`}
             aria-label={p.name}
+            aria-current={i === index}
             onClick={() => setIndex(i)}
           />
         ))}

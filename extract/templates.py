@@ -66,11 +66,25 @@ def _root_vars_wide(newsroom: Newsroom) -> str:
     return f"""
     :root {{
       --ink: #1b1a18; --paper: {newsroom.paper}; --paper-2: #fffdf7; --muted: #6f6a61;
-      --faint: #9b958a; --rule: #d9d3c6; --hairline: #e7e1d5; --accent: {newsroom.accent};
+      --faint: #9b958a; --rule: #d9d3c6; --hairline: #e7e1d5; --hover: #efe9dd; --accent: {newsroom.accent};
       --serif: {newsroom.serif};
       --nameplate: {newsroom.nameplate};
       --mono: {newsroom.mono};
     }}"""
+
+
+def render_robots(base_url: str) -> str:
+    """A root robots.txt that welcomes crawlers and points at the sitemap.
+
+    Only useful now that the site serves from the domain root (a Pages project
+    sub-path can't serve /robots.txt). Emitted from base_url so a fork's domain
+    stays correct.
+    """
+    return (
+        "User-agent: *\n"
+        "Allow: /\n"
+        f"Sitemap: {base_url}/sitemap.xml\n"
+    )
 
 
 def render_sitemap(
@@ -228,13 +242,28 @@ def _structured_data(
     photo_url: str | None = None,
 ) -> str:
     image = photo_url or ob.photo_url
+    publisher = {
+        "@type": "NewsMediaOrganization",
+        "name": newsroom.name,
+        "url": newsroom.url,
+    }
+    if newsroom.logo_url:
+        publisher["logo"] = {"@type": "ImageObject", "url": newsroom.logo_url}
     data = {
         "@context": "https://schema.org",
         "@type": "Obituary",
         "headline": f"{ob.name} obituary",
         "url": page_url,
+        "mainEntityOfPage": page_url,
         "datePublished": ob.source_date,
-        "publisher": {"@type": "NewsMediaOrganization", "name": newsroom.name},
+        "inLanguage": "en-US",
+        # The coverage area, not a claimed residence — reinforces the local
+        # "<name> obituary <area>" query intent without inventing a place.
+        "contentLocation": {"@type": "Place", "name": newsroom.coverage_area},
+        "publisher": publisher,
+        # Top-level image (Google's most-cited missing Article field); the branded
+        # 1200×630 card is always generated, so there is always one to point at.
+        **({"image": image} if image else {}),
         "about": {
             "@type": "Person",
             "name": ob.name,
@@ -347,17 +376,20 @@ def _breadcrumb_json(ob: Obituary, page_url: str, base_url: str) -> str:
     return json.dumps(data, indent=2)
 
 
-def _image_meta(og_image: str | None, pic: str | None) -> str:
+def _image_meta(og_image: str | None, pic: str | None, name: str = "") -> str:
     """og:image (the branded card when available, else the portrait) + Twitter card."""
     image = og_image or pic
     if not image:
         return '<meta name="twitter:card" content="summary" />'
+    alt = html.escape(f"In memoriam: {name}" if name else "In memoriam")
     tags = [f'<meta property="og:image" content="{html.escape(image)}" />']
     if og_image:  # the composed card is a known 1200x630
         tags.append('<meta property="og:image:width" content="1200" />')
         tags.append('<meta property="og:image:height" content="630" />')
+    tags.append(f'<meta property="og:image:alt" content="{alt}" />')
     tags.append('<meta name="twitter:card" content="summary_large_image" />')
     tags.append(f'<meta name="twitter:image" content="{html.escape(image)}" />')
+    tags.append(f'<meta name="twitter:image:alt" content="{alt}" />')
     return "\n  ".join(tags)
 
 
@@ -382,8 +414,8 @@ def render_person_page(
     # Tap the portrait to enlarge (the markup is inert without the small script below).
     photo = (
         f'<img class="portrait" src="{html.escape(pic)}" '
-        f'alt="{html.escape(ob.name)}" tabindex="0" role="button" '
-        f'aria-label="Enlarge portrait" />'
+        f'alt="{html.escape(ob.name)}" decoding="async" '
+        f'tabindex="0" role="button" aria-label="Enlarge portrait" />'
         if pic
         else ""
     )
@@ -397,22 +429,31 @@ def render_person_page(
     sponsor_section = _sponsor_section(sponsor, base_url, newsroom.analytics)
     share_section = _share_section(ob.name, page_url)
     related_section = _related_section(related or [], base_url)
+    # A bare "Name." summary (a hand-entered obit with no summary) makes a thin
+    # SERP snippet and duplicates the title; fall back to the body's opening.
+    description = ob.summary
+    if description.rstrip(" .") == ob.name.rstrip(" ."):
+        description = ob.excerpt(180) or ob.summary
 
     return f"""<!doctype html>
-<html lang="en">
+<html lang="en-US">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{html.escape(ob.name)} Obituary — {html.escape(newsroom.name)}</title>
-  <meta name="description" content="{html.escape(ob.summary)}" />
+  <meta name="description" content="{html.escape(description)}" />
+  <meta name="robots" content="max-image-preview:large, max-snippet:-1" />
   <meta name="theme-color" content="{newsroom.paper}" />
   <link rel="canonical" href="{canonical}" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="{html.escape(newsroom.name)}" />
   <meta property="og:title" content="{html.escape(ob.name)} Obituary" />
-  <meta property="og:description" content="{html.escape(ob.summary)}" />
-  <meta property="og:url" content="{page_url}" />
-  {_image_meta(og_image, pic)}
+  <meta property="og:description" content="{html.escape(description)}" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="article:published_time" content="{ob.source_date}" />
+  <meta property="article:section" content="Obituaries" />
+  <meta property="og:url" content="{canonical}" />
+  {_image_meta(og_image, pic, ob.name)}
   <script type="application/ld+json">
 {_structured_data(ob, page_url, sponsor, base_url, newsroom, pic)}
   </script>
@@ -428,7 +469,7 @@ def render_person_page(
     :root {{
       --ink: #1b1a18; --paper: {newsroom.paper}; --paper-2: #fffdf7;
       --muted: #6f6a61; --faint: #9b958a; --rule: #d9d3c6;
-      --hairline: #e7e1d5; --accent: {newsroom.accent};
+      --hairline: #e7e1d5; --hover: #efe9dd; --accent: {newsroom.accent};
       --serif: {newsroom.serif};
       --nameplate: {newsroom.nameplate};
       --mono: {newsroom.mono};

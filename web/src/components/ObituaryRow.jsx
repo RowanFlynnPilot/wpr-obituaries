@@ -15,7 +15,7 @@ export default function ObituaryRow({ ob }) {
 
   return (
     <li className="entry">
-      <a className="entry__link" href={href}>
+      <a className="entry__link" href={href} target="_top">
         {ob.photoUrl ? (
           <img
             className="entry__photo"

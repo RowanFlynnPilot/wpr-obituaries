@@ -49,14 +49,19 @@ export default function App() {
         // showing more than a sparse just-started month.
         if (index.obituaries.length) setFilter({ kind: "recent", value: RECENT_MONTHS });
       })
-      .catch((e) => setError(e.message));
+      .catch((e) => {
+        console.error("Obituary index failed to load:", e);
+        setError(e.message);
+      });
   }, []);
 
   // Search and browse are independent narrowings; activating one clears the other.
   const onSearch = (v) => {
     setTouched(true);
     setQuery(v);
-    if (v) setFilter(NO_FILTER);
+    // A query supersedes the browse filter; clearing it returns to the default
+    // recent view instead of dumping the reader into the whole catalogue.
+    setFilter(v ? NO_FILTER : { kind: "recent", value: RECENT_MONTHS });
   };
   const onFilter = (f) => {
     setTouched(true);
@@ -100,8 +105,9 @@ export default function App() {
   if (error) {
     return (
       <main className="page">
-        <p className="page__error">
-          The obituary index could not be loaded. {error}
+        <Masthead sponsor={sponsor} />
+        <p className="page__error" role="alert">
+          Obituaries are unavailable right now. Please check back in a little while.
         </p>
       </main>
     );

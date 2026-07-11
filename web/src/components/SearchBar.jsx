@@ -13,7 +13,7 @@ export default function SearchBar({ value, onChange, count }) {
         onChange={(e) => onChange(e.target.value)}
         autoComplete="off"
       />
-      <p className="search__count">
+      <p className="search__count" role="status" aria-live="polite" aria-atomic="true">
         {count} {count === 1 ? "name" : "names"}
       </p>
     </div>

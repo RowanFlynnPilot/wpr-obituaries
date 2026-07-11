@@ -5,8 +5,9 @@ export default function Register({ obituaries, query }) {
   if (obituaries.length === 0) {
     return (
       <p className="register__empty">
-        No obituaries match “{query}”. Try a last name, or browse the full
-        list by clearing the search.
+        {query
+          ? `No obituaries match “${query}”. Try a last name, or clear the search to browse.`
+          : "No obituaries to show here yet."}
       </p>
     );
   }

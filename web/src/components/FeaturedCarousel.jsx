@@ -17,10 +17,12 @@ function withinDays(sourceDate, days) {
 
 export default function FeaturedCarousel({ obituaries }) {
   const featured = useMemo(() => {
-    // filter() returns a fresh array, so shuffling it in place is safe.
-    const pool = obituaries.filter(
-      (o) => o.photoUrl && withinDays(o.sourceDate, DAYS)
-    );
+    // filter()/slice() return fresh arrays, so shuffling in place is safe.
+    const photographed = obituaries.filter((o) => o.photoUrl);
+    const recent = photographed.filter((o) => withinDays(o.sourceDate, DAYS));
+    // Prefer the past week; but on a quiet stretch (nothing photographed in the
+    // window) fall back to the most recent portraits so the hero never vanishes.
+    const pool = recent.length ? recent : photographed.slice(0, MAX * 2);
     // Fisher–Yates shuffle, then take MAX — a unique selection each page load.
     for (let i = pool.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -76,11 +78,11 @@ export default function FeaturedCarousel({ obituaries }) {
           </button>
         )}
 
-        <a className="featured__card" href={href} key={ob.slug}>
+        <a className="featured__card" href={href} target="_top" key={ob.slug}>
           <img
             className="featured__photo"
             src={photoSrc(ob.photoUrl)}
-            alt={ob.name}
+            alt=""
             loading="lazy"
             width="132"
             height="168"
@@ -108,14 +110,14 @@ export default function FeaturedCarousel({ obituaries }) {
       </div>
 
       {featured.length > 1 && (
-        <div className="featured__dots" role="tablist">
+        <div className="featured__dots" role="group" aria-label="Choose a featured obituary">
           {featured.map((f, n) => (
             <button
               key={f.slug}
               type="button"
               className={`featured__dot${n === i ? " is-active" : ""}`}
               aria-label={`Show ${f.name}`}
-              aria-selected={n === i}
+              aria-current={n === i}
               onClick={() => go(n)}
             />
           ))}

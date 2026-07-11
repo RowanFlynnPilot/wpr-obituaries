@@ -9,7 +9,7 @@
   --paper: #f6f2ea;
   --paper-2: #fffdf7;
   --muted: #6f6a61;
-  --faint: #9b958a;
+  --faint: #78726a; /* darkened from #9b958a so labels clear the contrast floor */
   --rule: #d9d3c6;
   --hairline: #e7e1d5;
   --accent: #7c2e36;       /* oxblood — dignified, ties to the sponsor crimson */
@@ -165,6 +165,7 @@ body {
 .masthead__sponsor-logo img {
   height: 40px;
   width: auto;
+  max-width: 100%;
   display: block;
   transition: opacity 0.15s ease;
 }
@@ -307,25 +308,30 @@ body {
 
 .featured__dots {
   display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 8px;
-  margin-top: 14px;
+  gap: 2px;
+  margin-top: 10px;
 }
 
+/* 8px dot painted inside a 24px transparent hit area (WCAG 2.5.8 target size). */
 .featured__dot {
-  width: 7px;
-  height: 7px;
-  padding: 0;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  padding: 8px;
+  box-sizing: border-box;
+  background-clip: content-box;
   border: 0;
   border-radius: 50%;
-  background: var(--rule);
+  background-color: var(--rule);
   cursor: pointer;
   transition: background-color 0.15s ease, transform 0.15s ease;
 }
 
 .featured__dot.is-active {
-  background: var(--accent);
-  transform: scale(1.3);
+  background-color: var(--accent);
+  transform: scale(1.25);
 }
 
 @keyframes featured-fade {
@@ -537,6 +543,12 @@ body {
   border-color: var(--muted);
 }
 
+/* A chosen facet reads active, like the month/letter chips. */
+.browse__select select.is-active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .browse__select select:focus {
   outline: 2px solid var(--accent);
   outline-offset: -1px;
@@ -596,7 +608,22 @@ body {
 .entry__link:hover,
 .entry__link:focus-visible {
   background: var(--hover);
-  outline: none;
+}
+
+/* Visible keyboard focus on every interactive control (was outline:none). Rows
+   and the featured card clip, so they take an inset ring. */
+.entry__link:focus-visible,
+.featured__card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.featured__arrow:focus-visible,
+.featured__dot:focus-visible,
+.browse__chip:focus-visible,
+.browse__letter:focus-visible,
+.browse__select select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .entry__photo {
@@ -635,6 +662,7 @@ body {
   font-weight: 700;
   font-size: 1.32rem;
   line-height: 1.2;
+  overflow-wrap: anywhere;
   color: var(--ink);
 }
 
@@ -667,7 +695,7 @@ body {
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--muted); /* real content on every row — keep it above AA */
 }
 
 .register__empty {
