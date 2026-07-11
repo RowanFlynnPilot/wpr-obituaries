@@ -35,6 +35,7 @@ class Newsroom:
     coverage_area: str
     submissions_email: str
     logo_url: str
+    logo_path: str  # optional vendored logo (repo-relative); falls back to logo_url
     seal_path: str
     accent: str
     paper: str
@@ -80,6 +81,7 @@ def load_newsroom(path: Path = CONFIG_FILE) -> Newsroom:
         coverage_area=_require(identity, "coverageArea", "identity"),
         submissions_email=_require(identity, "submissionsEmail", "identity"),
         logo_url=_require(branding, "logoUrl", "branding"),
+        logo_path=(branding.get("logoPath") or "").strip(),
         seal_path=_require(branding, "sealPath", "branding"),
         accent=_require(branding, "accent", "branding"),
         paper=_require(branding, "paper", "branding"),

@@ -97,9 +97,13 @@ def render_sitemap(
     Speeds indexing and tells search engines these URLs are canonical. Driven by
     the full master, so every published page is always listed.
     """
+    # The hubs (home + archive) are as fresh as the newest obituary; a lastmod
+    # tells crawlers when to revisit.
+    newest = max((o.source_date for o in obituaries), default="")
+    stamp = f"<lastmod>{newest}</lastmod>" if newest else ""
     urls = [
-        f"  <url><loc>{html.escape(base_url)}/</loc></url>",
-        f"  <url><loc>{html.escape(base_url)}/archive.html</loc></url>",
+        f"  <url><loc>{html.escape(base_url)}/</loc>{stamp}</url>",
+        f"  <url><loc>{html.escape(base_url)}/archive.html</loc>{stamp}</url>",
     ]
     for ob in obituaries:
         loc = html.escape(f"{base_url}/o/{ob.slug}.html")
@@ -208,6 +212,7 @@ def render_home_page(
   <title>{name} Obituaries — {html.escape(newsroom.name)}</title>
   <meta name="description" content="{html.escape(description)}" />
   <meta name="theme-color" content="{newsroom.paper}" />
+  {_favicon(base_url, newsroom)}
   <link rel="canonical" href="{page_url}" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="{html.escape(newsroom.name)}" />
@@ -226,7 +231,7 @@ def render_home_page(
     <header class="masthead">
       <a class="masthead__logo" href="{newsroom.url}"
          target="_blank" rel="noopener">
-        <img src="{newsroom.logo_url}" alt="{html.escape(newsroom.name)}" />
+        <img src="{_logo_src(base_url, newsroom)}" alt="{html.escape(newsroom.name)}" />
       </a>
       <img class="masthead__seal" src="{base_url}/{newsroom.seal_path}" alt=""
            width="46" height="46" />
@@ -248,6 +253,24 @@ def render_home_page(
 </body>
 </html>
 """
+
+
+def _logo_src(base_url: str, newsroom: Newsroom) -> str:
+    """Masthead logo: the vendored local copy when configured, else the remote URL.
+
+    Vendoring keeps every static page off a third-party origin, so the masthead
+    can't break if the newsroom restructures its WordPress media library.
+    """
+    return f"{base_url}/{newsroom.logo_path}" if newsroom.logo_path else newsroom.logo_url
+
+
+def _favicon(base_url: str, newsroom: Newsroom) -> str:
+    """Tab icon + home-screen icon, using the vendored newsroom seal."""
+    seal = f"{base_url}/{html.escape(newsroom.seal_path)}"
+    return (
+        f'<link rel="icon" href="{seal}" />\n'
+        f'  <link rel="apple-touch-icon" href="{seal}" />'
+    )
 
 
 def _month_heading(date_str: str) -> str:
@@ -307,6 +330,7 @@ def render_archive(
   <meta name="description" content="{html.escape(description)}" />
   <meta name="robots" content="max-image-preview:large" />
   <meta name="theme-color" content="{newsroom.paper}" />
+  {_favicon(base_url, newsroom)}
   <link rel="canonical" href="{page_url}" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="{html.escape(newsroom.name)}" />
@@ -329,7 +353,7 @@ def render_archive(
     <header class="masthead">
       <a class="masthead__logo" href="{newsroom.url}"
          target="_blank" rel="noopener">
-        <img src="{newsroom.logo_url}" alt="{html.escape(newsroom.name)}" />
+        <img src="{_logo_src(base_url, newsroom)}" alt="{html.escape(newsroom.name)}" />
       </a>
       <img class="masthead__seal" src="{base_url}/{newsroom.seal_path}" alt=""
            width="46" height="46" />
@@ -359,8 +383,8 @@ def _structured_data(
         "name": newsroom.name,
         "url": newsroom.url,
     }
-    if newsroom.logo_url:
-        publisher["logo"] = {"@type": "ImageObject", "url": newsroom.logo_url}
+    if newsroom.logo_url or newsroom.logo_path:
+        publisher["logo"] = {"@type": "ImageObject", "url": _logo_src(base_url, newsroom)}
     data = {
         "@context": "https://schema.org",
         "@type": "Obituary",
@@ -444,13 +468,19 @@ def _sponsor_section(sponsor: dict, base_url: str, analytics: dict) -> str:
 
 
 def _share_section(name: str, page_url: str) -> str:
-    """Facebook / email / print — families share obituaries widely."""
+    """Facebook / copy-link / email / print — families share obituaries widely."""
     fb = f"https://www.facebook.com/sharer/sharer.php?u={quote(page_url, safe='')}"
     subject = quote(f"{name} Obituary")
     body = quote(f"{name} — obituary on Wausau Pilot & Review:\n{page_url}")
+    copy_onclick = (
+        "var b=this;navigator.clipboard&&navigator.clipboard.writeText(b.dataset.url)"
+        ".then(function(){b.textContent='Link copied';"
+        "setTimeout(function(){b.textContent='Copy link'},1500)});return false;"
+    )
     return f"""<div class="share">
       <span class="share__label">Share</span>
       <a class="share__btn" href="{fb}" target="_blank" rel="noopener">Facebook</a>
+      <button class="share__btn" type="button" data-url="{html.escape(page_url)}" onclick="{copy_onclick}">Copy link</button>
       <a class="share__btn" href="mailto:?subject={subject}&amp;body={body}">Email</a>
       <button class="share__btn" type="button" onclick="window.print();return false;">Save as PDF</button>
     </div>"""
@@ -556,6 +586,7 @@ def render_person_page(
   <meta name="description" content="{html.escape(description)}" />
   <meta name="robots" content="max-image-preview:large, max-snippet:-1" />
   <meta name="theme-color" content="{newsroom.paper}" />
+  {_favicon(base_url, newsroom)}
   <link rel="canonical" href="{canonical}" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="{html.escape(newsroom.name)}" />
@@ -731,7 +762,7 @@ def render_person_page(
     <header class="masthead">
       <a class="masthead__logo" href="{newsroom.url}"
          target="_blank" rel="noopener">
-        <img src="{newsroom.logo_url}" alt="{html.escape(newsroom.name)}" />
+        <img src="{_logo_src(base_url, newsroom)}" alt="{html.escape(newsroom.name)}" />
       </a>
       <img class="masthead__seal" src="{base_url}/{newsroom.seal_path}" alt=""
            width="46" height="46" />

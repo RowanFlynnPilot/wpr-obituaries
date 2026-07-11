@@ -14,7 +14,10 @@ export default function Masthead({ sponsor }) {
         target="_blank"
         rel="noopener"
       >
-        <img src={branding.logoUrl} alt={identity.name} />
+        <img
+          src={branding.logoPath ? `${BASE}${branding.logoPath}` : branding.logoUrl}
+          alt={identity.name}
+        />
       </a>
       <img
         className="masthead__seal"

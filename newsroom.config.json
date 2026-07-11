@@ -8,6 +8,7 @@
   },
   "branding": {
     "logoUrl": "https://wausaupilotandreview.com/wp-content/uploads/2024/04/WausauPilotandReviewLogo.png",
+    "logoPath": "assets/wpr-logo.png",
     "sealPath": "assets/wpr-seal.png",
     "accent": "#7c2e36",
     "paper": "#f6f2ea",

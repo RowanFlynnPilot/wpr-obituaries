@@ -125,7 +125,11 @@ def to_obituary(row: dict, home_name: str) -> Obituary | None:
         birth_date=row.get("date_of_birth"),
         death_date=dod,
         age=age,
-        funeral_home=row.get("branch") or home_name,
+        # Attribute to the configured home, not the Tukios `branch` — for some
+        # homes `branch` is a chapel LOCATION (Peterson/Kraemer's "Wausau East",
+        # "Athens") or a sub-brand ("Waid"), which breaks the funeral-home facet
+        # and shows a town where the home should be. The home name is canonical.
+        funeral_home=home_name,
         photo_url=_photo_url(row),
         summary=_summary(name, age, city, row.get("formatted_date_of_death")),
         body=_html_to_paragraphs(row.get("obituary_text", "")),

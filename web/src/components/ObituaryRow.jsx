@@ -34,8 +34,8 @@ export default function ObituaryRow({ ob }) {
           <span className="entry__name">{ob.name}</span>
           {span && <span className="entry__span">{span}</span>}
           {ob.summary && <span className="entry__summary">{ob.summary}</span>}
-          {ob.funeralHome && (
-            <span className="entry__home">{ob.funeralHome}</span>
+          {(ob.homeName || ob.funeralHome) && (
+            <span className="entry__home">{ob.homeName || ob.funeralHome}</span>
           )}
         </span>
       </a>
