@@ -15,6 +15,7 @@ from __future__ import annotations
 import html
 import json
 from datetime import datetime, timezone
+from itertools import groupby
 from urllib.parse import quote
 
 from analytics import event_script, head_snippet, sponsor_track_attrs
@@ -96,7 +97,10 @@ def render_sitemap(
     Speeds indexing and tells search engines these URLs are canonical. Driven by
     the full master, so every published page is always listed.
     """
-    urls = [f"  <url><loc>{html.escape(base_url)}/</loc></url>"]
+    urls = [
+        f"  <url><loc>{html.escape(base_url)}/</loc></url>",
+        f"  <url><loc>{html.escape(base_url)}/archive.html</loc></url>",
+    ]
     for ob in obituaries:
         loc = html.escape(f"{base_url}/o/{ob.slug}.html")
         urls.append(
@@ -144,6 +148,10 @@ _SECONDARY_CSS = """
       color: var(--ink); text-decoration: none; }
     .list a:hover { color: var(--accent); text-decoration: underline; }
     .list .meta { font-family: var(--mono); font-size: 12.5px; color: var(--muted); margin-left: 8px; }
+    .archive__group { margin: 0; }
+    .archive__month { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--muted); margin: 32px 0 2px; }
+    .archive__group:first-of-type .archive__month { margin-top: 4px; }
     .sponsor-card { text-align: center; background: var(--paper-2); border: 1px solid var(--rule);
       border-top: 3px solid var(--accent); border-radius: 2px; padding: 26px 24px 28px; margin: 44px 0 0; }
     .sponsor-card__label { margin: 0 0 16px; font-family: var(--mono); font-size: 11px;
@@ -156,6 +164,10 @@ _SECONDARY_CSS = """
     .back { display: inline-block; margin-top: 34px; font-family: var(--mono); font-size: 12.5px;
       color: var(--accent); text-decoration: none; }
     .back:hover { text-decoration: underline; }
+    .index-link { margin: 32px 0 0; font-family: var(--mono); font-size: 13px; }
+    .index-link a { color: var(--accent); text-decoration: none; }
+    .index-link a:hover { text-decoration: underline; }
+    .index-link + .back { margin-top: 10px; }
     @media print {
       body { background: #fff; color: #000; }
       .wrap { max-width: 100%; padding: 0; }
@@ -229,7 +241,107 @@ def render_home_page(
       {links}
     </ul>
     {_sponsor_section(sponsor, base_url, newsroom.analytics)}
+    <p class="index-link"><a href="{base_url}/archive.html">Browse the full obituary index &rarr;</a></p>
     <a class="back" href="{base_url}/">&larr; All obituaries</a>
+  </main>
+  {event_script(newsroom.analytics)}
+</body>
+</html>
+"""
+
+
+def _month_heading(date_str: str) -> str:
+    """'2026-07-02' -> 'July 2026' for the archive's month sections."""
+    return datetime.strptime(date_str[:10], "%Y-%m-%d").strftime("%B %Y")
+
+
+def render_archive(
+    obituaries: list[Obituary], base_url: str, newsroom: Newsroom, sponsor: dict
+) -> str:
+    """A single crawlable index of every published obituary, grouped by month.
+
+    The per-person pages and the JS register only surface recent names; this hub
+    gives every name in the catalogue a permanent inbound link (from here, from
+    each person page's footer, and from the sitemap), so the back catalogue stays
+    crawlable and rankable instead of aging into sitemap-only orphans.
+    """
+    page_url = f"{base_url}/archive.html"
+    ordered = sorted(obituaries, key=lambda o: o.source_date, reverse=True)
+    sections = []
+    for heading, group in groupby(ordered, key=lambda o: _month_heading(o.source_date)):
+        items = []
+        for r in group:
+            span = _lifespan(r)
+            meta = f' <span class="meta">{span}</span>' if span else ""
+            items.append(
+                f'<li><a href="{base_url}/o/{r.slug}.html">{html.escape(r.name)}</a>{meta}</li>'
+            )
+        links = "\n        ".join(items)
+        sections.append(
+            f'<section class="archive__group">\n'
+            f'      <h2 class="archive__month">{heading}</h2>\n'
+            f'      <ul class="list">\n        {links}\n      </ul>\n    </section>'
+        )
+    body = "\n    ".join(sections)
+    description = (
+        f"Browse every obituary published on {newsroom.name} for "
+        f"{newsroom.coverage_area}, organized by month."
+    )
+    collection = json.dumps(
+        {
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": f"All Obituaries — {newsroom.name}",
+            "url": page_url,
+            "inLanguage": "en-US",
+            "isPartOf": {"@type": "WebSite", "name": newsroom.name, "url": newsroom.url},
+        },
+        indent=2,
+    )
+    return f"""<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>All Obituaries — {html.escape(newsroom.name)}</title>
+  <meta name="description" content="{html.escape(description)}" />
+  <meta name="robots" content="max-image-preview:large" />
+  <meta name="theme-color" content="{newsroom.paper}" />
+  <link rel="canonical" href="{page_url}" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="{html.escape(newsroom.name)}" />
+  <meta property="og:title" content="All Obituaries — {html.escape(newsroom.name)}" />
+  <meta property="og:description" content="{html.escape(description)}" />
+  <meta property="og:url" content="{page_url}" />
+  <script type="application/ld+json">
+{collection}
+  </script>
+  <link rel="alternate" type="application/rss+xml" title="{html.escape(newsroom.short_name)} Obituaries" href="{base_url}/feed.xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="{newsroom.fonts_url}" rel="stylesheet" />
+  {head_snippet(newsroom.analytics)}
+  <style>{_root_vars_wide(newsroom)}{_SECONDARY_CSS}</style>
+</head>
+<body>
+  <main class="wrap">
+    <a class="topnav" href="{base_url}/">&larr; Search obituaries</a>
+    <header class="masthead">
+      <a class="masthead__logo" href="{newsroom.url}"
+         target="_blank" rel="noopener">
+        <img src="{newsroom.logo_url}" alt="{html.escape(newsroom.name)}" />
+      </a>
+      <img class="masthead__seal" src="{base_url}/{newsroom.seal_path}" alt=""
+           width="46" height="46" />
+      <p class="kicker">Obituary Index</p>
+      <hr class="masthead__rule" />
+    </header>
+    <h1>All Obituaries</h1>
+    <p class="count">{len(obituaries)} obituaries published for {html.escape(newsroom.coverage_area)}</p>
+    <div class="rule"></div>
+    {body}
+    {_sponsor_section(sponsor, base_url, newsroom.analytics)}
+    <a class="back" href="{base_url}/">&larr; Search obituaries</a>
   </main>
   {event_script(newsroom.analytics)}
 </body>
@@ -580,6 +692,10 @@ def render_person_page(
       text-decoration: none;
     }}
     .back:hover {{ text-decoration: underline; }}
+    .index-link {{ margin: 30px 0 0; font-family: var(--mono); font-size: 13px; }}
+    .index-link a {{ color: var(--accent); text-decoration: none; }}
+    .index-link a:hover {{ text-decoration: underline; }}
+    .index-link + .back {{ margin-top: 10px; }}
     @media (max-width: 480px) {{
       .wrap {{ padding: 32px 18px 64px; }}
       .portrait {{ float: none; width: 100%; max-width: 100%; margin: 0 0 18px; }}
@@ -605,7 +721,7 @@ def render_person_page(
       .arrangements {{ text-align: center; }}
       .arrangements a {{ color: #000; text-decoration: none; }}
       /* Drop the interactive chrome — keep the name, dates, portrait, and text. */
-      .topnav, .share, .sponsor-card, .more, .back, .lightbox {{ display: none !important; }}
+      .topnav, .share, .sponsor-card, .more, .back, .index-link, .lightbox {{ display: none !important; }}
     }}
   </style>
 </head>
@@ -633,6 +749,7 @@ def render_person_page(
     {share_section}
     {sponsor_section}
     {related_section}
+    <p class="index-link"><a href="{base_url}/archive.html">Browse the full obituary index &rarr;</a></p>
     <a class="back" href="{base_url}/">&larr; All obituaries</a>
   </main>
   <div class="lightbox" id="lightbox" hidden><img class="lightbox__img" alt="" /></div>

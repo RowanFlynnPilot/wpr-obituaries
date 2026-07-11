@@ -461,11 +461,27 @@ def test_sitemap_and_feed():
     recs = [mk("A A", 1, "2026-06-10"), mk("B B", 2, "2026-06-09")]
     sm = templates.render_sitemap(recs, "http://b", ["helke"])
     xml.dom.minidom.parseString(sm)
-    assert sm.count("<loc>") == 4 and "/funeral-home/helke.html" in sm  # index + 2 + 1 home
+    # index + archive + 2 obits + 1 home
+    assert sm.count("<loc>") == 5
+    assert "/archive.html" in sm and "/funeral-home/helke.html" in sm
     feed = templates.render_feed(recs, "http://b", NEWSROOM)
     xml.dom.minidom.parseString(feed)
     assert feed.count("<item>") == 2 and "<pubDate>" in feed
     print("ok: sitemap + feed (well-formed, correct counts)")
+
+
+def test_archive():
+    # Two months so the month grouping produces two sections; every record links.
+    recs = [
+        mk("A A", 1, "2026-06-10"),
+        mk("B B", 2, "2026-06-09"),
+        mk("C C", 3, "2026-05-20"),
+    ]
+    html_out = templates.render_archive(recs, "http://b", NEWSROOM, {"sponsors": []})
+    assert "June 2026" in html_out and "May 2026" in html_out
+    assert html_out.count('/o/') == 3  # a link for every person
+    assert 'rel="canonical" href="http://b/archive.html"' in html_out
+    print("ok: archive (month sections, links every record, canonical)")
 
 
 def test_sanity_warnings():

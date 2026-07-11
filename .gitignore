@@ -15,6 +15,7 @@ web/public/data/obituaries.json
 web/public/sitemap.xml
 web/public/feed.xml
 web/public/robots.txt
+web/public/archive.html
 web/public/o/*.html
 !web/public/o/.gitkeep
 web/public/funeral-home/

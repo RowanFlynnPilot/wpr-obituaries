@@ -37,6 +37,7 @@ from og import render_card
 from photos import vendor_photos, vendored_slugs
 from store import Master, load_manual, load_master, load_suppressed, save_master
 from templates import (
+    render_archive,
     render_feed,
     render_home_page,
     render_person_page,
@@ -58,6 +59,7 @@ OG_CARD_VERSION = "1"  # bump when og.render_card's output changes, to force reg
 SITEMAP_FILE = ROOT / "web" / "public" / "sitemap.xml"
 FEED_FILE = ROOT / "web" / "public" / "feed.xml"
 ROBOTS_FILE = ROOT / "web" / "public" / "robots.txt"
+ARCHIVE_FILE = ROOT / "web" / "public" / "archive.html"
 SPONSOR_FILE = DATA_DIR / "sponsor.json"
 INDEX_FILE = DATA_DIR / "obituaries.json"
 MASTER_FILE = ROOT / "data" / "obituaries_master.json"
@@ -392,6 +394,9 @@ def render(master: Master, sponsor: dict, base_url: str, newsroom, allow_empty: 
     _write_index(canonical, vendored, homes)
     _write_pages(records, sponsor, base_url, vendored, homes, primary_by_slug, newsroom)
     home_slugs = _write_home_pages(canonical, sponsor, base_url, homes, newsroom)
+    ARCHIVE_FILE.write_text(
+        render_archive(canonical, base_url, newsroom, sponsor), encoding="utf-8"
+    )
     SITEMAP_FILE.write_text(
         render_sitemap(canonical, base_url, home_slugs), encoding="utf-8"
     )

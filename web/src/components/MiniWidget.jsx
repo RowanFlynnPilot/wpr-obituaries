@@ -92,6 +92,7 @@ export default function MiniWidget() {
   const span = lifespan(ob);
   const sponsors = sponsor?.sponsors || [];
   const allUrl = registerUrl();
+  const go = (delta) => setIndex((i) => (i + delta + picks.length) % picks.length);
 
   return (
     <aside
@@ -124,18 +125,38 @@ export default function MiniWidget() {
         </span>
       </a>
 
-      <div className="mini__dots" role="group" aria-label="More obituaries">
-        {picks.map((p, i) => (
+      {picks.length > 1 && (
+        <div className="mini__nav">
           <button
-            key={p.slug}
+            className="mini__arrow"
             type="button"
-            className={`mini__dot${i === index ? " is-active" : ""}`}
-            aria-label={p.name}
-            aria-current={i === index}
-            onClick={() => setIndex(i)}
-          />
-        ))}
-      </div>
+            aria-label="Previous obituary"
+            onClick={() => go(-1)}
+          >
+            ‹
+          </button>
+          <div className="mini__dots" role="group" aria-label="More obituaries">
+            {picks.map((p, i) => (
+              <button
+                key={p.slug}
+                type="button"
+                className={`mini__dot${i === index ? " is-active" : ""}`}
+                aria-label={p.name}
+                aria-current={i === index}
+                onClick={() => setIndex(i)}
+              />
+            ))}
+          </div>
+          <button
+            className="mini__arrow"
+            type="button"
+            aria-label="Next obituary"
+            onClick={() => go(1)}
+          >
+            ›
+          </button>
+        </div>
+      )}
 
       <a className="mini__all" href={allUrl} target="_top">
         View all obituaries →

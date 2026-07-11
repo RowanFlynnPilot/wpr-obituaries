@@ -38,6 +38,11 @@ export default function Footer({ sponsor }) {
       )}
 
       <hr className="footer__rule" />
+      <p className="footer__index">
+        <a href={`${BASE}archive.html`} target="_top">
+          Browse the full obituary index →
+        </a>
+      </p>
       <p className="footer__fineprint">
         {identity.name} — {copy.footerTagline}
       </p>

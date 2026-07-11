@@ -104,12 +104,47 @@ body {
   overflow: hidden;
 }
 
+.mini__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.mini__arrow {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  background: var(--paper-2);
+  color: var(--accent);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.mini__arrow:hover {
+  background: var(--hover);
+  border-color: var(--accent);
+}
+
+.mini__arrow:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .mini__dots {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 1px;
-  margin-top: 8px;
 }
 
 /* 6px dot inside a 22px transparent hit area so it's tappable. */
