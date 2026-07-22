@@ -76,6 +76,12 @@
     "funeral_home_scrape:49026657": "2026-07-16",
     "funeral_home_scrape:49029277": "2026-07-17",
     "funeral_home_scrape:49039442": "2026-07-19",
+    "funeral_home_scrape:49042138": "2026-07-20",
+    "funeral_home_scrape:49045042": "2026-07-20",
+    "funeral_home_scrape:49045533": "2026-07-20",
+    "funeral_home_scrape:49045601": "2026-06-23",
+    "funeral_home_scrape:49048372": "2026-07-21",
+    "funeral_home_scrape:49053460": "2026-07-21",
     "funeral_home_scrape:194842645655": "b6906b7e360e",
     "funeral_home_scrape:1166772303551": "1354b81bae6b",
     "funeral_home_scrape:1517070287541": "524e01e12e67",
@@ -99,6 +105,7 @@
     "funeral_home_scrape:35789218580950": "388a6449823c",
     "funeral_home_scrape:37723580880888": "f36b5c1edd27",
     "funeral_home_scrape:39211101747124": "47b8e03b1a5b",
+    "funeral_home_scrape:40525375264610": "a97f1cdeadf5",
     "funeral_home_scrape:41086725308440": "2f5fddf77ff4",
     "funeral_home_scrape:45361595697133": "8f656693e294",
     "funeral_home_scrape:47826100330115": "f39454d297df",
@@ -126,8 +133,9 @@
     "funeral_home_scrape:66751308211152": "8afdb85f5851",
     "funeral_home_scrape:66835211418237": "31876c704055",
     "funeral_home_scrape:67940044676908": "ae27f93f0100",
-    "funeral_home_scrape:68681840825505": "d356692d88bc",
+    "funeral_home_scrape:68681840825505": "8a401670cd18",
     "funeral_home_scrape:69132690797848": "87ba8a0837a6",
+    "funeral_home_scrape:69369153760458": "1fd2dbae5887",
     "funeral_home_scrape:71548839287023": "ed85faff4c90",
     "funeral_home_scrape:71628710201083": "8205325a6a6c",
     "funeral_home_scrape:74529507558258": "5b4a6ad2d974",
@@ -146,7 +154,7 @@
     "funeral_home_scrape:92286793836041": "002e034c5ea4",
     "funeral_home_scrape:94432514215427": "e1f99a37767b",
     "funeral_home_scrape:95146446792733": "6c2ff49a617c",
-    "funeral_home_scrape:96826551573369": "3f07b7615125",
+    "funeral_home_scrape:96826551573369": "14d3a4ae54ee",
     "funeral_home_scrape:98579117393358": "d70ef67df874",
     "funeral_home_scrape:101179998556057": "4dba9ac8aab3",
     "funeral_home_scrape:101837499540986": "9e50d04a4919",
@@ -166,8 +174,10 @@
     "funeral_home_scrape:116782595373158": "9dfe6fb65be1",
     "funeral_home_scrape:116790263081799": "98446e189c34",
     "funeral_home_scrape:117816721736235": "e53b0f68f3ce",
+    "funeral_home_scrape:119198991147264": "0a3e7508e04f",
     "funeral_home_scrape:119412819896354": "bdc912e0a86c",
     "funeral_home_scrape:120999614142742": "7dd5f0e5d307",
+    "funeral_home_scrape:122777797961161": "6160c7a69725",
     "funeral_home_scrape:123021751698761": "8fd909c65c9c",
     "funeral_home_scrape:124360622688713": "eed7a713451d",
     "funeral_home_scrape:125204139411913": "f66c4cc3ab11",
@@ -190,6 +200,7 @@
     "funeral_home_scrape:148132861325324": "0fcab556cefd",
     "funeral_home_scrape:148289238500674": "9d49d4ba2c90",
     "funeral_home_scrape:150784727540544": "f352ebe1a25f",
+    "funeral_home_scrape:151651976498558": "d1d50bc980b2",
     "funeral_home_scrape:153053320430046": "955e004b2bcd",
     "funeral_home_scrape:153691832565342": "d114010d9be1",
     "funeral_home_scrape:157911464439135": "64c4fb26fcdd",
@@ -247,6 +258,7 @@
     "funeral_home_scrape:218484194909808": "5ba82af4d21c",
     "funeral_home_scrape:218622148373635": "fd4fe64a75a5",
     "funeral_home_scrape:218863502117546": "45467bb5e307",
+    "funeral_home_scrape:222459603670434": "f25efcd70095",
     "funeral_home_scrape:224001200986605": "4d4507c142d6",
     "funeral_home_scrape:224423997513500": "2b77c496a55b",
     "funeral_home_scrape:224912966151345": "4ee7baf6f19c",
@@ -364,7 +376,8 @@
     "wordpress_scrape:298820": "2026-07-10T14:03:58",
     "wordpress_scrape:299086": "2026-07-13T19:50:43",
     "wordpress_scrape:299317": "2026-07-15T20:02:28",
-    "wordpress_scrape:299572": "2026-07-17T20:12:45"
+    "wordpress_scrape:299572": "2026-07-17T20:12:45",
+    "wordpress_scrape:299775": "2026-07-20T15:02:31"
   },
   "records": [
     {
@@ -10840,6 +10853,20 @@
       "body": "Patricia Krake, 88 of Weston, WI passed away on June 23,2026 after a lengthy battle with dementia. She was born on March 13th, 1938, to the late Walter and Clara Kempf.\n\nPatricia graduated from Wausau High School. She married David Krake on May 19th, 1963. Patricia spent most of her adult life as a homemaker, helping to raise the couple's three children. Patricia enjoyed cooking, canning and reading, but her absolute favorite thing to do was to go up to the family cottage near Lake Tomahawk, WI and go fishing.\n\nSurvivors include her husband David (Weston, WI), daughter Kelly (Coupland, TX), son Keith (Weston, WI), granddaughters Trista (Dallas, TX) and Kiera (Austin, TX), sisters Ellen Rustad (Rhinelander, WI), Bonnie Fisher ( Kronenwetter , WI), Sandy Marquardt (Wausau, WI) and Cathy Szekeress (Schofield, WI).\n\nPatricia is preceded in death by her parents, Walter and Clara Kempf, son, Kevin Krake, brothers, Marvin Kempf and Donald Kempf, sisters, Carol Hess, Mary Ruplinger and Linda Kempf.\n\nFuneral services will be 11:00 am Monday July 6th at St. Agnes Parish in Weston, WI. Visitation will be from 10:00 am until the time of service. Burial will follow at the parish cemetery.\n\nThe family would like to thank the staff at Mount View Care Center in Wausau, WI for the compassion and caring of Patricia in her final years."
     },
     {
+      "name": "Sarah Pagel",
+      "source_id": 49045601,
+      "source_url": "https://www.midwisconsincremationsociety.com/obituaries/Sarah-Pagel?obId=49045601",
+      "source_date": "2026-06-23",
+      "death_year": 2026,
+      "birth_date": "1974-08-31",
+      "death_date": "2026-06-23",
+      "age": 51,
+      "funeral_home": "Mid-Wisconsin Cremation Society",
+      "photo_url": "https://d1q40j6jx1d8h6.cloudfront.net/Obituaries/49045601/Thumbnail.jpg",
+      "summary": "Sarah Pagel, age 51 passed away on June 23, 2026.",
+      "body": "Sarah (Warnke) Pagel, age 51 passed away on Tuesday June 23rd, 2026.\n\nSarah was born in Wausau, WI on August 31st, 1974, to Robert and Christine Warnke. She graduated from Wausau East High School and upon graduation she went on to get married to the love of her life. The couple got married in Las Vegas and a few years later started their family. They loved traveling and adventuring together always doing something spontaneous. In 2022, she became a grandma, which was her absolute pride and joy. Her free time was always spent with family or reading a good book.\n\nSarah is survived by her husband Chad Pagel, daughters Mackenzie and Madison (Kyle Thurs) Pagel, granddaughters Layla, Lucy, soon to be Lainey, niece Sienna Warnke, nephew Connor Warnke, and many aunts, uncles, and cousins.\n\nSarah is proceeded in death by her parents Robert Warnke, Christine Lake, and her brother James Warnke.\n\nThere will be no service, but a family get together at a later date.\n\nMid Wisconsin Cremation Society is assisting the family. Words of remembrance and online condolences may be left at MWCS.WS"
+    },
+    {
       "name": "Barbara L. Ortman",
       "source_id": 56794908940388,
       "source_url": "https://www.petersonkraemer.com/obituaries/barbara-ortman",
@@ -12926,6 +12953,20 @@
       "body": "Ronald Arthur Jaeger, age 86, of Merrill, passed away on July 11, 2026, at Aspirus Wausau Hospital in Wausau.\n\nHe was born on January 14, 1940, in Pine River, son of Wilbert and Bernice (Billerbeck) Jaeger. He married Rosalie Baumann on November 21, 1987, at Grace Baptist Church in Irma, WI – she preceded him in death in 2025.\n\nRonald worked as a Granite Polisher for Anderson Brothers and Johnson and later for SEMCO prior to his retirement. He enjoyed gardening, fishing, Sheepshead and other card games, sports, spending time with his family and friends and listening to old country music. He will be missed by all who knew and loved him.\n\nRonald is survived by his children, Kevin (Tara) Jaeger, Bruce Jaeger, Kraig (RaDell) Jaeger, James Jaeger, Jamie (Daniel) Lemke, Paul Jaeger (Holly), Peggy (Joan) Jaeger, Joshua (Christina) Jaeger, Dawn (Allan) Lemke, Joseph Gleason, Jerry (Jesse) Duginski, Linda Goodman (Greg Baierl), Jason (Shannon) Duginski; siblings, Arthur (Joreen) Jaeger, Phillip Jaeger, Glen (Jackie) Jaeger; many grand and great-grandchildren, as well as several nieces, nephews and other extended relatives.\n\nHe is preceded in death by, his parents, Wilbert and Bernice; his first wife, DeJon LaMountain; his second wife, Mary Ann Jaeger; his third wife, Rosalie; son, Brian; brothers, Richard and William; sister-in-law, Connie Jaeger; stepson, Leon Duginski; grandchildren, Robert Goodman and Brandon Duginski.\n\nThe funeral service for Ronald will be held on Friday, July 17, 2026, at 11:00 a.m. at Taylor-Stine-Waid Funeral Home at 301 Eagle Drive, Merrill. Pastor Andy Perry will officiate. Visitation will be held from 10:00 a.m. until the time of the service, also at the funeral home. Burial at Merrill Memorial Park Cemetery will immediately follow the service.\n\nTaylor-Stine-Waid Funeral & Cremation Services of Merrill is assisting the family with arrangements. Online condolences are encouraged and may be made at www.taylorstinewaid.com ."
     },
     {
+      "name": "Anne Lee Phillips Maurer",
+      "source_id": 49048372,
+      "source_url": "https://www.schmidtschulta.com/obituaries/Anne-Lee-Phillips-Maurer?obId=49048372",
+      "source_date": "2026-07-12",
+      "death_year": 2026,
+      "birth_date": "1936-06-30",
+      "death_date": "2026-07-12",
+      "age": 90,
+      "funeral_home": "Schmidt & Schulta Funeral Home",
+      "photo_url": "https://d1q40j6jx1d8h6.cloudfront.net/Obituaries/49048372/Thumbnail.png",
+      "summary": "Anne Lee Phillips Maurer, age 90, of Oshkosh passed away on July 12, 2026.",
+      "body": "Anne Lee Phillips Maurer, 90 of Oshkosh, passed away with her husband of 71 years, Phil, by her side, on Sunday, July 12, 2026, at Eden Vista Assisted Living in Oshkosh, under the care of Preceptor Hospice.\n\nAnne was born on June 30, 1936, in Kansas City, Missouri. Her parents, Marjorie and Paul Phillips, adopted her and her brother 6 weeks later. She grew up in Middleton, Wisconsin. After she graduated from High School, Anne went to college at UW-Beloit where she met her husband of 71 years, Philip Laird Maurer. They were married in 1955.\n\nThey moved to the family farm in Wittenberg, Wisconsin where they had 4 children; Marjorie, Paul, John, and Julie. Anne stayed home to raise the children while Phil went to school and worked to support the family. It was the custom in those days to have traditional roles. In the 1970s, when gender roles began to change, Anne went to school and became a Legal Secretary. She worked for many years as a secretary and then a paralegal. She loved her job but her children were still number one in her life.\n\nDuring their high school years Anne would accompany her children and their friends on the piano for the Wisconsin Solo Ensemble Festival.  She attended as many concerts, plays, and sporting events as she could. She made sure they knew how to cook and clean. She made sure to spend leisure time with them as well. There were many a summer she would take them to a museum or historical site near wherever they were camping. She did love history and maps!\n\nTime moved along and both Phil and Anne retired from their jobs. Anne retired as a paralegal. They decided to sell the house and hit the road for a few years. They became seasonal workers at Disneyland in Florida and wintered there for 18 years. During the summer they lived in Wisconsin at a home they had built on their property near Wittenberg, Wisconsin. They then fell into a comfortable routine of summer trips out West and Winters in Florida working at Disney part time to reap the rewards of the park.\n\nAs time marched on Anne filled her days with reading books, working on Cross stitch, short walks, and watching now classic tv shows which included Gunsmoke and Perry Mason and classic movies and of course, the Packers and Brewers games. She loved all her children and was blessed with 9 grandchildren and 9 more great grandchildren. She always said the best way to enjoy them was one at a time baking something in the kitchen. It was always a joy for someone to visit. She was always interested in what they were up to and would inquire whenever she saw them. She had a deep and abiding love for Phil. They celebrated 71 years together in September. Through it all she always had a cat to keep her company.\n\nAnne is preceded in death by her brother, Thomas Malcom Phillips; his wife, Darlene; her daughter-in-law, Sandra Hofmiester-Maurer, and two nephews, Alfred Maurer and Siegfried Maurer.  She is survived by her husband, Philip; her four children, Marjorie (Larry) Carpenter, Paul (Judi) Maurer, John Maurer, and Julie Maurer (Darryl Henderson); her grandchildren, Michael, Edgar, Hannah, Stefan, Sarah, Calista, Dorothy, Adam, and Jennifer; her great grandchildren, and her nieces and nephews.\n\nA Memorial Service will be held at 11 AM on Saturday, August 8, 2026, at Schmidt & Schulta Funeral Home, Wittenberg. Pastor Mike Siehr will preside. Visitation will be on Saturday, from 10:30 AM until the time of the service at the funeral home.\n\nIn lieu of flowers, please donate to a charity of your choice or your local hospice.\n\nMemories and messages of support may be shared at schmidtschulta.com."
+    },
+    {
       "name": "Marjorie Mae Zdun",
       "source_id": 1166772303551,
       "source_url": "https://www.rembsfh.com/obituaries/marjorie-mae-zdun",
@@ -12965,7 +13006,7 @@
       "funeral_home": "Peterson/Kraemer Funeral Homes & Crematory",
       "photo_url": "https://cdn.tukioswebsites.com/4881bd5d-ab85-451f-8c9f-3b54c66e3e8a/lg",
       "summary": "Virginia M. Zastrow, age 99, of Wausau passed away on Jul 12, 2026.",
-      "body": "Virginia M. Zastrow, 99, town of Wausau, passed away on Sunday, July 12, 2026 while under the care of St. Croix Hospice at Careview Transitional Care of Weston.\n\nShe was born December 21, 1926, in Wausau, daughter of the late August and Marie (Behnke) Tietz. On May 22, 1943 she married Fred Zastrow in Wausau. He preceded her in death on June 26, 2000.\n\nMom belonged to the Highland Grove Grade School Mothers Club and the Highland Homemakers Club. She could fix the electric cord on her clothes iron as well as adjust the carburetor on the car. Holidays were always special with decorations, gifts and special meals.\n\nMom and Dad enjoyed fishing trips to Canada later in life and spent years bowling and going to casinos.\n\nAfter dad’s passing, she enjoyed textile painting, Nintendo Wii, bowling, writing poetry and word find puzzles. Her treasured dog, Slick, kept her company.\n\nShe remained in the beloved farm home of 83 years until 10 days before her passing. Mom attended Grant, Franklin and Highland Grove grade schools in Wausau through the 8th grade. She was baptized and confirmed at St. Paul’s United Church of Christ in Wausau. She attended Sunday School regularly.\n\nMom met dad because she was a good friend to Delores “Toots” Zastrow, dad’s sister, during school days. Romance blossomed and they married on May 22, 1943 at a pastor’s house in Wausau. A honeymoon trip to LaCrosse followed.\n\nA family came along and Mom and Dad became farm owners in 1949. Through lean years Mom helped with hand milking, cooking, canning meats, fruits and vegetables and cared for her large family. Mom enjoyed doing beautiful pencil drawings, writing poetry and keeping a notebook of song lyrics in her younger years. After raising the family Mom began an extensive doll collection which she enjoyed thoroughly.\n\nSurvivors include her children, Linda Schroeder, Wausau, Donna Kufahl, Wausau, Elroy (Sharon) Zastrow, Wausau, Vicki Deckert, Wausau, Arlin Zastrow, Wausau, her grandchildren, Todd (Jane) Schroeder, Troy (Tammy) Schroeder, Ted (fiancé Michelle) Schroeder, Tiffany (Jeremy) Knopow, Blake (Beckie) Kufahl, Brett Kufahl, Brooke (Bob) Frenkel, Jennifer (Brad) Altergott, Scott Zastrow, Steven (Amanda) Zastrow, Karen Zastrow, Rod (Stacey) Zastrow, Kelly Zastrow, Alec (Bianca) Zastrow, Brittanie (Matt) Schulz, Amelia Zastrow, Dustin Dudek, Travis (Shania) Wistrom, Ryan (Meghan) Wistrom, Erika (Dan) Staffeil, Cody Smoker, Kyle Smoker, her great grandchildren, Adam (Amanda), Brad, Corwin, Griffin (Amanacer), Willow, Hudson, Hazel, Alexia, Alivia, Brock, Jadden, Logan, Samantha (Tyler), Brandon (Emilee), Morgahn, Siena, Oakley, Odessa, Natalee, Julian, Chanelle, Cole, Jenna, Brooke, Klaire, Gracie, Ember, Bria, Allie, Alex, Chase, George (Megan), Saxon (Aylissa) and great great grandchildren, Teagan, Llane, Mason, Lilah, Emma, Nora and numerous nieces and nephews.\n\nVirginia was preceded in death by her parents, her husband Fred in 2000, her children, Wayne Zastrow in 1972, Garry Zastrow in 2009, Robin Zastrow in 2018 and Kathy Wistrom in 2026. She was also preceded in death by her sons-in-law, Richard “Dick” Schroeder, Gary Wistrom and Bruce Kufahl and her siblings, Henry (Ella) Tietz, Clarence (Marge) Tietz, Lorinda (Ralph) Wimmer, Hilda (Claude) Pettit, Harold (Christa) Tietz, August (Cathleen) Tietz, Emil Tietz and Verna Tietz.\n\nFuneral services will be held at 11:00 a.m. Wednesday, July 22, 2026 at the Peterson/Kraemer Funeral Home, 1302 Sixth Street, Wausau.  Chris Ewan will officiate. Burial will be in Restlawn Memorial Park, Wausau. Visitation will be held on Wednesday from 9:30 a.m. until the time of services all at the Sixth Street funeral home. In lieu of flowers a memorial fund has been established in Virginia’s name. Online condolences may be expressed at www.petersonkraemer.com"
+      "body": "Virginia M. Zastrow, 99, town of Wausau, passed away on Sunday, July 12, 2026 while under the care of St. Croix Hospice at Careview Transitional Care of Weston.\n\nShe was born December 21, 1926, in Wausau, daughter of the late August and Marie (Behnke) Tietz. On May 22, 1943 she married Fred Zastrow in Wausau. He preceded her in death on June 26, 2000.\n\nMom belonged to the Highland Grove Grade School Mothers Club and the Highland Homemakers Club. She could fix the electric cord on her clothes iron as well as adjust the carburetor on the car. Holidays were always special with decorations, gifts and special meals.\n\nMom and Dad enjoyed fishing trips to Canada later in life and spent years bowling and going to casinos.\n\nAfter dad’s passing, she enjoyed textile painting, Nintendo Wii, bowling, writing poetry and word find puzzles. Her treasured dog, Slick, kept her company.\n\nShe remained in the beloved farm home of 83 years until 10 days before her passing. Mom attended Grant, Franklin and Highland Grove grade schools in Wausau through the 8th grade. She was baptized and confirmed at St. Paul’s United Church of Christ in Wausau. She attended Sunday School regularly.\n\nMom met dad because she was a good friend to Delores “Toots” Zastrow, dad’s sister, during school days. Romance blossomed and they married on May 22, 1943 at a pastor’s house in Wausau. A honeymoon trip to LaCrosse followed.\n\nA family came along and Mom and Dad became farm owners in 1949. Through lean years Mom helped with hand milking, cooking, canning meats, fruits and vegetables and cared for her large family. Mom enjoyed doing beautiful pencil drawings, writing poetry and keeping a notebook of song lyrics in her younger years. After raising the family Mom began an extensive doll collection which she enjoyed thoroughly.\n\nSurvivors include her children, Linda Schroeder, Wausau, Donna Kufahl, Wausau, Elroy (Sharon) Zastrow, Wausau, Vicki Deckert, Wausau, Arlin Zastrow, Wausau, her grandchildren, Todd (Jane) Schroeder, Troy (Tammy) Schroeder, Ted (fiancé Michelle) Schroeder, Tiffany (Jeremy) Knopow, Blake (Beckie) Kufahl, Brett Kufahl, Brooke (Bob) Frenkel, Jennifer (Brad) Altergott, Scott Zastrow, Steven (Amanda) Zastrow, Karen Zastrow, Rod (Stacey) Zastrow, Kelly Zastrow, Alec (Bianca) Zastrow, Brittanie (Matt) Schulz, Amelia Zastrow, Dustin Dudek, Travis (Shania) Wistrom, Ryan (Meghan) Wistrom, Erika (Dan) Staffeil, Cody Smoker, Kyle Smoker, her great grandchildren, Adam (Amanda), Brad, Corwin, Griffin (Amanacer), Willow, Hudson, Hazel, Alexia, Alivia, Brock, Jadden, Logan, Samantha (Tyler), Brandon (Emilee), Morgahn, Siena, Oakley, Odessa, Natalee, Julian, Chanelle, Cole, Jenna, Brooke, Klaire, Gracie, Ember, Bria, Allie, Alex, Chase, George (Megan), Saxon (Aylissa) and great great grandchildren, Teagan, Layne, Ayden, Abbie, Mason, Lilah, Emma, Nora and numerous nieces and nephews.\n\nVirginia was preceded in death by her parents, her husband Fred in 2000, her children, Wayne Zastrow in 1972, Garry Zastrow in 2009, Robin Zastrow in 2018 and Kathy Wistrom in 2026. She was also preceded in death by her sons-in-law, Richard “Dick” Schroeder, Gary Wistrom and Bruce Kufahl and her siblings, Henry (Ella) Tietz, Clarence (Marge) Tietz, Lorinda (Ralph) Wimmer, Hilda (Claude) Pettit, Harold (Christa) Tietz, August (Cathleen) Tietz, Emil Tietz and Verna Tietz.\n\nFuneral services will be held at 11:00 a.m. Wednesday, July 22, 2026 at the Peterson/Kraemer Funeral Home, 1302 Sixth Street, Wausau.  Chris Ewan will officiate. Burial will be in Restlawn Memorial Park, Wausau. Visitation will be held on Wednesday from 9:30 a.m. until the time of services all at the Sixth Street funeral home. In lieu of flowers a memorial fund has been established in Virginia’s name. Online condolences may be expressed at www.petersonkraemer.com"
     },
     {
       "name": "Blake R. Mosher",
@@ -13064,6 +13105,20 @@
       "photo_url": "https://cdn.tukioswebsites.com/1cdeb7ce-520b-4d53-9188-585b2d23d932/lg",
       "summary": "Jeanette Switlick, age 93, of Athens passed away on Jul 13, 2026.",
       "body": "Jeanette Switlick,93, Athens passed away on Monday, July 13, 2026.\n\nShe was born January 29, 1933 in Athens. On May 26, 1951, she married Stanley Switlick at St. Anthony Catholic Church, Athens. He preceded her in death on March 31, 1996.\n\nJeanette was a proud homemaker and truly enjoyed raising her children and grandchildren and anyone who came through her door. Some of her favorite pastimes included embroidery, making quilts, playing cards, cooking, shopping, gardening and enjoying the company of her grandchildren and great grandchildren. Jeanette made baby quilts for all the grandchildren and great grandchildren.\n\nShe also enjoyed blueberry picking, visiting with people and living life to the fullest.\n\nSurvivors include her children, Mike (Kathy) Switlick, Lorraine (Donald) Sobjeck, Mark Switlick, Daniel (Laura) Switlick, Leanne (Victor) Smith, Francis (Jennifer) Switlick and Lori Switlick, her grandchildren, Kristine (Jose Argueta Granados) Switlick, Josh (Korina) Switlick, Justin (Tania) Switlick, Jeremy (Jessica) Switlick, Erin Sobjeck, Kyle Sobjeck, Kimberly (Joe) Ellis, Matt Switlick, Tiffany (Andrew) Lukasko, Melanie (Jordan) Locher, Jonathon Patton, Cassandra (AJ) Switlick, Nadine (Casey) Aho, Ryan (Samantha) Switlick, Russell (Amanda) Switlick and Megan Switlick, her great grandchildren, Blake, Brock, Luke, Jake, Landon, Eli, Everly, Oliver, Lyla, Madden, Finnley, Ashlyn, Emma, Holden, Elsie and soon Baby Girl Locher and her special cousin, Mabel Drewek.\n\nBesides her parents and husband, she was preceded in death by three sons, Richard, Florian and Jerome “Mego” Switlick and her grandchildren, Keith Boehm, Amanda Boehm and Jennifer Patton and a great granddaughter Adrian Handrick.\n\nThe Funeral Mass will be celebrated at 11:00 a.m. Tuesday, July 21, 2026, at St. Anthony Catholic Church, Athens. The Rev. George Graham will preside. Burial will be in Calvary Cemetery, Athens. Visitation will be held on Tuesday from 9:00 a.m. until the time of services at the church. Peterson/Kraemer Funeral Home, Athens is in charge of arrangements. Online condolences be expressed at www.petersonkraemer.com"
+    },
+    {
+      "name": "Judith Agnes Cramer",
+      "source_id": 119198991147264,
+      "source_url": "https://www.rembsfh.com/obituaries/judith-cramer",
+      "source_date": "2026-07-13",
+      "death_year": 2026,
+      "birth_date": "1941-06-16",
+      "death_date": "2026-07-13",
+      "age": 85,
+      "funeral_home": "Rembs Funeral Home",
+      "photo_url": "https://cdn.tukioswebsites.com/295f395c-4edb-496c-b893-c50cbc40dbea/lg",
+      "summary": "Judith Agnes Cramer, age 85 passed away on Jul 13, 2026.",
+      "body": "Judith (Judy) Agnes Cramer (Andraska) passed away from complications of cancer on the afternoon of Monday, July 13, 2026, while in hospice care at the House of the Dove in Marshfield, WI. Judy survived three previous bouts with cancer, a testament to her strength and resilience. She was born on June 16, 1941, in Ladysmith, WI, to Bernard and Louise Andraska (Grittner). She recently celebrated her 85th birthday surrounded by nearly 100 of her friends and family.\n\nJudy graduated from Park Falls High School. She met the love of her life, Michael Cramer, and they married soon after on April 22, 1961, in Park Falls. They were an inspirational couple to all who met them, true soulmates who were never far apart. They even performed on a radio show, and their love for entertaining was passed on to all their descendants.\n\nIn 1965, Judy and Mike began raising a family with the birth of their son, Tim. In 1968, they moved to Wisconsin Rapids. They built their dream home in 1978, which served as a peaceful haven for them, their children Tim, Kelli, Dan, and Michael, and everyone who visited, for more than four decades.\n\nJudy became the office manager for Complete Control, a temperature control company founded by her husband with his business partner Rick Rustad in 1989.\n\nJudy was the heart and soul of her family, placing them above all else. She enjoyed reading, playing games (particularly Cribbage, Hand and Foot, Bridge, and Scrabble), campfires, listening to music (especially when performed by her family), feeding her loved ones, and socializing. Beyond her fierce love of family, Judy had numerous friend groups, including bridge clubs, a \"girls' night out\" group, and her neighbors. She shared an epic 60 year relationship with her best friend, Kathy Mayer. She loved traveling and went on many trips with her husband, children, grandchildren, siblings, and friends. Judy adored and bolstered her children, grandchildren, and great-grandchildren, reveling in everything they did. She encouraged and generously supported their activities, especially when it came to performing. She also proudly supported the LGBTQ+ community.\n\nJudy was preceded in death by her parents, her husband, her brother William Andraska, her sister Susan Andraska, and her infant daughter Kathleen Cramer. She is survived by her loving children Timothy (Kathleen Zelony), Kelli (John), Daniel (Tammie), and Michael (Dantzi) Cramer; her siblings Mary Kelnhofer, Carole Andraska, Kathy Weinberger, Pat Andraska, and Barb Teeters; her 11 grandchildren Max, Meagan, Sean, Elena, Maisie, Katie, Jude, Aidan, Charlie, Lexi, and Eilya; and her three great-grandchildren Asa, August, and Shepherd."
     },
     {
       "name": "Lauretta A. Tauschek",
@@ -13486,6 +13541,20 @@
       "body": "Mark A. Schroeder, 71, Chili, passed away peacefully on Friday, April 24, 2026, at Mayo Clinic in Eau Claire surrounded by his family and friends.\n\nA celebration of life will be held at Chili Corners from 12:00 - 6:00 pm on Saturday, July 18, 2026. Parking will be available at the School District of Granton, 217 North Main St., Granton, with a shuttle service to Chili Corners, W894 US Highway 10, Chili, starting at 12:00 PM and running on the hour.\n\nHis full obituary can be found at https://www.rembsfh.com/obituaries/mark-a-schroeder"
     },
     {
+      "name": "Carol D Hallas",
+      "source_id": 49045533,
+      "source_url": "https://www.midwisconsincremationsociety.com/obituaries/Carol-D-Hallas?obId=49045533",
+      "source_date": "2026-07-17",
+      "death_year": 2026,
+      "birth_date": "1939-03-27",
+      "death_date": "2026-07-17",
+      "age": 87,
+      "funeral_home": "Mid-Wisconsin Cremation Society",
+      "photo_url": "https://d1q40j6jx1d8h6.cloudfront.net/Obituaries/49045533/Thumbnail.jpg",
+      "summary": "Carol D Hallas, age 87 passed away on July 17, 2026.",
+      "body": "Carol D. Hallas, 87, passed away peacefully, leaving behind a lifetime of love, laughter, and cherished memories.\n\nBorn on March 27, 1939, to the late Clarence and Violet (Rempke) Raymond, Carol found the love of her life when she married Frank Hallas on August 1, 1959. Together they shared 54 wonderful years of marriage until Frank's passing on May 17, 2013. Their love was steadfast, and infinite.\n\nCarol was the quintessential homemaker. She took great pride in caring for her home, keeping it spotless and welcoming. Whether she was cleaning, baking, or finding another project to keep her busy, Carol was always doing something. She especially enjoyed knitting, creating beautiful handmade treasures that her family will cherish for years to come.\n\nCarol will be remembered for her quick wit, charming personality, and wonderful sense of humor. She was a devoted Elvis Presley fan and an even bigger Green Bay Packers fan. During football season, family and friends could always count on hearing Carol enthusiastically cheering—and occasionally yelling—at the television as she rooted for her beloved Packers.\n\nShe is lovingly survived by her children, Leslie LaPorte and Bob Hallas; her grandchildren, Zachary, Lacey, and Brody; and her bonus grandchildren, Trish and T.J. Gorski.\n\nIn addition to her parents and her beloved husband, Frank, Carol was preceded in death by her two sisters and four brothers.\n\nPer Carol's wishes, no services will be held at this time. She and Frank will be laid to rest together at Mosinee City Cemetery.\n\nMid Wisconsin Cremation Society is assisting the family. Family and friends are invited to leave online condolences and words of remembrance at MWCS.WS."
+    },
+    {
       "name": "Donald J. Koeller",
       "source_id": 299572,
       "source_url": "https://wausaupilotandreview.com/2026/07/17/wausau-area-obituaries-july-17-2026/",
@@ -13512,6 +13581,34 @@
       "photo_url": "https://wausaupilotandreview.com/wp-content/uploads/2026/07/vadva-771x965.jpg",
       "summary": "Jeanette Switlick, 93, of Athens, passed away on July 13, 2026.",
       "body": "Jeanette Switlick, 93, Athens passed away on Monday, July 13, 2026.\n\nShe was born January 29, 1933 in Athens. On May 26, 1951, she married Stanley Switlick at St. Anthony Catholic Church, Athens. He preceded her in death on March 31, 1996.\n\nJeanette was a proud homemaker and truly enjoyed raising her children and grandchildren and anyone who came through her door. Some of her favorite pastimes included embroidery, making quilts, playing cards, cooking, shopping, gardening and enjoying the company of her grandchildren and great grandchildren. Jeanette made baby quilts for all the grandchildren and great grandchildren.\n\nShe also enjoyed blueberry picking, visiting with people and living life to the fullest.\n\nSurvivors include her children, Mike (Kathy) Switlick, Lorraine (Donald) Sobjeck, Mark Switlick, Daniel (Laura) Switlick, Leanne (Victor) Smith, Francis (Jennifer) Switlick and Lori Switlick, her grandchildren, Kristine (Jose Argueta Granados) Switlick, Josh (Korina) Switlick, Justin (Tania) Switlick, Jeremy (Jessica) Switlick, Erin Sobjeck, Kyle Sobjeck, Kimberly (Joe) Ellis, Matt Switlick, Tiffany (Andrew) Lukasko, Melanie (Jordan) Locher, Jonathon Patton, Cassandra (AJ) Switlick, Nadine (Casey) Aho, Ryan (Samantha) Switlick, Russell (Amanda) Switlick and Megan Switlick, her great grandchildren, Blake, Brock, Luke, Jake, Landon, Eli, Everly, Oliver, Lyla, Madden, Finnley, Ashlyn, Emma, Holden, Elsie and soon Baby Girl Locher and her special cousin, Mabel Drewek.\n\nBesides her parents and husband, she was preceded in death by three sons, Richard, Florian and Jerome \"Mego\" Switlick and her grandchildren, Keith Boehm, Amanda Boehm and Jennifer Patton and a great granddaughter Adrian Handrick.\n\nThe Funeral Mass will be celebrated at 11:00 a.m. Tuesday, July 21, 2026, at St. Anthony Catholic Church, Athens. The Rev. George Graham will preside. Burial will be in Calvary Cemetery, Athens. Visitation will be held on Tuesday from 9:00 a.m. until the time of services at the church. Peterson/Kraemer Funeral Home, Athens is in charge of arrangements."
+    },
+    {
+      "name": "John Roger Gorman",
+      "source_id": 40525375264610,
+      "source_url": "https://www.bestefh.com/obituaries/john-gorman",
+      "source_date": "2026-07-17",
+      "death_year": 2026,
+      "birth_date": "1936-07-28",
+      "death_date": "2026-07-17",
+      "age": 89,
+      "funeral_home": "Beste Funeral Home",
+      "photo_url": "https://cdn.tukioswebsites.com/1a3a3d8e-c38e-4e04-b1e5-11f27addd345/lg",
+      "summary": "John Roger Gorman, age 89, of Marshfield passed away on Jul 17, 2026.",
+      "body": "John Roger Gorman, age 89, of Marshfield entered the arms of the Lord on Friday, July 17, 2026, just short of his 90th birthday. He joins his beloved wife, Nancy A. Gorman, who passed away on April 10, 2023.\n\nJohn was born on July 28, 1936, the son of Roman and Rosalie (Dahlke) Gorman of Halder, WI. He was the fifth of six children. John attended St. Robert’s Catholic School in Halder and graduated from Mosinee High School in 1954. After graduation he served in the Army and was able to travel throughout Europe when he was stationed in Germany. Then upon returning to the Gorman homestead, he met and married the love of his life, Nancy A. Lepak, on August 29, 1959. They purchased the farm homestead a year later and raised their three children there near Halder, WI. The first five years they did dairy farming and thereafter, they did hobby farming, grew cash crops and ginseng for many years. John worked for 33 years at Foremost Foods in Rothschild and was a proud Teamster Union member. In May of 2020, they moved to Marshfield.\n\nJohn was an accomplished gardener and loved yard work especially mowing lawns. He took great pride in helping Nancy with their perennial flower gardens and keeping the property in good shape for all to enjoy. They also enjoyed playing cards together with friends and family. John was an active outdoorsman as he fished in Canada for many years and was an avid deer hunter with both rifle and bow. John enjoyed sports and was a huge fan of anything Wisconsin: Brewers, Packers, Badgers, and Bucks. He played high school baseball and played on the Halder ball team for many years. For 40 years he enjoyed golfing with the same partner and longtime friend, Jerry Heindl. John was an active member of St. Patrick’s Parish in Halder mowing the parish grounds and cemetery for over 20 years. He also served as the sexton of the cemetery upon his retirement. John was a lector at masses and often assisted priests by serving mass and drove them to visit the sick at area homes, hospitals and assisted living facilities.\n\nJohn is survived by three children: Karmen (John Baur) Gorman, Marshfield; Mary Becher, Janesville; and John Jay (Jackie) Gorman, Halder. He is also survived by nine grandchildren: Amber (Joe), Lindsay (Geno), Grant (Sheila), Emma (Grant), Chloe (Matt), Jacob (Nicole), Claire (Andrew), Camille (Tyler) and Ben; seven great-grandsons: Devon, Sam, George, Max, Leo, Theodore and Benson; one great granddaughter: Birdie; four step grandchildren: Paige, Lydia, Gavin and Koda. He is further survived by a sister-in-law, Fran Gorman.\n\nHe was preceded in death by his wife Nancy A. Gorman; his parents, Roman and Rosalie Gorman; two brothers, Duane Gorman and William (Bill) Gorman; three sisters, Doris Kennedy, Virjean Dallman, Ann Fischer, and a son-in-law, Ron Becher.\n\nA joint Mass of Christian Burial honoring and celebrating the life of John R. Gorman and his wife, Nancy A. Gorman will be held on Monday, July 27, 2026, at 11:00 at St. Patrick’s Church, Halder. They will be laid to rest together at St. Patrick’s Cemetery following the service. Visitation for relatives and friends will be from 9:00 AM until time of service at the church.\n\nThe family would like to thank Aster Senior Living Community staff, John’s dear friends at Aster, and Heartland Hospice for their compassionate care during John’s final days.\n\nBeste Funeral Home, Mosinee, is honored to be assisting the family with arrangements."
+    },
+    {
+      "name": "Kyle V. Wendt",
+      "source_id": 222459603670434,
+      "source_url": "https://www.rembsfh.com/obituaries/kyle-v-wendt",
+      "source_date": "2026-07-17",
+      "death_year": 2026,
+      "birth_date": "1969-03-01",
+      "death_date": "2026-07-17",
+      "age": 57,
+      "funeral_home": "Rembs Funeral Home",
+      "photo_url": "https://cdn.tukioswebsites.com/15d1564e-bbe9-4c82-8c8a-599ed8929abc/lg",
+      "summary": "Kyle V. Wendt, age 57, of Marshfield passed away on Jul 17, 2026.",
+      "body": "Kyle V. Wendt, 57, Marshfield, passed away on Friday, July 17, 2026 at Marshfield Medical Center.\n\nA memorial service will be held at 1:00 pm on Monday, July 27, 2026 at Rembs Funeral Home, Marshfield with visitation from 10:00 am until the time of service. Burial will take place at Trinity Lutheran Cemetery, Town of Richfield, Wood County.\n\nKyle was born on March 1, 1969 in Neillsville to Armin Jr. and Marjorie (Luepke) Wendt. He attended Nasonville Elementary, Trinity Lutheran, Marshfield Junior High School, and graduated from Marshfield Senior High School.\n\nKyle worked for Grupp’s Farm, Nasonville Dairy, Pork Plant in Abbotsford, and Solutions in Marshfield.\n\nHe took great pride in his ’72 Gran Torino Sport. He enjoyed snowmobiling, ATV trail riding, buying and selling junk cars, demolition derbies, and going to car shows. Most of all, he loved being a dad and grandpa.\n\nHe is survived by his daughter, Jenna Zahn and grandchildren, Sophia, Kinzleigh, Cameron, and Oliver (on the way).\n\nHe is further survived by his mother, Marjorie, sister, Katherine “Kathy” Wendt, brothers, Keith, Kevin, and Kory Wendt, nephews, Shaun Sandley and Brian Wendt, niece, Tammy (DJ) Kolb, and many cousins, aunts, and uncles.\n\nHe was preceded in death by his father, Armin Jr, stepfather, Richard Bue, and grandparents, Vilas and Irene Luepke and Armin Sr. and Sarah Wendt."
     },
     {
       "name": "Lois E Wetterau",
@@ -13595,7 +13692,35 @@
       "funeral_home": "Rembs Funeral Home",
       "photo_url": "https://cdn.tukioswebsites.com/f50249ee-a2ea-4534-82f7-2b6a0480dba7/lg",
       "summary": "Patricia \"Patty\" A. Jahnke, age 68, of La Crosse passed away on Jul 17, 2026.",
-      "body": "Patricia “Patty” A. Jahnke, 68, La Crosse, passed away on Friday, July 17, 2026 at Marshfield Medical Center.\n\nA graveside service will be held at 2:00 pm on Tuesday, July 28, 2026 at Calvary Cemetery in Prairie du Chien.\n\nPatty was born on March 14, 1958 in Milwaukee to William “Bill” and Elizabeth “Liz” (Nolan) Jahnke. She graduated from Columbus Catholic High School in 1977.\n\nPatty worked various factory jobs and volunteer work through the years. She loved cats, collecting knickknacks - especially cat figurines, and spending time with her family.\n\nShe is survived by her brother, Edward Jahnke, and nieces and nephews, Maya, Jackson, Alexander, and Jonah.\n\nShe was preceded in death by her parents, Bill and Liz Jahnke."
+      "body": "Patricia “Patty” A. Jahnke, 68, La Crosse, passed away on Friday, July 17, 2026 at Marshfield Medical Center.\n\nA graveside service will be held at 2:00 pm on Tuesday, July 28, 2026 at Calvary Cemetery in Prairie du Chien.\n\nPatty was born on March 14, 1958 in Milwaukee to William “Bill” and Elizabeth “Liz” (Nolan) Jahnke. She graduated from Columbus Catholic High School in 1977.\n\nPatty worked various factory jobs and volunteer work through the years. She loved cats, collecting knickknacks - especially cat figurines, and spending time with her family.\n\nShe is survived by her brother, Edward Jahnke, and niece and nephews, Maya, Jackson, Alexander, and Jonah.\n\nShe was preceded in death by her parents, Bill and Liz Jahnke."
+    },
+    {
+      "name": "Ronald Joseph Windorski",
+      "source_id": 122777797961161,
+      "source_url": "https://www.brainardfuneral.com/obituaries/ronald-windorski",
+      "source_date": "2026-07-17",
+      "death_year": 2026,
+      "birth_date": "1952-11-18",
+      "death_date": "2026-07-17",
+      "age": 73,
+      "funeral_home": "Brainard Funeral Home & Cremation Center",
+      "photo_url": "https://cdn.tukioswebsites.com/acf91335-1eb4-4c63-b999-21512209dd85/lg",
+      "summary": "Ronald Joseph Windorski, age 73 passed away on Jul 17, 2026.",
+      "body": "Ronald Joseph Windorski, 73, of Weston, Wisconsin, passed away peacefully on July 17, 2026. He was born on November 18, 1952, in Wausau, Wisconsin, to Theodore and Theresa (Discher) Windorski. He grew up in the Wausau area and built a life centered on family, hard work, and helping others.\n\nHe was preceded in death by his parents, and his beloved son, Scott Windorski.\n\nRonald shared a loving life of 52 years with his wife, Karen, and took immense pride in his family. His greatest joy was his four granddaughters, Madison, Briley, Hailey, and Vivian. They were truly the light of his life. He cherished every moment with them, whether he was cheering them on at school events, picking them up from school, delivering popsicles to them when they were sick, or coming up with fun activities like playing kick ball, going to the beach and digging up worms to go fishing, going for \"wild rides\" on the swing, ice fishing or going for rides around town.  Always keeping the girls busy, the list is endless.\n\nRonald was known for his generous heart and welcoming spirit. Whether he was ice fishing at the shack, playing cards, or enjoying time at the lake, anyone who stopped by quickly became a friend. He loved making wood, shooting pool, bowling, golfing and relaxing with a brandy old fashioned sweet. He was always ready to lend a helping hand to his neighbors, doing so with a smile and never expecting recognition or thanks.\n\nA hard worker, Ronald had a long career at Federal-Mogul, where he enjoyed working and made many great friends. He also took pride in and loved his work siding houses, operating Windorski Siding after Federal-Mogul closed. He took immense pride in his craftsmanship, especially the steel siding he installed in his earlier years, which still looks great on many homes around Wausau today.\n\nWhile living in Schofield, Ronald faithfully answered the call to help others as a volunteer firefighter and EMT with the Schofield Fire Department. Even after leaving the depart ment, he continued his training to serve as a first responder at Federal-Mogul. His dedication to serving others truly reflected the kindness and selflessness that defined his life.\n\nRonald is survived by his loving wife, Karen Windorski of Weston; his children, Jodi Beck (Matt) of Weston and Erik Windorski (Amanda) of Rothschild; his cherished granddaughters, Madison, Briley , Hailey, and Vivian; his brother, Tom Windorski (Sue) of Wausau; along with many extended family members, friends, neighbors, and all those whose lives were touched by his kindness.\n\nA visitation will be held Friday, July 24th, 2026 from 12 pm to 1 pm at Brainard Funeral Home - Weston, Wisconsin. A memorial service will follow at 1 pm with Father Janusz Kowalski officia ting."
+    },
+    {
+      "name": "Sally  Jo Towne",
+      "source_id": 49042138,
+      "source_url": "https://www.carlsonfh.com/obituaries/Sally-Jo-Towne?obId=49042138",
+      "source_date": "2026-07-17",
+      "death_year": 2026,
+      "birth_date": "1953-10-23",
+      "death_date": "2026-07-17",
+      "age": 72,
+      "funeral_home": "Carlson Funeral Home",
+      "photo_url": "https://d1q40j6jx1d8h6.cloudfront.net/Obituaries/49042138/Thumbnail.jpg",
+      "summary": "Sally  Jo Towne, age 72 passed away on July 17, 2026.",
+      "body": "Sally Jo (Jenkins) Towne passed away on Friday, July 17, 2026, peacefully in her sleep. She was born on October 23, 1953. Her absence is greatly felt by our family, and she can never be replaced. Everyone who ever met her knew she was a friend to all. Her laugh was contagious—the famous “Jenkins” laugh. She loved golf, shooting pool, rock picking on any beach, meeting up with friends for a good time, and spending time with her grandsons and grand pup, Broni. Her happy place was at the family camp, and she always had a project in progress. Don’t worry, Mom—we have your worklist, and we’ll get as much done as we can.\n\nShe will be dearly missed and is survived by her husband of 53 years, Jeff Towne; her children: Molly Towne; Lenore Towne (Steven Vormwald); Chelsea (Frankie) Tedtaotao; her grandchildren: Francisco “Kiko” Tedtaotao; Grayson Tedtaotao; siblings: Bette Jean Hofman; Barbara Elliot; Allen (Lynda) Jenkins; and Tina (Vern) Sneller; along with numerous nieces, nephews, and cousins.\n\nShe was preceded in death by her parents, Cecil and Edith Jenkins; an infant brother, Roger Jenkins; brother, James Jenkins; sister, Mary Mickelson; brother, Cecil Jenkins Jr.; sister, Darlene Reinmann; sister, Louise “Lou” Steffes; sister, Elaine “Ellie” Yungerman; brother, David Jenkins; and paternal grandmother of her grandsons: Eloise Tedtaotao.\n\nA Celebration of Life for Sally will be determined later. You may leave your private condolences for Sally’s family at www.carlsonfh.com. The Carlson Funeral Home (715-369-1414) is serving the Towne family."
     },
     {
       "name": "Shirley A Philipp",
@@ -13610,6 +13735,90 @@
       "photo_url": "https://wausaupilotandreview.com/wp-content/uploads/2026/07/vqRV-771x963.jpg",
       "summary": "Shirley A Philipp, 90, of Tomahawk and formerly of Wausau, passed away on July 15, 2026.",
       "body": "Shirley A Philipp, Tomahawk (and formerly from Wausau), 90, passed away peacefully on Wednesday July 15, 2026, under the care of the Aspirus Wausau Hospital Palliative unit. Shirley was born on November 16, 1935, in the township of Texas, Marathon County, WI to the late Max and Martha (Johlke) Hartig.\n\nShirley is survived by her daughters Patricia (Bob) Jumbeck and Pamela (Jim) Daniels, her Grandchildren Matthew (Jerica) Philipp, Stephanie (Jeff) Stone, Ashely (Tony) Davis, Jessica (Nick) Davis, and her Great Grandchildren Mason Koepke, Nova Haasch, Max Haasch, Cecelia Stone, Jaxton Philipp, Parker Philipp, Jedrix Philipp, Jaylex Philipp, and Maddix Philipp.\n\nShe is proceeded in death by her late husband Robert Philipp, her 5 brothers and 5 sisters, her daughter Karen Philipp, and her son Robert Philipp.\n\nShirley and her late husband Robert owned and operated Northern Service Toyota in Wausau. After selling the dealership, Shirley continued her career in the Auto Industry as the Service Manager for Jim Buck Toyota and finally retired after serving in the health care industry at North Central Health Care.\n\nShirley had a passion for her time up north, being at the lake, playing cards, tending to her plants and flowers, having family and friends visit, steak and lobster on Christmas Eve, and a cold Miller Lite.\n\nThere will be a friends and family gathering in honor of Shirley on Sunday, August 2, 2026, from 2pm to 5 pm at 4 Father's Pub, 1724 Merrill Ave, Wausau, WI 54401."
+    },
+    {
+      "name": "Rick Alan Swanson",
+      "source_id": 49045042,
+      "source_url": "https://www.carlsonfh.com/obituaries/Rick-Alan-Swanson?obId=49045042",
+      "source_date": "2026-07-18",
+      "death_year": 2026,
+      "birth_date": "1968-09-12",
+      "death_date": "2026-07-18",
+      "age": 57,
+      "funeral_home": "Carlson Funeral Home",
+      "photo_url": "https://d1q40j6jx1d8h6.cloudfront.net/Obituaries/49045042/Thumbnail_1.jpg",
+      "summary": "Rick Alan Swanson, age 57 passed away on July 18, 2026.",
+      "body": "A lifelong resident of Rhinelander, Rick Swanson, age 57 passed away at his home on July 18, 2026. He was born September 12, 1968 in Rhinelander, youngest son of Frederick and Helen (Swift) Swanson. He attended schools in Rhinelander and graduated from high school in 1987. His work life included jobs from being a Master Glass Bender in Antigo, a Master Control Operator & Newscast Technical Director, Janitorial Support and currently a Dispatch Scheduler/IT.\n\nRick married his Billie Jo (Bissonnette) Will on November 4, 2004.  He was an avid reader, loved music and music history, enjoyed western history and maps of all varieties.  He will be remembered for his witty sense of humor with no filter.\n\nHe is survived by his wife Billie Jo; his children Matthew Will, Nicole Swanson and Christian Swanson and sister Susan Swanson.  He is preceded in death by his father, Fred in 2002 and mother, Helen in 2019 and his brother Dennis in 2023.\n\nA visitation for Rick will be held on Friday, July 31, 2026 from 10:00 AM to 12:00 PM at the Carlson Funeral Home. In lieu of flowers a memorial is being established in Rick's name and any gifts may be directed to his family. You may also leave your private condolences for the Swanson family at www.carlsonfh.com. A complete notice will follow shortly. The Carlson Funeral Home (715-369-1414) is serving the Swanson family."
+    },
+    {
+      "name": "Lucille A. Christensen",
+      "source_id": 69369153760458,
+      "source_url": "https://www.rembsfh.com/obituaries/lucille-a-christensen",
+      "source_date": "2026-07-19",
+      "death_year": 2026,
+      "birth_date": "1933-10-22",
+      "death_date": "2026-07-19",
+      "age": 92,
+      "funeral_home": "Rembs Funeral Home",
+      "photo_url": "https://cdn.tukioswebsites.com/d58a5723-f850-4380-a66c-aa91bb9393a2/lg",
+      "summary": "Lucille A. Christensen, age 92, of Marshfield passed away on Jul 19, 2026.",
+      "body": "Lucille “Lucy” Agnes Christensen died Sunday, July 19th, at The House of the Dove. She was born on the family farm to Frank Cherney and Olga Gross Cherney on October 22, 1933.\n\nA memorial service will be held at 3:00 pm on Friday, July 24, 2026 at Rembs Funeral Home, Marshfield with visitation from 1:30 pm until the time of service. Deacon Ray Draeger will officiate. Burial will take place at Gate of Heaven Cemetery, Marshfield at a later date.\n\nShe graduated from Spencer High School (1952) and continued to earn a certificate from St. Joseph's Hospital School of Radiology in Marshfield, WI. Lucy then worked at Milwaukee Children's Hospital in the radiology department while pursuing studies in clinical laboratory medicine at UW-Milwaukee. Afterwards, she graduated from St. Joseph's Hospital School of Medical Technology (1959) in Marshfield, WI, and Adams State College of Colorado (1964) in Alamosa, Colorado, where she received a Bachelor of Arts in biology. Most of her professional work was in clinical hospital laboratories, especially microbiology. The last 13 years of her career, she was a laboratory supervisor at Eagle River Memorial Hospital in Eagle River, WI.\n\nShe was married to Carl Christensen in Colorado and later was divorced. Then she moved back to the family farm in 1987 to help care for her family and has lived there since. In the meantime, she boarded dairy heifers for ten years after her return home. Throughout her adult life, Lucy loved to travel both internationally and nationally with friends and family extensively.\n\nShe is survived by her children Inga (Chris) Johnson, Alex (Janelle) Christensen; 4 granddaughters Emma, Mollie, Sarah (David) Path, and Katie (Ben) Seehafer; and 5 great-grandsons Devin and Grayson Path and Arthur, Ethan, and Elliot Seehafer.\n\nPreceding Lucy in death are her parents (Frank and Olga Cherney), three sisters (Elaine, Amy, and Rose), one brother (Bill), and one grandson (Luke Johnson).\n\nAt Lucy's request, in lieu of flowers, memorials may be given to Defenders of Wildlife or Marshfield Area Pet Shelter (MAPS)."
+    },
+    {
+      "name": "Patricia Louise Nellessen",
+      "source_id": 49053460,
+      "source_url": "https://www.schmidtschulta.com/obituaries/Patricia-Louise-Nellessen?obId=49053460",
+      "source_date": "2026-07-19",
+      "death_year": 2026,
+      "birth_date": "1951-03-16",
+      "death_date": "2026-07-19",
+      "age": 75,
+      "funeral_home": "Schmidt & Schulta Funeral Home",
+      "photo_url": "https://d1q40j6jx1d8h6.cloudfront.net/Obituaries/49053460/Thumbnail.jpg",
+      "summary": "Patricia Louise Nellessen, age 75, of Rosholt passed away on July 19, 2026.",
+      "body": "Patricia L. Nellessen, 75 of Rosholt, died on Sunday, July 19, 2026, at her home, under the care of Compassus Hospice.\n\nPatricia was born on March 16, 1951, in Rhinelander.\n\nOn July 25, 1970, Patricia was united in marriage to Mark Nellessen in Hartland, Illinois.\n\nFor more than 20 years, Patricia owned and operated a dog kennel, where she groomed, bred, and cared for dogs. She especially loved showing dogs, which remained one of her greatest passions. Patricia also looked forward to her annual trips to Wisconsin Dells with her sisters and motorcycle trips to Door County with Mark. She always kept a tidy house and enjoyed being in the kitchen. Above all, Patricia adored her grandchildren and always attended their sporting events; they were the sunshine in her life. She will be remembered for her joyful spirit and warm smile.\n\nPatricia is survived by her husband, Mark; two sons, Jude Allen Nellessen and Marc Patrick (Blyth) Nellessen; two grandchildren, Ben and Aubrey Nellessen; brother, Lloyd Slack and brothers and sister-in-law, Peter Bergman, Susie Slack and Dave Drury.\n\nPatricia was preceded in death by her parents; foster mom, Doris Wagner; brother, Art Slack and sisters, Barbara Drury and Elsie Bergman.\n\nA Funeral Mass will be held at 11 AM on Tuesday, August 4, 2026, at St. Joseph’s Catholic Church, Galloway. Visitation will be on Tuesday, from 9-11 AM at the church, with the Rosary being recited at 10 AM.\n\nSchmidt & Schulta Funeral Home, Wittenberg is assisting the family with arrangements. Memories and messages of support may be shared at schmidtschulta.com."
+    },
+    {
+      "name": "Peggy Lou Buecker",
+      "source_id": 151651976498558,
+      "source_url": "https://www.rembsfh.com/obituaries/peggy-buecker",
+      "source_date": "2026-07-19",
+      "death_year": 2026,
+      "birth_date": "1943-06-29",
+      "death_date": "2026-07-19",
+      "age": 83,
+      "funeral_home": "Rembs Funeral Home",
+      "photo_url": "https://cdn.tukioswebsites.com/8879a213-6cb7-4ae1-a4d0-f6496922c60b/lg",
+      "summary": "Peggy Lou Buecker, age 83, of Spencer passed away on Jul 19, 2026.",
+      "body": "Peggy L. Buecker, 83, passed away on Sunday, July 19, 2026 at House of the Dove, Marshfield.\n\nA memorial service will be held at 11:30 am on Saturday, August 1st, 2026 at Restoring Hope Church, 228936 Cemetery Ave, Abbotsford, with visitation from 11am until the time of service.\n\nPeggy was born on June 29, 1943 in Geneseo, Illinois. She was united in marriage to Larry Buecker on June 28, 1990 in Forest City, Iowa. He passed away on April 25, 1994.\n\nPeggy was a joyful, creative, and faith-filled woman who found great happiness in using her talents to bless those around her. She had a love for music and singing, enjoyed painting, and photography. She delighted in making crafts, creating beautiful wreaths and decorations, and was always happiest when baking homemade treats for family and friends, especially her famous banana bread and cookies. Above all, Peggy had a deep and unwavering faith in Jesus Christ. She loved sharing the story of how He had saved her and was passionate about telling others the good news of the Gospel.\n\nShe is survived by her daughters, Debra (Jeff) Bendickson of Mason City, IA and Penny Miller of Spencer, grandchildren, Brittany (Joe) Hart-vilmain, Ryan Willis, Craig (Tonya) Miller, Amber (Raymond) Novokoski, Audrey (Ben) Misikin, and Aaron (Elizabeth) Miller, great grandchildren, Zack, Jordan, Kennedy, Payton, Josh, Mary, Steven, Lily, Devon, Dakotah, Hadley, Madison, Alexandria, Ambrella, Mayoree, Raymond Jr., Liam, Michael, Joshua, and Chloe.\n\nShe is further survived by her sister, Rosemary Blau of Hampton, IA.\n\nShe was preceded in death by her parents, Aiko and Mary (Collins) Blau, husband, Larry Buecker, great grandson, Raymond Willis, son in law, Craig Miller Sr., and brother, Daniel Blau.\n\nThe family would like to extend a special thanks to House of the Dove for their wonderful care."
+    },
+    {
+      "name": "Bernette B. Steffenhagen",
+      "source_id": 299775,
+      "source_url": "https://wausaupilotandreview.com/2026/07/20/wausau-area-obituaries-july-20-2026/",
+      "source_date": "2026-07-20",
+      "death_year": 2026,
+      "birth_date": "1931-02-26",
+      "death_date": "2026-07-15",
+      "age": 95,
+      "funeral_home": "Taylor-Stine-Waid Funeral & Cremation",
+      "photo_url": "https://wausaupilotandreview.com/wp-content/uploads/2026/07/vbdfbdf-771x964.jpg",
+      "summary": "Bernette B. Steffenhagen, age 95, of Merrill, Wisconsin, passed away on July 15, 2026.",
+      "body": "Bernette Bernice Steffenhagen, age 95, passed away peacefully in the Aspirus Merrill Emergency Room with family by her side on July 15, 2026. She was born February 26, 1931 to the late Erna (Waldow) and Bernard Barkow in Athens, Wi. She graduated from Athens High School. Bernette was married to Alvin Steffenhagen on September 1, 1956 at Trinity Lutheran Church in Athens.\n\nBernette retired from Wausau Insurance Company in 1992 from the supervisory position which she held for 42 years. She was a member of the Wausau Insurance Retired Women's Club and Wausau Insurance Quarter Century Club. During her retirement she was an election poll worker for the town of Berlin for 19 years. She is a member of Trinity Lutheran Church Merrill, Wi.\n\nPrior to moving to Pinecrest she enjoyed going to polka dances, going out to eat, and going on road trips with her husband and friends. Bernette enjoyed embroidering, doing crafts, baking and cooking for her family, putting puzzles together, and doing word search books. Bernette meticulously manicured her lawn and was very proud of her yard and home. She loved spending time with her grandchildren and great grandchildren.\n\nBernette is survived by her daughter, Dawn Teske of Merrill; grandsons, Josh (Casi) Teske of Rib Mountain, Tyler Teske of Merrill; great-granddaughters, Brooklyn and Brianne Teske. She is also survived by her brother, Dale (Rosie) Barkow of Athens and brother-in-law, Lowell (Marie) Steffenhagen of Merrill, along with many other relatives and friends.\n\nShe is preceded in death by her husband, Alvin; her parents, brother, Marvin Barkow, Sister in-law Evelyn Barkow and son-in-law, David Teske.\n\nThe family would like to thank the staff at Pinecrest Nursing Home for their exceptional care that they provided for Bernette for the past year and one-half. A special thank you to Olivia Barker, a CNA at Pinecrest, whom she formed a special bond with. Also Thank You to the Paramedics and the staff at Aspirus Merrill Hospital."
+    },
+    {
+      "name": "JoAnn V. Plano",
+      "source_id": 299775,
+      "source_url": "https://wausaupilotandreview.com/2026/07/20/wausau-area-obituaries-july-20-2026/",
+      "source_date": "2026-07-20",
+      "death_year": 2026,
+      "birth_date": "1936-12-22",
+      "death_date": null,
+      "age": null,
+      "funeral_home": "Helke Funeral Home",
+      "photo_url": "https://wausaupilotandreview.com/wp-content/uploads/2026/07/vfbaf-771x964.jpg",
+      "summary": "JoAnn V. Plano of Wausau, Wisconsin, passed away in 2026.",
+      "body": "JoAnn V. Plano was born on December 22, 1936, as an only child to Carl O. Olson and Josephine M. Olson (VerBunker) in Wisconsin Rapids, Wisconsin. She grew up in Port Edwards, Wisconsin and graduated from high school there. After high school she married James E. Faehling and had three children, Mary Jo, James C. and Michael J. Faehling.\n\nAfter she and James divorced, JoAnn went on to attend U.W. Stevens Point where she graduated with a Bachelor of Science degree. During this time, she met the love of her life, Franklin V. Plano and they married in 1971. They lived in Wausau for their entire marriage. JoAnn worked for the State of Wisconsin Job Service until she retired in 1999.\n\nJoAnn spent many years tracing her family genealogy and self-published 8 books under \"Good Heart Publications\" on these lineages. She visited extended family sites in Canada and France. She completed much of her writing at their cottage on Lake Tomahawk, Wisconsin. She also enjoyed entertaining at the lake and at home serving elaborate dinners for family and friends.\n\nShe and Frank traveled to all of the contiguous U.S. states during summer vacations. Frank often said that JoAnn knew every shopping mall, restaurant, hotel, motel and rest stop between Bangor, Maine and San Diego, California.\n\nJoAnn loved her family and she always made sure to remember birthdays of her three children, 8 grandchildren, and 16 great grandchildren. She was a loving wife, mother, grandmother and will truly be missed.\n\nJoAnn is survived by her loving husband of 54 years, her sons James Faehling (Joan) and Michael Faehling (Becky). She is preceded in death by her parents and her daughter Mary Jo Winnie.\n\nThe family would also like to thank Sylvan Crossings on Evergreen Road, Wausau for the assisted living care they provided JoAnn the past 2 ½ years."
     }
   ]
 }
