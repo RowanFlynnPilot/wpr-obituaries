@@ -103,6 +103,8 @@
     "funeral_home_scrape:49199335": "2026-08-06",
     "funeral_home_scrape:49199449": "2026-08-06",
     "funeral_home_scrape:49200281": "2026-08-06",
+    "funeral_home_scrape:49203492": "2026-08-07",
+    "funeral_home_scrape:49211642": "2026-08-09",
     "funeral_home_scrape:194842645655": "b6906b7e360e",
     "funeral_home_scrape:1166772303551": "1354b81bae6b",
     "funeral_home_scrape:1517070287541": "524e01e12e67",
@@ -126,10 +128,12 @@
     "funeral_home_scrape:19810798119179": "535848e43451",
     "funeral_home_scrape:21120309540495": "7a7e7740fbe8",
     "funeral_home_scrape:21496602333715": "ecbedc86c047",
+    "funeral_home_scrape:25281155370337": "b089d25c84e3",
     "funeral_home_scrape:25538541966923": "19ab9491e95c",
     "funeral_home_scrape:27918689818547": "9f0aa970b8cb",
     "funeral_home_scrape:31389018358166": "6ffc2284aabb",
-    "funeral_home_scrape:32034768772805": "cc85618d21ef",
+    "funeral_home_scrape:32034768772805": "77b21a1eed42",
+    "funeral_home_scrape:32914504693442": "9194dd5d2035",
     "funeral_home_scrape:33106157321355": "0fd886649c62",
     "funeral_home_scrape:35789218580950": "388a6449823c",
     "funeral_home_scrape:36603253656612": "cb215d803816",
@@ -145,6 +149,7 @@
     "funeral_home_scrape:48553300141532": "a7908ef5d9d0",
     "funeral_home_scrape:51634876421854": "bf25056aa1e4",
     "funeral_home_scrape:52207445713866": "9232952713dc",
+    "funeral_home_scrape:52213936070105": "638c2fbd110f",
     "funeral_home_scrape:52280556646928": "0d2321619636",
     "funeral_home_scrape:53651689626081": "e5eb76ebf0a5",
     "funeral_home_scrape:54183210589402": "454cc42ff722",
@@ -153,6 +158,7 @@
     "funeral_home_scrape:56794908940388": "18b13390075e",
     "funeral_home_scrape:57496249424004": "0edb1dea3cf1",
     "funeral_home_scrape:57996561679867": "214ff6c65c95",
+    "funeral_home_scrape:58359894213485": "946cfd67647f",
     "funeral_home_scrape:58625800166491": "afb63a836412",
     "funeral_home_scrape:60803101788077": "562015f1a01a",
     "funeral_home_scrape:62362551285909": "484f6044fff5",
@@ -164,7 +170,7 @@
     "funeral_home_scrape:65998531419681": "8995db3c0b64",
     "funeral_home_scrape:66751308211152": "8afdb85f5851",
     "funeral_home_scrape:66835211418237": "31876c704055",
-    "funeral_home_scrape:67622680662799": "df63e8fc91b5",
+    "funeral_home_scrape:67622680662799": "e709ac483d31",
     "funeral_home_scrape:67940044676908": "ae27f93f0100",
     "funeral_home_scrape:68560653619260": "c8431fac94b7",
     "funeral_home_scrape:68681840825505": "8a401670cd18",
@@ -249,6 +255,7 @@
     "funeral_home_scrape:153691832565342": "d114010d9be1",
     "funeral_home_scrape:157911464439135": "64c4fb26fcdd",
     "funeral_home_scrape:157993166786374": "d7b5abb81c0b",
+    "funeral_home_scrape:158015180830152": "866048836bb2",
     "funeral_home_scrape:159274952627401": "780b4b6a205f",
     "funeral_home_scrape:161410559898575": "8ee9a9c2f023",
     "funeral_home_scrape:162109385604505": "37eb5254e9e7",
@@ -274,6 +281,7 @@
     "funeral_home_scrape:181976663818693": "097274da982c",
     "funeral_home_scrape:182459928155624": "2ce42b2f009e",
     "funeral_home_scrape:182608607914870": "4533307fbfbe",
+    "funeral_home_scrape:185235245370577": "6b47501bb1b3",
     "funeral_home_scrape:185267781660372": "86313e87b2c7",
     "funeral_home_scrape:187378339526473": "b553cfe2036b",
     "funeral_home_scrape:189114077280848": "d7819c188c4d",
@@ -312,9 +320,10 @@
     "funeral_home_scrape:218484194909808": "5ba82af4d21c",
     "funeral_home_scrape:218622148373635": "fd4fe64a75a5",
     "funeral_home_scrape:218863502117546": "45467bb5e307",
+    "funeral_home_scrape:220729875658401": "9d30e8d24522",
     "funeral_home_scrape:222459603670434": "f25efcd70095",
     "funeral_home_scrape:222882742865228": "8fc6f4016260",
-    "funeral_home_scrape:223427963374535": "97350ed2da73",
+    "funeral_home_scrape:223427963374535": "225cb6771ea9",
     "funeral_home_scrape:224001200986605": "4d4507c142d6",
     "funeral_home_scrape:224423997513500": "2b77c496a55b",
     "funeral_home_scrape:224458530219154": "70523fb5e87e",
@@ -358,6 +367,7 @@
     "funeral_home_scrape:274311429492656": "b850a9b60bef",
     "funeral_home_scrape:274417359593431": "4e0e9b3e6afc",
     "funeral_home_scrape:279013572397732": "c4487399e00e",
+    "funeral_home_scrape:279107779022176": "188b176b8801",
     "funeral_home_scrape:279932964213067": "557e4e387a9c",
     "funeral_home_scrape:281259446904590": "7dfac7eeb58a",
     "funeral_home_scrape:281392422732579": "ae95c23912d4",
@@ -450,7 +460,8 @@
     "wordpress_scrape:300549": "2026-07-29T20:34:10",
     "wordpress_scrape:300794": "2026-07-31T16:49:03",
     "wordpress_scrape:301032": "2026-08-03T18:38:25",
-    "wordpress_scrape:301188": "2026-08-05T19:58:27"
+    "wordpress_scrape:301188": "2026-08-05T19:58:27",
+    "wordpress_scrape:301382": "2026-08-07T20:03:25"
   },
   "records": [
     {
@@ -14118,6 +14129,20 @@
       "body": "JoAnn Maxine VanSleet, passed away on July 21, 2026, at the age of 71. Born on January 19, 1955, in Wausau, Wisconsin, JoAnn was the daughter of Harold and Josephine (Opichka) Williams. She grew up in Wausau, where she graduated from Newman High School, eventually earning her Associate's Degree in accounting.\n\nJoAnn married the love of her life, Robert VanSleet, on September 16, 1978, at St. Mary’s Church in Wausau. Together, they built a beautiful life filled with love, laughter, and countless adventures. JoAnn devoted a great deal of her professional life to administration at Lincoln County Economic Development, but it was her role as a wife and mother that truly defined her.\n\nJoAnn had a zest for life that was infectious. In her younger years, she enjoyed hunting, fishing, camping, backpacking, and canoeing. She embraced the great outdoors with enthusiasm. As time went on, JoAnn became famous for her Christmas letters updating family and friends about the past year’s events. Cooking became more than a hobby. It was how she showed love. And, you could taste it! JoAnn was a warm and generous soul who put others before herself.\n\nShe leaves behind her devoted husband, Robert, and her son, Eric (Danielle) VanSleet. JoAnn also leaves a loving family, including siblings Gary (Rebecca) Williams of Mosinee, Sandra (Geoff) Groshek of Mosinee, Keith (Christine) Williams of Merrill, Donald (Beth) Williams of Wausau, Ann (Steve) Osborne of Wausau, and Patrick (Tricia) Williams of Wausau, along with sister-in-law Frances Foley of Wausau, and brothers-in-law Donovan \"Don\" (Nancy) VanSleet of Wausau, Gary (Karrie) VanSleet of Chippewa Falls, and Bruce (Susan) VanSleet of Merrill, as well as many nieces and nephews.\n\nJoAnn was preceded in death by her parents and her brother, Thomas Williams, along with in-laws, Valeria \"Val\" and Jay Turnmire, and brother-in-law John \"Jack\" Foley. In lieu of flowers, we ask that you share a good meal with your family and friends. Spread the kindness and generosity that JoAnn exuded every day of her life.\n\nCelebration of Life will take place at Taylor-Stine-Waid Funeral & Cremation, 301 S. Eagle Dr. in Merrill, Saturday, August 1, from 4pm-7pm.\n\nTaylor-Stine-Waid Funeral & Cremation, Merrill, is assisting the family. Online condolences may be made at www.taylorstinewaid.com"
     },
     {
+      "name": "John \"Jay\" A. Emerick Jr.",
+      "source_id": 185235245370577,
+      "source_url": "https://www.petersonkraemer.com/obituaries/john-jay-emerick-jr",
+      "source_date": "2026-07-21",
+      "death_year": 2026,
+      "birth_date": "1959-04-13",
+      "death_date": "2026-07-21",
+      "age": 67,
+      "funeral_home": "Peterson/Kraemer Funeral Homes & Crematory",
+      "photo_url": "https://cdn.tukioswebsites.com/092cf9a6-e615-4dde-8081-3c4d85e55081/lg",
+      "summary": "John \"Jay\" A. Emerick Jr., age 67 passed away on Jul 21, 2026.",
+      "body": "John A. Emerick Jr. (“Jay”), 67, of Kronenwetter, died unexpectedly on July 21, 2026, while scuba diving the Cedarville shipwreck in the Straits of Mackinac in Michigan.\n\nJay was born April 13, 1959, in Milwaukee, son of John A. Emerick Sr. and Esther (Meyer) Emerick. Jay was a scientist and outdoorsman who explored the natural world throughout his professional and personal life. He earned degrees in geology and geophysics from the University of Wisconsin and spent his career exploring for oil and gas, first based in Louisiana and Texas where he raised four children alongside his former wife Jessica Emerick, and later stationed abroad in Asia and Africa, before returning home to Wisconsin in his well-deserved retirement where his adventures continued in earnest alongside his partner Cindy Radenz.\n\nJay’s love for the outdoors filled his calendar with trips hunting, fishing, and trapping; kayaking, canoeing, and scuba diving; hiking, biking, and camping; and what he jokingly called “thumb sports”: ATVs, motorcycles, and snowmobiles. His appreciation for nature was surpassed only by his commitment to sharing it with others. His favorite place to do that was Spirit Falls Lodge, where he dedicated his “labor of love” to carrying on decades-long family traditions in the woods and on the Spirit River with his children and relatives. He embodied its core values to preserve traditions, to remember those who went before, and to always honor their memory.\n\nHe is preceded in death by his parents, sister Regina, brother Patrick, best friend and cousin Tom, and a special uncle, Raymond Meyer. He is survived by his partner Cindy Radenz; his children Matt Emerick, Jay Emerick, Jenna Emerick, and Megan Emerick; his grandchildren Elliot Emerick and Jack Emerick; his siblings Richard, Mark, and Nancy; and numerous cousins, nieces, nephews, and in-laws.\n\nThe funeral Mass will be celebrated at 11:00 a.m. on Friday, August 28, 2026, at St. Therese Catholic Church, 113 West Kort Street, Rothschild, with Rev. Janusz Kowalski presiding. Visitation will begin at 10:00 a.m. until the time of service at the church. Private family burial will take place at a later date. Online condolences may be expressed at www.petersonkraemer.com."
+    },
+    {
       "name": "Kathleen \"Kathy\" A. Rice",
       "source_id": 217319054366867,
       "source_url": "https://www.rembsfh.com/obituaries/kathleen-kathy-a-rice",
@@ -15000,6 +15025,20 @@
       "body": "Gloria Ann Kottman, age 82, passed away at Aspirus Hospital in Steven's Point, Wisconsin after a short illness. Born September 13, 1943 in Merrill, at Holy Cross Hospital, to Martin and Leota (Culver) Berndt.\n\nGloria married the love of her life, Julius Richard Kottman at St. Stephen's United Church of Christ in Merrill, on April 28, 1962. She worked for Hanson Glove, Weinbrenner Shoe, and Merrill Manufacturing. She also taught Sunday School at St. Stephens UCC.\n\nGloria is survived by her daughter, Beth Ann Weideman; son, Marty James Kottman; grandsons, Jasper Weideman and Daniel Grover all of Merrill; sisters, Bonnie Pftonhauer, Faye Stevenson, and Linda (LaVon) Anderson of Myton, Utah; brother, Evert (Cindy) Berndt of Franklin, Wisconsin; Sister-in-law, Sue Kottman, and many nieces and nephews.\n\nGloria was preceded in death by her husband, Julius; infant son, Dale; parents, Martin and Leota Berndt; grandparents, William and Amanda Berndt and Everett and Julia Culver, along with many in-laws.\n\nVisitation will take place at St. Stephen's United Church of Christ, in Merrill, on Saturday, August 8, 2026 from 9am-11am. Service will be at 11am at St. Stephen's UCC and burial will immediately follow the service at St. Paul's Cemetery in the Town of Corning."
     },
     {
+      "name": "Jeffrey L Roll",
+      "source_id": 49211642,
+      "source_url": "https://www.honorone.com/obituaries/Jeffrey-L-Roll?obId=49211642",
+      "source_date": "2026-07-31",
+      "death_year": 2026,
+      "birth_date": "1951-10-21",
+      "death_date": "2026-07-31",
+      "age": 74,
+      "funeral_home": "John J. Buettgen Funeral Home",
+      "photo_url": "https://d1q40j6jx1d8h6.cloudfront.net/Obituaries/49211642/Thumbnail.jpg",
+      "summary": "Jeffrey L Roll, age 74 passed away on July 31, 2026.",
+      "body": "Jeffrey L Roll, 74, passed away after a brief illness July 31, 2026.\n\nJeff was one of a kind. His life was not always easy as he faced his share of challenges, but through it all he managed to leave an impression on the people who crossed his path. Jeff maintained many friendships and acquaintances throughout his life and those who knew him best know that he had his moods and that you never quit knew which version of  you were going to get. That was simply part of who he was - those who knew him learned to appreciate him for all that he was.\n\nJeff proudly served in the National Guard. In his younger years he enjoyed playing hockey with Wausau Cyclones, hunting and fishing, where he made memories and friendships. He also won the soap box derby in 1964 with the car he and his dad built.\n\nJeff lived his life his own way. He wasn’t always easy to understand and he was never ordinary. He had a strong, complicated, and sometimes difficult personality. Beneath it all was a man who touched the lives of many friends in ways they will remember.\n\nHe is survived by his sister Linda Smith (Dave) of Tennessee, Jamie Warnberg (Tom) of Barron Wi and Carrie Steckbauer (Jeff) of Rib Mountain, Wi.\n\nHe was preceded in death by his parents Don and Betty and brother Danny.\n\nThough his life had its struggles his story was his own. May he find the peace that life did not always give him.\n\nFuneral services will be held at 11:00 am on Tuesday August 18th, 2026, at John J Buettgen Funeral Home, 948 Grand Ave, Schofield. Visitation is at 10:00 am until the time of services at the funeral home.\n\nFamily and friends may leave words of remembrance at www.honorone.com"
+    },
+    {
       "name": "John E. Gunderson",
       "source_id": 300794,
       "source_url": "https://wausaupilotandreview.com/2026/07/31/wausau-area-obituaries-july-31-2026/",
@@ -15067,7 +15106,7 @@
       "funeral_home": "Peterson/Kraemer Funeral Homes & Crematory",
       "photo_url": "https://cdn.tukioswebsites.com/22125fb3-224f-446c-a3dd-3c6434f20b32/lg",
       "summary": "William \"Bill\" Tryba, age 98, of Wausau passed away on Jul 31, 2026.",
-      "body": "William “Bill” Tryba Obituary\n\nWilliam \"Bill\" Tryba was born to his earthly life on August 30, 1927, in the town of Albin in Portage County to Felix and Mary (Kuklinski) Tryba. He entered his eternal rest on July 31, 2026 at the age of 98, at Weston Memory Care in Weston, under the care of Interim Healthcare of Wausau.\n\nWilliam married Alice Modrzejewski on October 16, 1948 at St. Ladislaus Catholic Church in Bevent. They had 68 years together before she preceded him in death on August 23, 2017.\n\nWilliam is survived by three daughters: Marlene (David) Zoromski of Hatley; Elaine Haas of Wausau, and Cynthia (Kenneth) Milbeck of Rib Mountain. He is survived by eight grandchildren: Kevin (Kristy) Zoromski, Sara (Ryan Cronce), Benjamin, and Matthew Zoromski; Gregory (Becki) and Daniel Tryba; Leah (Tyler) Wipperfurth and Ryan (Krysta) Milbeck. Additional survivors include four step-grandchildren, ten great-grandchildren and 13 step-great grandchildren. He is also survived by a step sister, Joyce Downs; sister-in-law, Mary Goytowski; daughter-in-law, Joanie Tryba; goddaughter, Lori Follmann; and godson, Michael Tryba.\n\nIn addition to Alice and his parents, William was preceded in death by his in-laws, Leo and Martha Modrzejewski; two sons, Kenneth and Jerome; two grandsons, Scott and Jason Zoromski; one step-granddaughter, Victoria Ladwig; daughter-in-law, Sue Tryba; son-in-law, Donald Haas; a goddaughter, Edna Brandt and his three younger brothers, James, Gabriel and George.\n\nWilliam attended Simonis and St. Albert Catholic schools. He was self-taught in many trades. After completing only a sixth-grade education, he learned welding, masonry, electrical and plumbing work, and was an avid carpenter, having built and remodeled several homes in the Wausau area. His proudest achievement besides his family was the home he and Alice built in 1962.\n\nBill was happiest outdoors—fishing, hunting, tending his two vegetable gardens, or sitting on a stool in his back garage tinkering. He often spoke of how lucky he was to have enjoyed many years of retirement. He was proud of the many family vacations taken each summer and of the cottage he built near Crandon.\n\nIn his early years, William worked at a sawmill, and he and Alice farmed in the Rosholt area until 1956, when they moved to Wausau. William worked at LOED Corp (formerly Wausau Iron Works) from 1956–1983. He then worked at SNE from 1985 until his retirement in 1990.\n\nWilliam will be missed by his daughters, extended family, and friends, especially Jerry Literski, Ken Zipperer and Jim Lang.\n\nVisitation will be held at Holy Name of Jesus Catholic Church, Wausau on Monday, August 10, 2026 from 9:30am until the time of service, with the assist of Peterson/Kraemer Funeral Home. The Mass celebration of William’s life will be at 11:00am, followed by lunch at the church. A private family Entombment will be held at the Memorial Chapel Mausoleum at Restlawn Memorial Park in Wausau.\n\nWilliam’s family would like to extend a huge thank you to the exceptional team of caregivers at Interim Healthcare, especially Joleen, Malayna, Makayla, Wendy, Amanda, Chaplain Dennis, and Mary as well as Kyle, Autumn, and Ginger at Weston Memory Care."
+      "body": "William “Bill” Tryba Obituary\n\nWilliam \"Bill\" Tryba was born to his earthly life on August 30, 1927, in the town of Albin in Portage County to Felix and Mary (Kuklinski) Tryba. He entered his eternal rest on July 31, 2026 at the age of 98, at Weston Memory Care in Weston, under the care of Interim Healthcare of Wausau.\n\nWilliam married Alice Modrzejewski on October 16, 1948 at St. Ladislaus Catholic Church in Bevent. They had 68 years together before she preceded him in death on August 23, 2017.\n\nWilliam is survived by three daughters: Marlene (David) Zoromski of Hatley; Elaine Haas of Wausau, and Cynthia (Kenneth) Milbeck of Rib Mountain. He is survived by eight grandchildren: Kevin (Kristy) Zoromski, Sara (Ryan Cronce), Benjamin, and Matthew Zoromski; Gregory (Becki) and Daniel Tryba; Leah (Tyler) Wipperfurth and Ryan (Krysta) Milbeck. Additional survivors include four step-grandchildren, ten great-grandchildren and 13 step-great grandchildren. He is also survived by a step sister, Joyce Downs; sister-in-law, Mary Goytowski; daughter-in-law, Joanie Tryba; goddaughter, Lori Follmann; and godson, Michael Tryba.\n\nIn addition to Alice and his parents, William was preceded in death by his in-laws, Leo and Martha Modrzejewski; two sons, Kenneth and Jerome; two grandsons, Scott and Jason Zoromski; one step-granddaughter, Victoria Ladwig; daughter-in-law, Sue Tryba; son-in-law, Donald Haas; a goddaughter, Edna Brandt and his three younger brothers, James, Gabriel and George.\n\nWilliam attended Simonis and St. Albert Catholic schools. He was self-taught in many trades. After completing only a sixth-grade education, he learned welding, masonry, electrical and plumbing work, and was an avid carpenter, having built and remodeled several homes in the Wausau area. His proudest achievement besides his family was the home he and Alice built in 1962.\n\nBill was happiest outdoors—fishing, hunting, tending his two vegetable gardens, or sitting on a stool in his back garage tinkering. He often spoke of how lucky he was to have enjoyed many years of retirement. He was proud of the many family vacations taken each summer and of the cottage he built near Crandon.\n\nIn his early years, William worked at a sawmill, and he and Alice farmed in the Rosholt area until 1956, when they moved to Wausau. William worked at LOED Corp (formerly Wausau Iron Works) from 1956–1983. He then worked at SNE from 1985 until his retirement in 1990.\n\nWilliam will be missed by his daughters, extended family, and friends, especially Jerry Literski, Ken Zipperer and Jim Lang.\n\nVisitation will be held at Holy Name of Jesus Catholic Church, Wausau on Monday, August 10, 2026 from 9:30am until the time of service, with the assist of Peterson/Kraemer Funeral Home. The Mass celebration of William’s life will be at 11:00am, followed by lunch at the church. A private family Entombment will be held at the Memorial Chapel Mausoleum at Restlawn Memorial Park in Wausau.\n\nWilliam’s family would like to extend a huge thank you to the exceptional team of caregivers at Interim Healthcare, especially Joleen, Malayna, Makayla, Wendy, Amanda, Chaplain Dennis, and Mary as well as Kyle, Autumn, and Ginger at Weston Memory Care. Thank you also to Tammy, William's at-home caregiver.  Her compassion, kindness, patience and superb care allowed William to stay at home for a longer period of time."
     },
     {
       "name": "William Ivan Weber",
@@ -15096,6 +15135,20 @@
       "photo_url": "https://d1q40j6jx1d8h6.cloudfront.net/Obituaries/49199449/Thumbnail.jpg",
       "summary": "Joel Allen Boldig, age 61 passed away on August 1, 2026.",
       "body": "Joel Allen Boldig, 61, passed away tragically as the result of an automobile accident on Saturday, August 1, 2026.\n\nJoel was born on March 6, 1965, in Wisconsin to Jay and Marlese (Sengstock) Boldig. On November 12, 1983, he married his high school sweetheart, Carrie Hull.\n\nJoel spent more than 40 years working in manufacturing and operations. In 2026, he joined Crystal Finishing, where he continued his career.\n\nJoel spent his life on the family land where he was raised, a place that had been in his family for generations. Living alongside parents, grandparents, and extended family, he raised his own family there, continuing a tradition that was an important part of his life.\n\nHe had a lifelong appreciation for the outdoors and enjoyed hunting, fishing, camping, kayaking, biking, and spending time on the land he called home. He and Carrie also had a passion for raising and showing horses, an interest that took their family on many adventures over the years.\n\nJoel was a talented woodworker and handyman who could build or repair nearly anything. Together, he and Carrie founded Rustic River Mosaics, where his craftsmanship helped create custom furniture and woodworking pieces that quickly became well known and highly sought after. He was also known for his skill at the grill and smoker, taking pride in preparing barbecue and meals for family and friends.\n\nTo his grandchildren, he was Papa Joel. He was the loud, goofy grandpa who kept everyone laughing and brought energy wherever he went. At family holidays and gatherings, Joel was often the life of the party, and no one ever knew what he might say or do next. His grandchildren adored him.\n\nJoel is survived by his wife, Carrie Boldig; his son, Adam (Megan) Boldig; his daughter, Chandra (Kyle) Jochimsen; his grandchildren, Jaela, Kinslee, Benjamin, Austyn, Wyatt, Everett, Holden, Jack, and John; his mother, Marlese (Dave) Lindsay; his brother, Jeff (Deborah) Boldig; his sister, Jennifer (Steve) Byers; his mother-in-law, Donna Hull; his sisters-in-law, Cheryl (Terry) Nillissen and Patty (Mark) Kropf; along with many beloved nieces, nephews, extended family members, and dear friends.\n\nHe was preceded in death by his father, Jay Boldig, and his father-in-law, Donald Hull.\n\nJoel's memory lives on through his wife, Carrie, his children, and his grandchildren, who carry forward some of the very best parts of him; his appreciation for the outdoors, his practical skills, his sense of humor, and the traditions he helped create. His legacy can be found in the family homestead, the pieces he built with his hands, and the memories made with those who knew him.\n\nService information below:\n\nSaturday, August 15th, 2026\n\nSt. Paul Lutheran Church\n\nWittenberg, WI 54499\n\nVisitation: 9am-11am (At the church)\n\nService: 11:30am\n\nLunch to follow\n\nFamily and friends may leave words of remembrance and online condolences at MWCS.WS"
+    },
+    {
+      "name": "Margaret Ramirez",
+      "source_id": 49203492,
+      "source_url": "https://www.midwisconsincremationsociety.com/obituaries/Margaret-Ramirez?obId=49203492",
+      "source_date": "2026-08-01",
+      "death_year": 2026,
+      "birth_date": "1968-04-23",
+      "death_date": "2026-08-01",
+      "age": 58,
+      "funeral_home": "Mid-Wisconsin Cremation Society",
+      "photo_url": "https://d1q40j6jx1d8h6.cloudfront.net/Obituaries/49203492/Thumbnail.jpg",
+      "summary": "Margaret Ramirez, age 58 passed away on August 1, 2026.",
+      "body": "Margaret Ramirez, 58, passed away peacefully on August 1, 2026. She was born on April 23, 1968, to the late Jerome and Valoise Ullmer.\n\nMargaret was united in marriage to the love of her life, Jorge Ramirez, with whom she shared a life centered on love, family, and cherished memories.\n\nMargaret had a heart as big as her smile and was known for her kindness and willingness to help anyone in need. She found joy in caring for others and was happiest when she could lend a helping hand. She loved playing video games, listening to music, gathering with family and friends for cookouts, and creating lasting memories with those she loved most.\n\nHer greatest joy in life was her family. Margaret treasured every moment spent with her children and grandchildren, who brought endless happiness to her life. She also had a special love for animals, and her compassion extended to every creature she met.\n\nMargaret will be remembered for her generous spirit, loving heart, and the warmth she shared so freely with everyone around her. Though she will be deeply missed, the love she gave and the memories she created will live on in the hearts of all who knew her.\n\nShe is lovingly survived by her husband, Jorge Ramirez; her children, Jennifer (Chase) Kramer, Jessika Power, Mike Berk, and Greg (Ally) Bishop; her cherished grandchildren, Mynah, Maliyah, Greyson, Joseph, Andrew, Alexa, Gavin, Olivia, Ellie, and Jace; her sister, Tamara McCauly; her brother, Daniel (Stacey) Ullmer; as well as many extended family members, dear friends, and all whose lives were touched by her kindness.\n\nShe was preceded in death by her parents, Jerome and Valoise Ullmer; her two sons, Andrew and Joseph; and her brother, Robert Roundtree.\n\nA Celebration of Margaret's Life will be held at 12:00 p.m. on Saturday, August 15, 2026, at 823 East Thomas Street, Wausau, Wisconsin. Family and friends are invited to gather to share stories, celebrate her life, and honor the love and kindness she so generously shared with everyone she met.\n\nMargaret's legacy of compassion, generosity, and unwavering love for her family will continue to live on in the hearts of those who knew and loved her.\n\nMid Wisconsin Cremation Society is assisting the family. Words of remembrance and online condolences may be shared at MWCS.WS"
     },
     {
       "name": "Mindy Lynn Skindingsrude",
@@ -15179,7 +15232,7 @@
       "funeral_home": "Rembs Funeral Home",
       "photo_url": "https://cdn.tukioswebsites.com/a5c5ded2-5063-4c74-959f-29676d0efc9f/lg",
       "summary": "Leotta S. Schroeder, age 91, of Owen passed away on Aug 2, 2026.",
-      "body": "Leotta S. Schroeder, 91, of Owen, WI passed away on Sunday, August 2nd , 2026 at Clark County Rehab.\n\nA private family memorial will happen at a later date.\n\nLeotta was born on July 3, 1935 to Morrel and Flossie (Ames) Suiter. She was united in marriage to Lester Schroeder on June 3, 1961 in Hewitt. He passed away on November 11, 2008.\n\nLeotta enjoyed crocheting, knitting, and bird watching.\n\nLeotta was a devoted member of the Marshfield Church of Christ.\n\nShe is survived by her children, Sarah Lehnann of Marshfield and John Schroeder of Marshfield. She is also survived by her grandchildren Ashley Coyle, Michael Lehmann, and Eric Lehmann and great-grandchildren Leia Lehmann, Adrienne Lehmann, Ruby Lehmann, Tripp Lehmann, Ambrose Lehmann, Wynterlyn Lehmann.\n\nShe was preceded in death by her parents, her infant son Robert and her son-in-law Michael Lehmann.\n\nThe family would like to extend a special thank you to Clark County Rehab for their excellent care of Leotta."
+      "body": "Leotta S. Schroeder, 91, of Owen, WI passed away on Sunday, August 2nd , 2026 at Clark County Rehab.\n\nA private family memorial will happen at a later date.\n\nLeotta was born on July 3, 1935 to Morrel and Flossie (Ames) Suiter. She was united in marriage to Lester Schroeder on June 3, 1961 in Hewitt. He passed away on November 11, 2008.\n\nLeotta enjoyed crocheting, knitting, and bird watching.\n\nLeotta was a devoted member of the Marshfield Church of Christ.\n\nShe is survived by her children, Sarah Lehmann of Marshfield and John Schroeder of Marshfield. She is also survived by her grandchildren Ashley Coyle, Michael Lehmann, and Eric Lehmann and great-grandchildren Leia Lehmann, Adrienne Lehmann, Ruby Lehmann, Tripp Lehmann, Ambrose Lehmann, Wynterlyn Lehmann.\n\nShe was preceded in death by her parents, her infant son Robert and her son-in-law Michael Lehmann.\n\nThe family would like to extend a special thank you to Clark County Rehab for their excellent care of Leotta."
     },
     {
       "name": "Barbara Helen Leffin",
@@ -15308,6 +15361,20 @@
       "body": "William was born to his earthly life on August 30, 1927, in the town of Albin in Portage County to Felix and Mary (Kuklinski) Tryba.\n\nWilliam married Alice Modrzejewski on October 16, 1948 at St. Ladislaus Catholic Church in Bevent. They had 68 years together before she preceded him in death on August 23, 2017.\n\nWilliam is survived by three daughters: Marlene (David) Zoromski of Hatley; Elaine Haas of Wausau, and Cynthia (Kenneth) Milbeck of Rib Mountain. He is survived by eight grandchildren: Kevin (Kristy) Zoromski, Sara (Ryan Cronce), Benjamin, and Matthew Zoromski; Gregory (Becki) and Daniel Tryba; Leah (Tyler) Wipperfurth and Ryan (Krysta) Milbeck. Additional survivors include four step-grandchildren, ten great-grandchildren and 13 step-great grandchildren. He is also survived by a step sister, Joyce Downs; sister-in-law, Mary Goytowski; daughter-in-law, Joanie Tryba; goddaughter, Lori Follmann; and godson, Michael Tryba.\n\nIn addition to Alice and his parents, William was preceded in death by his in-laws, Leo and Martha Modrzejewski; two sons, Kenneth and Jerome; two grandsons, Scott and Jason Zoromski; one step-granddaughter, Victoria Ladwig; daughter-in-law, Sue Tryba; son-in-law, Donald Haas; a goddaughter, Edna Brandt and his three younger brothers, James, Gabriel and George.\n\nWilliam attended Simonis and St. Albert Catholic schools. He was self-taught in many trades. After completing only a sixth-grade education, he learned welding, masonry, electrical and plumbing work, and was an avid carpenter, having built and remodeled several homes in the Wausau area. His proudest achievement besides his family was the home he and Alice built in 1962.\n\nBill was happiest outdoors—fishing, hunting, tending his two vegetable gardens, or sitting on a stool in his back garage tinkering. He often spoke of how lucky he was to have enjoyed many years of retirement. He was proud of the many family vacations taken each summer and of the cottage he built near Crandon.\n\nIn his early years, William worked at a sawmill, and he and Alice farmed in the Rosholt area until 1956, when they moved to Wausau. William worked at LOED Corp (formerly Wausau Iron Works) from 1956–1983. He then worked at SNE from 1985 until his retirement in 1990.\n\nWilliam will be missed by his daughters, extended family, and friends, especially Jerry Literski, Ken Zipperer and Jim Lang.\n\nWilliam's family would like to extend a huge thank you to the exceptional team of caregivers at Interim Healthcare, especially Joleen, Malayna, Makayla, Wendy, Amanda, Chaplain Dennis, and Mary as well as Kyle, Autumn, and Ginger at Weston Memory Care."
     },
     {
+      "name": "Dr. Charles \"Randy\" Bohon",
+      "source_id": 25281155370337,
+      "source_url": "https://www.rembsfh.com/obituaries/dr-charles-randy-bohon",
+      "source_date": "2026-08-04",
+      "death_year": 2026,
+      "birth_date": "1951-02-12",
+      "death_date": "2026-08-04",
+      "age": 75,
+      "funeral_home": "Rembs Funeral Home",
+      "photo_url": "https://cdn.tukioswebsites.com/bd6576a3-2b3c-4827-a62b-a0ffffa7fd12/lg",
+      "summary": "Dr. Charles \"Randy\" Bohon, age 75, of Marshfield passed away on Aug 4, 2026.",
+      "body": "Randy Bohon, age 75, entered his promised home in heaven on August 4, 2026, after living with Multiple Myeloma for ten years.\n\nDr. Bohon spent his entire 33-year career as an anesthesiologist at Marshfield Clinic Health System. Most of those years were at the Marshfield Center, with four and a half of the later years at the Minocqua Center. He never retired.\n\nHe was born Charles Randall Bohon on February 12, 1951, in Chicago, Illinois to Charles Kenneth Bohon and Annie Elnora Wilburn Bohon. His family then lived in St. Louis and Hobart, Indiana before settling in Appleton, Wisconsin when he was eight years old.\n\nIn his youth, Randy played Little League baseball, was on the YMCA swim team, played piano and violin, and sang with the Appleton Boy Choir. In high school he was on the track and wrestling teams, graduating in 1969 from Appleton West High School in the top 10% of his class.\n\nAfter high school, Randy pursued general college studies at Southwestern College in Waxahachie, Texas, where he played basketball. His science studies then took him to UW-Green Bay, Lawrence University, and UW-Oshkosh, where he received his Bachelor of Science Degree in Biology.\n\nRandy worked as a self-employed beekeeper for a dozen years before pursuing medical school.\n\nRandy received his Doctor of Medicine (MD) in 1988 from Oral Roberts University in Tulsa, Oklahoma and completed his residency in Anesthesiology in 1992 from the Medical College of Wisconsin in Milwaukee, Wisconsin, receiving Board Certification in 1993.\n\nOn his first day of medical school, Randy met Frances Jennemann Garabedian, a widow with two children, who was also going back to school. They married on August 10, 1985. Shortly after, Randy adopted her two children, Rebecca and Anna. They had two more children during Randy’s medical school, Claire and Amy, another child during residency, Spencer, and later adopted one more, Kori Thomas.\n\nRandy joined the US Navy Reserves in 1990, serving with a Primus Unit in Milwaukee into 1997. From 1998 through 2012, he served as a Battalion medical officer attached to the Marine Corps. In 2000, Randy completed nine weeks of intensive Naval Dive Training in Panama City, Florida to become a certified diving medical officer. At age 49, he was the oldest person at that time to complete this physically demanding training. Commander Charles Randall Bohon, MC, USNR-S2 received his Honorable Discharge on February 12, 2013, on his 62nd Birthday.\n\nAlways learning, questioning and serving, Randy coached Little League, served on the hockey board, had rental properties, managed timberland, owned a Wisconsin Northwoods restaurant and bar (Springstead Lake Lodge) and RB Honey LLC, an apiary with over 2000 bee hives for honey production and pollination in Wisconsin, Florida and California (which is now being managed by his son Spencer).\n\nRandy loved the bees and trees, deer camp and bird hunting with family and friends in the Northwoods, hiking, trout stream fishing and snowstorms. He enjoyed exploring less populated areas. Randy revived and maintained a family camp tradition with immediate and extended family at Spencer Lake Bible Camp in Waupaca over the 4th of July week each year for over 15 years. For some years, he invited more rural friends to bring their families for Halloween trick or treating in our neighborhood, a tradition that expanded as others joined the party. Playing games or celebrating Christmas by watching classic Christmas movies with family and friends made him happy.\n\nAn avid reader, Randy began each day at a coffee shop, where he read his Bible and then fiction and non-fiction. He had high expectations for himself and others. He loved to debate moral, political and theological issues. He could be strong and firm, show grace, generosity and kindness. He loved partnering with people he could count on and offering work to those who wanted an opportunity. He was loyal to family and friends. He had a one-of-a-kind sense of humor, often using his own made-up words or language and funny nicknames. He could be a jokester, would tease kids, and get people to believe made-up sceneries (such as the Oklahoma town where you could see a tornado come through every Saturday evening). Despite of all this, Randy was truly authentic and honest.\n\nMost importantly, Randy’s desire was to know and serve God. Like Jacob in Genesis, he sometimes “wrestled” with God to understand. He could identify with David in Psalms who was imperfect but had a “heart for God”. As he got older, Randy understood his faith by seeing God’s faithfulness in his life. Randy remarked that when he looked at family and friends, they were all miracles to him. On Facebook he wrote, “I have been truly blessed with a miraculous life. God has blessed me over and over and his faithfulness has been demonstrated to me continually throughout. I thank God for the wonderful life he has given me.” Randy wasn’t afraid of death because he knew that he would have an eternal home with his Lord and Savior.\n\nRandy is survived by his wife of more than 40 years, Frances Jennemann Bohon, and five children- Rebecca Reading, Anna Chapman, Claire (Bob) Bach, Kori Thomas and Charles Spencer (Chelsey) Bohon. He is also survived by nine grandchildren- Noah, Natalie and Emma Reading; Carlos and Randy Bach; Raevan Thomas; Lillian, Charles Bennett and Franklin Bohon. He is also survived by his sister Deborah (Joe) Cooper and brother David (Karin) Bohon and numerous nieces, nephews, and in-laws.\n\nRandy was predeceased by his daughter, Amy Elizabeth in infancy, his parents Charles Kenneth (Ken) and Annie E. Bohon and his parents-in-law Vincent and Frances Jennemann.\n\nA funeral service will be held for Randy at 11:00 on Friday, August 14, 2026 at Faith Fellowship, 217 W. McMillian St. Marshfield, Wisconsin officiated by Pastor Larry Sheahan. Visitation will be held for an hour before the service.\n\nA visitation will also be held on the evening of Thursday, August 13, 2026 from 5:00 – 7:00 pm at Rembs Funeral Home, 300 S. Oak St., Marshfield, Wisconsin.\n\nIn lieu of flowers, donations to Faith Fellowship or the Sanford Health Foundation Marshfield in his memory would be appreciated."
+    },
+    {
       "name": "Marion \"Mickey\" J. Froemming",
       "source_id": 245275954635206,
       "source_url": "https://www.helke.com/obituaries/marion-mickey-froemming",
@@ -15320,6 +15387,20 @@
       "photo_url": "https://cdn.tukioswebsites.com/8cd71ca9-2ef1-4dde-ac0d-2b3e043c415f/lg",
       "summary": "Marion \"Mickey\" J. Froemming, age 92, of Wausau passed away on Aug 4, 2026.",
       "body": "Marion “Mickey” J. Froemming, age 92, of Wausau, passed away peacefully on Tuesday, August 4, 2026, while at Country Terrace in Tomahawk, with her family gathered by her side and while under the care of St. Croix Hospice.\n\nMarion was born in Rib Falls, Marathon County, on December 23, 1933, to the late George and Irene (Frank) Schultz. She grew up in Wausau and attended local schools, graduating from Wausau High School in 1952. Marion married the late Donald Froemming on October 6, 1952, in Pine City, Minnesota, and together they enjoyed 63 years of marriage. Donald and Marion made their home in Wausau. Marion was a lifelong member of Trinity Lutheran Church in Wausau. She was employed with the Marathon County Treasurer / Finance Department, where she retired after 26 years of service.\n\nMarion enjoyed spending time with her family and get-togethers at their cottage on Manson Lake. She bowled on the National Bowling League for over 25 years, and on the State Bowling League for over 35 years. Marion was especially fond of the many friends she met through bowling.\n\nMarion will be sadly missed by her children: Daniel (Kathie) Froemming, Michael (Vickie) Froemming and Lisa (Eric) Whitburn. She is further survived by her grandchildren: Elizabeth, Sarah, Jennifer, Christopher, Becky, Natalie, Clinton and Luke, as well as her sister-in-law: Barbara Schultz. She was lovingly called “Granny” by her beloved great grandchildren: Elayne, Jaxson, Benjamin, Walter, Charlie, Vincent, Leonardo and Jane. She is preceded in death by her parents, husband: Donald, brother: Roger Schultz, sisters: Barbara Schultz, Caroline Koehler and Lois Schultz.\n\nThe funeral service for Marion will be held on Friday, August 14, 2026, at 11:00 a.m. at Trinity Lutheran Church, 501 Stewart Avenue, Wausau. The Rev. Paul Sundbom will officiate. Visitation will be held on Friday, August 14, 2026, from 10:00 a.m. until the time of the service, also at the church. A private burial at Pine Grove Cemetery in Wausau will follow.\n\nIn lieu of flowers, please direct donations in Marion’s name to either Trinity Lutheran Church or the Ronald McDonald House at www.Rmhc.org, both very close to her heart.\n\nThe family wishes to extend a heartfelt thank you to St. Croix Hospice, especially Holly and Alisa, for all of their support and care, as well as the staff at Country Terrace in Tomahawk for helping Marion and her family adjust to the facility.\n\nHelke Funeral Home & Cremation Services of Wausau is honored to assist Marion’s family with the arrangements. Online condolences may be made at www.helke.com."
+    },
+    {
+      "name": "Ben Koski",
+      "source_id": 52213936070105,
+      "source_url": "https://www.ascendweston.org/obituaries/ben-koski",
+      "source_date": "2026-08-05",
+      "death_year": 2026,
+      "birth_date": "1964-09-12",
+      "death_date": "2026-08-05",
+      "age": 61,
+      "funeral_home": "Ascend Funeral Home & Cremation Care",
+      "photo_url": "https://cdn.tukioswebsites.com/e463b893-1336-4f44-9890-8e35e86b811d/lg",
+      "summary": "Ben Koski, age 61, of Rothschild passed away on August 5, 2026.",
+      "body": "Ben Koski of Rothschild, Wisconsin passed away on August 5, 2026, at Aspirus Hospice House, with his beloved wife at his side.\n\nBen was born September 12, 1964, in Stambaugh, Michigan, the sixth son of Konstant Koski Jr. and Leona (Beckman) Koski. He graduated from the West Iron County School system in 1982. He eventually moved to Colorado where he met Carolyn Bon, who became his wife. They were married on November 26, 1988, and continued to live and work in Colorado until 1992, when they moved to Wausau, Wisconsin where Ben worked as a custom cabinet maker until his retirement.\n\nBen enjoyed hockey, football, cats and listening to the radio, especially bluegrass music.\n\nBen was preceded in death by both parents and his brothers, Wayne, Roy and John and his nephew Joe. He is survived by his wife, Carolyn, brothers Glen and David, sisters-in-law Joy, Donna, Leanne and Lois Lathrop, numerous nieces and nephews and extended family.\n\nMemorials may be given to the Portage County Humane Society (in honor of his precious cat Fleur).\n\nA small, informal celebration of life will be held at a later date.\n\nAscend Funeral Home & Cremation Care of Weston is assisting the family with arrangements. Condolences may be shared at www.ascendweston.org."
     },
     {
       "name": "Dean L. Flemal",
@@ -15457,7 +15538,7 @@
       "death_date": "2026-08-05",
       "age": 67,
       "funeral_home": "Ascend Funeral Home & Cremation Care",
-      "photo_url": "https://cdn.tukioswebsites.com/265c037c-b2b2-40b2-adc7-8e82c38aefff/lg",
+      "photo_url": "https://cdn.tukioswebsites.com/8c4c4b22-ac35-45dc-b8d4-ff6f43794c6c/lg",
       "summary": "Patrick Jon Dodge, age 67, of Rothschild passed away on August 5, 2026.",
       "body": "It is with heavy hearts that we announce the unexpected passing of Patrick Jon Dodge, 67.\n\nPatrick was the second of five children born to Richard and Jean Dodge. While born in Amery, WI, he spent most of his childhood and early years in Wisconsin Rapids, where he formed many of the values and friendships that remained with him throughout his life.\n\nHe began his military service in the Wisconsin National Guard before entering active duty with the United States Army, serving in Korea. He was proud of his military service and a true advocate for the VA Healthcare System.\n\nThough he spent his last six years in Washington State, Patrick never lost touch with his Wisconsin roots. A lifelong Green Bay Packers fan and stockholder, he wore his Packers pride proudly and followed the team with enthusiasm each season.\n\nPat was known for his generous spirit and was always willing to help anyone in need. He approached life with an unusual level of optimism, finding reasons for hope and humor even during difficult times. He was also an active student of martial arts, embracing the discipline, perseverance, and lifelong learning it encouraged.\n\nHe is survived by his wife, Becky, with whom he shared nearly 42 years of marriage; his son, Carl Dodge and wife Amanda and their two children Evan and Charlie; and his daughter, Melissa.\n\nHe is also survived by his siblings, Jody Halliday (John), Terri Grant (Jerry), Mary Kranick (Rich), and Dan Dodge (Liz); and by his nieces and nephews, Kati, Sam, Elizabeth, Jean, Sarah, Mary, Matthew, Allison, and Tyler. He was preceded in death by his parents, Richard and Jean Dodge.\n\nPatrick will be remembered for his service to his country, his loyalty to friends and family, his willingness to lend a helping hand, and his enduring optimism. He will be deeply missed by all who knew him.\n\nFuneral services will be planned for a later date.\n\nAscend Funeral Home & Cremation Care is assisting the family with arrangements. Condolences may be shared at www.ascendweston.org."
     },
@@ -15504,6 +15585,20 @@
       "body": "Thomas Zimmerman passed away surrounded by the love of his family, leaving behind a legacy of hard work, kindness, and unwavering devotion to those he loved. He was born to the late Ervin and Florence (Marske) Zimmerman.\n\nOn May 2, 1959, Thomas married the love of his life, Sharon Hitt. Together they shared 67 wonderful years of marriage, building a life centered on faith, family, and steadfast commitment to one another.\n\nThomas proudly served his country in the United States Army Reserve and was called to active duty during the Berlin Crisis. Following his military service, he discovered the work that would define much of his life—logging. Wood wasn't just his livelihood; it was his passion. He spent many years working for Jim Grezenski, earning a reputation as one of the hardest-working and most respected men in the logging community.\n\nEven after retirement, Thomas never truly left the woods. He found peace cutting firewood, and anyone who knew him knew there wasn't a better day than one spent with a chainsaw in his hands. His meticulously stacked woodpiles were as legendary as his work ethic—straight, neat, and built to last.\n\nThomas was known throughout his community and the logging industry as a man of exceptional character. He was fair, honest, hardworking, and always willing to lend a helping hand to anyone in need. His integrity, generosity, and quiet strength earned him the respect and admiration of all who knew him.\n\nWhen he wasn't in the woods, Thomas loved trains and enjoyed model railroading and restoring Allis-Chalmers tractors, taking pride in preserving pieces of history with the same care he brought to everything he did.\n\nAbove all else, Thomas cherished his family. His greatest joy came from spending time with his grandchildren, and great-grandchildren; he treasured his little buddy, Shawn; his beautiful granddaughter, Shazia; and the shining stars in his eyes, his great-granddaughters, Alexa, Ariella, and Miley. His love for his family was unconditional, and they were the center of his world.\n\nThomas is survived by his beloved wife of 67 years, Sharon Zimmerman; his daughters, Lorena Von der Puetten and Kathy Luksich; his granddaughter, Shazia (Jared Runyon) Hussain; and his cherished great-granddaughters, Alexa, Ariella, and Miley.\n\nHe was preceded in death by his parents, Ervin and Florence Zimmerman; his beloved son, Kirby; and his cherished grandson, Shawn."
     },
     {
+      "name": "Carol Jean Daul",
+      "source_id": 279107779022176,
+      "source_url": "https://www.bestefh.com/obituaries/carol-daul",
+      "source_date": "2026-08-06",
+      "death_year": 2026,
+      "birth_date": "1962-03-19",
+      "death_date": "2026-08-06",
+      "age": 64,
+      "funeral_home": "Beste Funeral Home",
+      "photo_url": "https://cdn.tukioswebsites.com/9c8d4b61-6d01-4159-8713-4e55beaadede/lg",
+      "summary": "Carol Jean Daul, age 64, of Mosinee passed away on Aug 6, 2026.",
+      "body": "Carol J. Daul, 64, Mosinee, peacefully passed away after a courageous battle with cancer on Thursday, August 6, 2026, at St. Joseph’s Hospital, Marshfield, surrounded by her family.\n\nCarol was born on March 19, 1962, in Marshfield, daughter of Fred and Mavis (Foster) Johnson. She graduated from Mosinee High School. She married Neil Daul on June 27, 1980, at St. Patrick Catholic Church, Halder, where they had 46 wonderful years together.\n\nCarol had a way of making the people around her feel loved, welcomed, and at home, and the memories she created with her family and friends will be treasured forever.\n\nCarol loved spending time with her family and friends. She especially enjoyed traveling to the mountains of Montana, gardening, crafting/thrifting, going to NASCAR races, watching her kids/grandkids at their sporting events and spending time at the cabin. She loved making maple syrup, gathering with her girl friends and enjoying the outdoors (fishing, pontoon rides, snowmobiling, snowshoeing, cross country skiing and many other adventures).\n\nCarol worked at Marshfield Clinic for 30 years where she made many lifelong friendships.\n\nCarol will be lovingly remembered by her husband Neil, their children, son Jason Daul (Laura) and daughter Jodi Hotchkiss (Eric); grandchildren, Jaylen Daul, Hunter Halbesleben, Austin and Aiden Hotchkiss; siblings, Gary Johnson (Darlene), Diane Paul (Joe) and Terry Johnson (Christine); as well as many nieces and nephews.\n\nShe was preceded in death by her father, Fred Johnson; her mother and father-in-law, Betty and Leo Daul; and her brother-in-law, Mike Daul.\n\nIn lieu of flowers, donations in Carol’s name can be directed to Breast Cancer Research.\n\nA Christian Mass will be held at 11:00 a.m., on Friday, August 14, 2026, at St. Patrick Catholic Church, Halder. Reverend Don Bosco will officiate. Visitation will be held from 9:00 a.m., until the time of service, all at the church. Beste Funeral Home, Mosinee, is honored to be assisting the family with arrangements. Online condolences and memories may be shared with the family at www.bestefh.com.\n\nOur family would like to extend a heartfelt thank you to her caregivers and nurses at Marshfield Clinic and St. Joseph’s Hospital. Your kindness and patience brought Carol so much comfort. We will forever be grateful."
+    },
+    {
       "name": "Daniel Cole Skochil",
       "source_id": 49200281,
       "source_url": "https://www.carlsonfh.com/obituaries/Daniel-Cole-Skochil?obId=49200281",
@@ -15516,6 +15611,146 @@
       "photo_url": "https://d1q40j6jx1d8h6.cloudfront.net/Obituaries/49200281/Thumbnail_1.jpg",
       "summary": "Daniel Cole Skochil, age 65, of Rhinelander passed away on August 6, 2026.",
       "body": "Daniel Cole Skochil, age 65, of Rhinelander, died on August 6, 2026, in Rhinelander. He was born on September 18, 1960 in Rhinelander, the son of Richard and Nettie (Cole) Skochil. Survivors include his brother Jeffrey (Barbara) Skochil. Arrangements are incomplete at this time. A complete notice will follow shortly. You may leave your private condolences for the Skochil family at www.carlsonfh.com. The Carlson Funeral Home (715-369-1414) is serving the Skochil family."
+    },
+    {
+      "name": "Paul David Quisenberry",
+      "source_id": 32914504693442,
+      "source_url": "https://www.brainardfuneral.com/obituaries/paul-quisenberry",
+      "source_date": "2026-08-06",
+      "death_year": 2026,
+      "birth_date": "1965-04-10",
+      "death_date": "2026-08-06",
+      "age": 61,
+      "funeral_home": "Brainard Funeral Home & Cremation Center",
+      "photo_url": "https://cdn.tukioswebsites.com/44986b0e-a6fb-4cdb-93ae-990705f6c134/lg",
+      "summary": "Paul David Quisenberry, age 61, of Weston, Wisconsin passed away on Aug 6, 2026.",
+      "body": "Paul David Quisenberry, age 61 of Weston, Wisconsin, passed away peacefully on Thursday, August 6, 2026, at his home.\n\nHe was born on April 10, 1965, in Fort Thomas, Kentucky, the son of Charles and Ellen (Ogden) Quisenberry. Paul graduated from the University of Arkansas with his Juris Doctorate Degree. He worked as a Special Agent for the FBI until his retirement. He played rugby during his time in college and played professional darts in New York City. He loved watching cricket, snooker, frequenting a nice Irish Pub and cheering on FC Barcelona.\n\nHe is survived by his sister, Amy Quisenberry Faustine, her children, Aidan Samuel Faustine and Cian Quinn Faustine; Tony Faustine and close friends, John Cochran and Eugene Gormley. He is preceded in death by his parents, Chuck and Rock.\n\nArrangements are with Brainard Funeral and Cremation Service in Weston, Wisconsin."
+    },
+    {
+      "name": "Ben Koski",
+      "source_id": 301382,
+      "source_url": "https://wausaupilotandreview.com/2026/08/07/wausau-area-obituaries-august-7-2026/",
+      "source_date": "2026-08-07",
+      "death_year": 2026,
+      "birth_date": "1964-09-12",
+      "death_date": "2026-08-05",
+      "age": 61,
+      "funeral_home": "Ascend Funeral Home & Cremation Care",
+      "photo_url": "https://wausaupilotandreview.com/wp-content/uploads/2026/08/gnsetj-771x992.jpg",
+      "summary": "Ben Koski of Rothschild, Wisconsin, age 61, passed away on August 5, 2026.",
+      "body": "Ben Koski of Rothschild, Wisconsin passed away on August 5, 2026, at Aspirus Hospice House, with his beloved wife at his side.\n\nBen was born September 12, 1964, in Stambaugh, Michigan, the sixth son of Konstant Koski Jr. and Leona (Beckman) Koski. He graduated from the West Iron County School system in 1982. He eventually moved to Colorado where he met Carolyn Bon, who became his wife. They were married on November 26, 1988, and continued to live and work in Colorado until 1992, when they moved to Wausau, Wisconsin where Ben worked as a custom cabinet maker until his retirement.\n\nBen enjoyed hockey, football, cats and listening to the radio, especially bluegrass music.\n\nBen was preceded in death by both parents and his brothers, Wayne, Roy and John and his nephew Joe. He is survived by his wife, Carolyn, brothers Glen and David, sisters-in-law Joy, Donna, Leanne and Lois Lathrop, numerous nieces and nephews and extended family.\n\nMemorials may be given to the Portage County Humane Society (in honor of his precious cat Fleur).\n\nA small, informal celebration of life will be held at a later date."
+    },
+    {
+      "name": "Joel A. Boldig",
+      "source_id": 301382,
+      "source_url": "https://wausaupilotandreview.com/2026/08/07/wausau-area-obituaries-august-7-2026/",
+      "source_date": "2026-08-07",
+      "death_year": 2026,
+      "birth_date": "1965-03-06",
+      "death_date": "2026-08-01",
+      "age": 61,
+      "funeral_home": null,
+      "photo_url": "https://wausaupilotandreview.com/wp-content/uploads/2026/08/gjl.jpg",
+      "summary": "Joel A. Boldig, age 61, passed away tragically on August 1, 2026.",
+      "body": "Joel Allen Boldig, 61, passed away tragically as the result of an automobile accident on Saturday, August 1, 2026.\n\nJoel was born on March 6, 1965, in Wisconsin to Jay and Marlese (Sengstock) Boldig. On November 12, 1983, he married his high school sweetheart, Carrie Hull.\n\nJoel spent more than 40 years working in manufacturing and operations. In 2026, he joined Crystal Finishing, where he continued his career.\n\nJoel spent his life on the family land where he was raised, a place that had been in his family for generations. Living alongside parents, grandparents, and extended family, he raised his own family there, continuing a tradition that was an important part of his life.\n\nHe had a lifelong appreciation for the outdoors and enjoyed hunting, fishing, camping, kayaking, biking, and spending time on the land he called home. He and Carrie also had a passion for raising and showing horses, an interest that took their family on many adventures over the years.\n\nJoel was a talented woodworker and handyman who could build or repair nearly anything. Together, he and Carrie founded Rustic River Mosaics, where his craftsmanship helped create custom furniture and woodworking pieces that quickly became well known and highly sought after. He was also known for his skill at the grill and smoker, taking pride in preparing barbecue and meals for family and friends.\n\nTo his grandchildren, he was Papa Joel. He was the loud, goofy grandpa who kept everyone laughing and brought energy wherever he went. At family holidays and gatherings, Joel was often the life of the party, and no one ever knew what he might say or do next. His grandchildren adored him.\n\nJoel is survived by his wife, Carrie Boldig; his son, Adam (Megan) Boldig; his daughter, Chandra (Kyle) Jochimsen; his grandchildren, Jaela, Kinslee, Benjamin, Austyn, Wyatt, Everett, Holden, Jack, and John; his mother, Marlese (Dave) Lindsay; his brother, Jeff (Deborah) Boldig; his sister, Jennifer (Steve) Byers; his mother-in-law, Donna Hull; his sisters-in-law, Cheryl (Terry) Nillissen and Patty (Mark) Kropf; along with many beloved nieces, nephews, extended family members, and dear friends.\n\nHe was preceded in death by his father, Jay Boldig, and his father-in-law, Donald Hull.\n\nJoel's memory lives on through his wife, Carrie, his children, and his grandchildren, who carry forward some of the very best parts of him; his appreciation for the outdoors, his practical skills, his sense of humor, and the traditions he helped create. His legacy can be found in the family homestead, the pieces he built with his hands, and the memories made with those who knew him.\n\nService information below:\n\nSaturday, August 15th, 2026\n\nSt. Paul Lutheran Church\n\nWittenberg, WI 54499\n\nVisitation: 9am-11am (At the church)\n\nService: 11:30am\n\nLunch to follow"
+    },
+    {
+      "name": "John A. Emerick Jr.",
+      "source_id": 301382,
+      "source_url": "https://wausaupilotandreview.com/2026/08/07/wausau-area-obituaries-august-7-2026/",
+      "source_date": "2026-08-07",
+      "death_year": 2026,
+      "birth_date": "1959-04-13",
+      "death_date": "2026-07-21",
+      "age": 67,
+      "funeral_home": null,
+      "photo_url": "https://wausaupilotandreview.com/wp-content/uploads/2026/08/xdngsdgn-771x963.jpg",
+      "summary": "John A. Emerick Jr., age 67, of Kronenwetter, died unexpectedly on July 21, 2026.",
+      "body": "John A. Emerick Jr. (\"Jay\"), 67, of Kronenwetter, died unexpectedly on July 21, 2026, while scuba diving the Cedarville shipwreck in the Straits of Mackinac in Michigan.\n\nJay was born April 13, 1959, in Milwaukee, son of John A. Emerick Sr. and Esther (Meyer) Emerick. Jay was a scientist and outdoorsman who explored the natural world throughout his professional and personal life. He earned degrees in geology and geophysics from the University of Wisconsin and spent his career exploring for oil and gas, first based in Louisiana and Texas where he raised four children alongside his former wife Jessica Emerick, and later stationed abroad in Asia and Africa, before returning home to Wisconsin in his well-deserved retirement where his adventures continued in earnest alongside his partner Cindy Radenz.\n\nJay's love for the outdoors filled his calendar with trips hunting, fishing, and trapping; kayaking, canoeing, and scuba diving; hiking, biking, and camping; and what he jokingly called \"thumb sports\": ATVs, motorcycles, and snowmobiles. His appreciation for nature was surpassed only by his commitment to sharing it with others. His favorite place to do that was Spirit Falls Lodge, where he dedicated his \"labor of love\" to carrying on decades-long family traditions in the woods and on the Spirit River with his children and relatives. He embodied its core values to preserve traditions, to remember those who went before, and to always honor their memory.\n\nHe is preceded in death by his parents, sister Regina, brother Patrick, best friend and cousin Tom, and a special uncle, Raymond Meyer. He is survived by his partner Cindy Radenz; his children Matt Emerick, Jay Emerick, Jenna Emerick, and Megan Emerick; his grandchildren Elliot Emerick and Jack Emerick; his siblings Richard, Mark, and Nancy; and numerous cousins, nieces, nephews, and in-laws.\n\nThe funeral Mass will be celebrated at 11:00 a.m. on Friday, August 28, 2026, at St. Therese Catholic Church, 113 West Kort Street, Rothschild, with Rev. Janusz Kowalski presiding. Visitation will begin at 10:00 a.m. until the time of service at the church. Private family burial will take place at a later date."
+    },
+    {
+      "name": "Lois Ann Rasmussen",
+      "source_id": 158015180830152,
+      "source_url": "https://www.rembsfh.com/obituaries/lois-rasmussen",
+      "source_date": "2026-08-07",
+      "death_year": 2026,
+      "birth_date": "1931-10-06",
+      "death_date": "2026-08-07",
+      "age": 94,
+      "funeral_home": "Rembs Funeral Home",
+      "photo_url": "https://cdn.tukioswebsites.com/7a754205-cc3e-4792-963d-2a1a32f761a6/lg",
+      "summary": "Lois Ann Rasmussen, age 94, of Marshfield passed away on Aug 7, 2026.",
+      "body": "Lois A. Rasmussen, 94, of Marshfield passed away peacefully at the Wells Nature View 2711 South Apple under the care of Heartland Hospice with family by her side.\n\nPer her wishes, there will be no public services. She will be interred with her husband at Gate of Heaven Cemetery.\n\nLois was born October 6, 1931 in Marshfield to Edmund W. “Bill” and Viola (Laufenberg) Treutel. The third of four daughters born to the couple, she attended local schools, graduating From Marshfield High in 1949. Lois was united in marriage to the late Gordon E. Rasmussen February 3, 1951 at Our Lady of Peace Catholic Church in Marshfield. He sadly passed in 2021.\n\nLois is survived by her children: Sandee Kramer of Palatine, IL; Jeffrey (Mary Jane) Rasmussen of Chester, NJ; Scott (Clare) Rasmussen of Eau Claire, WI; Cindy (Wayne) Zygarlicke of Marshfield, WI; Brian (Sandy) Rasmussen of Orono, MN; Aimee (Jerry) Clough of Sobieski, WI; and Brenda Carpenter of Menomonie, WI. She is further survived by 18 grandchildren: Jim (Amy) Kramer, Tom (Crista) Kramer, Tim (Rebecca) Kramer, Matt (Catie) Kramer, Dana (Christopher) Zebrowski, Laura (Courtney) Holland, Eric (Arwen) Rasmussen, Joel (Sally) Rasmussen, Bryan (Johanna) Rasmussen, Kyle (Melissa) Zygarlicke, Neal (Whitney) Zygarlicke, Rob Rasmussen, Erin Rasmussen, Katie Rasmussen, Noah (Alecia) Clough, Zoe (Nathan) Schumacher, Ada Clough, Ryan (McKenna) Carpenter, and 24 great grandchildren: JD, Hayley & Caleb Kramer, Julia, Paige, Allison, & Sarah Kramer, Lucas & Lily Kramer, Mason, Evelyn, & Harrison Kramer, CJ & Grace Zebrowski, Mira Holland, Gordon & Quinn Rasmussen, Elwood, Leah, & Brynn Zygarlicke, Monroe Zygarlicke, Kynsley Clough, and Kaden & Dawson Carpenter; and her sister Mary Carol Schlagenhaft of Marshfield.\n\nShe was preceded in death by her parents, her husband Gordon, sons Joseph & Michael, and sisters Jeanne Hanson & Anita Dieringer."
+    },
+    {
+      "name": "Margaret Ramirez",
+      "source_id": 301382,
+      "source_url": "https://wausaupilotandreview.com/2026/08/07/wausau-area-obituaries-august-7-2026/",
+      "source_date": "2026-08-07",
+      "death_year": 2026,
+      "birth_date": "1968-04-23",
+      "death_date": "2026-08-01",
+      "age": 58,
+      "funeral_home": "Mid Wisconsin Cremation Society",
+      "photo_url": "https://wausaupilotandreview.com/wp-content/uploads/2026/08/fshqwh.jpg",
+      "summary": "Margaret Ramirez, age 58, passed away peacefully on August 1, 2026.",
+      "body": "Margaret Ramirez, 58, passed away peacefully on August 1, 2026. She was born on April 23, 1968, to the late Jerome and Valoise Ullmer.\n\nMargaret was united in marriage to the love of her life, Jorge Ramirez, with whom she shared a life centered on love, family, and cherished memories.\n\nMargaret had a heart as big as her smile and was known for her kindness and willingness to help anyone in need. She found joy in caring for others and was happiest when she could lend a helping hand. She loved playing video games, listening to music, gathering with family and friends for cookouts, and creating lasting memories with those she loved most.\n\nHer greatest joy in life was her family. Margaret treasured every moment spent with her children and grandchildren, who brought endless happiness to her life. She also had a special love for animals, and her compassion extended to every creature she met.\n\nMargaret will be remembered for her generous spirit, loving heart, and the warmth she shared so freely with everyone around her. Though she will be deeply missed, the love she gave and the memories she created will live on in the hearts of all who knew her.\n\nShe is lovingly survived by her husband, Jorge Ramirez; her children, Jennifer (Chase) Kramer, Jessika Power, Mike Berk, and Greg (Ally) Bishop; her cherished grandchildren, Mynah, Maliyah, Greyson, Joseph, Andrew, Alexa, Gavin, Olivia, Ellie, and Jace; her sister, Tamara McCauly; her brother, Daniel (Stacey) Ullmer; as well as many extended family members, dear friends, and all whose lives were touched by her kindness.\n\nShe was preceded in death by her parents, Jerome and Valoise Ullmer; her two sons, Andrew and Joseph; and her brother, Robert Roundtree.\n\nA Celebration of Margaret's Life will be held at 12:00 p.m. on Saturday, August 15, 2026, at 823 East Thomas Street, Wausau, Wisconsin. Family and friends are invited to gather to share stories, celebrate her life, and honor the love and kindness she so generously shared with everyone she met.\n\nMargaret's legacy of compassion, generosity, and unwavering love for her family will continue to live on in the hearts of those who knew and loved her."
+    },
+    {
+      "name": "Marion J. Froemming",
+      "source_id": 301382,
+      "source_url": "https://wausaupilotandreview.com/2026/08/07/wausau-area-obituaries-august-7-2026/",
+      "source_date": "2026-08-07",
+      "death_year": 2026,
+      "birth_date": "1933-12-23",
+      "death_date": "2026-08-04",
+      "age": 92,
+      "funeral_home": "Helke Funeral Home & Cremation Services",
+      "photo_url": "https://wausaupilotandreview.com/wp-content/uploads/2026/08/ndsgn-771x964.jpg",
+      "summary": "Marion J. Froemming, age 92, of Wausau, passed away peacefully on August 4, 2026.",
+      "body": "Marion \"Mickey\" J. Froemming, age 92, of Wausau, passed away peacefully on Tuesday, August 4, 2026, while at Country Terrace in Tomahawk, with her family gathered by her side and while under the care of St. Croix Hospice.\n\nMarion was born in Rib Falls, Marathon County, on December 23, 1933, to the late George and Irene (Frank) Schultz. She grew up in Wausau and attended local schools, graduating from Wausau High School in 1952. Marion married the late Donald Froemming on October 6, 1952, in Pine City, Minnesota, and together they enjoyed 63 years of marriage. Donald and Marion made their home in Wausau. Marion was a lifelong member of Trinity Lutheran Church in Wausau. She was employed with the Marathon County Treasurer / Finance Department, where she retired after 26 years of service.\n\nMarion enjoyed spending time with her family and get-togethers at their cottage on Manson Lake. She bowled on the National Bowling League for over 25 years, and on the State Bowling League for over 35 years. Marion was especially fond of the many friends she met through bowling.\n\nMarion will be sadly missed by her children: Daniel (Kathie) Froemming, Michael (Vickie) Froemming and Lisa (Eric) Whitburn. She is further survived by her grandchildren: Elizabeth, Sarah, Jennifer, Christopher, Becky, Natalie, Clinton and Luke, as well as her sister-in-law: Barbara Schultz. She was lovingly called \"Granny\" by her beloved great grandchildren: Elayne, Jaxson, Benjamin, Walter, Charlie, Vincent, Leonardo and Jane. She is preceded in death by her parents, husband: Donald, brother: Roger Schultz, sisters: Barbara Schultz, Caroline Koehler and Lois Schultz.\n\nThe funeral service for Marion will be held on Friday, August 14, 2026, at 11:00 a.m. at Trinity Lutheran Church, 501 Stewart Avenue, Wausau. The Rev. Paul Sundbom will officiate. Visitation will be held on Friday, August 14, 2026, from 10:00 a.m. until the time of the service, also at the church. A private burial at Pine Grove Cemetery in Wausau will follow.\n\nIn lieu of flowers, please direct donations in Marion's name to either Trinity Lutheran Church or the Ronald McDonald House at www.Rmhc.org, both very close to her heart.\n\nThe family wishes to extend a heartfelt thank you to St. Croix Hospice, especially Holly and Alisa, for all of their support and care, as well as the staff at Country Terrace in Tomahawk for helping Marion and her family adjust to the facility."
+    },
+    {
+      "name": "Patrick J. Dodge",
+      "source_id": 301382,
+      "source_url": "https://wausaupilotandreview.com/2026/08/07/wausau-area-obituaries-august-7-2026/",
+      "source_date": "2026-08-07",
+      "death_year": 2026,
+      "birth_date": null,
+      "death_date": null,
+      "age": 67,
+      "funeral_home": "Ascend Funeral Home & Cremation Care",
+      "photo_url": "https://wausaupilotandreview.com/wp-content/uploads/2026/08/sgns-771x964.jpg",
+      "summary": "Patrick J. Dodge, age 67, passed away unexpectedly.",
+      "body": "It is with heavy hearts that we announce the unexpected passing of Patrick Jon Dodge, 67.\n\nPatrick was the second of five children born to Richard and Jean Dodge. While born in Amery, WI, he spent most of his childhood and early years in Wisconsin Rapids, where he formed many of the values and friendships that remained with him throughout his life.\n\nHe began his military service in the Wisconsin National Guard before entering active duty with the United States Army, serving in Korea. He was proud of his military service and a true advocate for the VA Healthcare System.\n\nThough he spent his last six years in Washington State, Patrick never lost touch with his Wisconsin roots. A lifelong Green Bay Packers fan and stockholder, he wore his Packers pride proudly and followed the team with enthusiasm each season.\n\nPat was known for his generous spirit and was always willing to help anyone in need. He approached life with an unusual level of optimism, finding reasons for hope and humor even during difficult times. He was also an active student of martial arts, embracing the discipline, perseverance, and lifelong learning it encouraged.\n\nHe is survived by his wife, Becky, with whom he shared nearly 42 years of marriage; his son, Carl Dodge and wife Amanda and their two children Evan and Charlie; and his daughter, Melissa.\n\nHe is also survived by his siblings, Jody Halliday (John), Terri Grant (Jerry), Mary Kranick (Rich), and Dan Dodge (Liz); and by his nieces and nephews, Kati, Sam, Elizabeth, Jean, Sarah, Mary, Matthew, Allison, and Tyler. He was preceded in death by his parents, Richard and Jean Dodge.\n\nPatrick will be remembered for his service to his country, his loyalty to friends and family, his willingness to lend a helping hand, and his enduring optimism. He will be deeply missed by all who knew him.\n\nFuneral services will be planned for a later date."
+    },
+    {
+      "name": "Brenda Ann Pierschalla",
+      "source_id": 58359894213485,
+      "source_url": "https://www.taylorstinewaid.com/obituaries/brenda-pierschalla",
+      "source_date": "2026-08-08",
+      "death_year": 2026,
+      "birth_date": "1949-09-10",
+      "death_date": "2026-08-08",
+      "age": 76,
+      "funeral_home": "Taylor-Stine-Waid Funeral Home",
+      "photo_url": "https://cdn.tukioswebsites.com/c7ccfa55-d88a-4fcf-a056-bcf7c2a01a37/lg",
+      "summary": "Brenda Ann Pierschalla, age 76, of Irma, WI passed away on Aug 8, 2026.",
+      "body": "Full obituary is pending.  Please check back later."
+    },
+    {
+      "name": "Gordon \"Gordie\" Joseph Rutkowski",
+      "source_id": 220729875658401,
+      "source_url": "https://www.brainardfuneral.com/obituaries/gordon-gordie-rutkowski",
+      "source_date": "2026-08-08",
+      "death_year": 2026,
+      "birth_date": "1940-04-16",
+      "death_date": "2026-08-08",
+      "age": 86,
+      "funeral_home": "Brainard Funeral Home & Cremation Center",
+      "photo_url": "https://cdn.tukioswebsites.com/616c6435-a736-4d3a-8d19-c1a356982eb8/lg",
+      "summary": "Gordon \"Gordie\" Joseph Rutkowski, age 86, of Wausau passed away on Aug 8, 2026.",
+      "body": "Full obituary and service details are pending.  Please check back later."
     }
   ]
 }
