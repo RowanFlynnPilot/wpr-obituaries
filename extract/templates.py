@@ -77,7 +77,7 @@ def _root_vars_wide(newsroom: Newsroom) -> str:
     return f"""
     :root {{
       --ink: #1b1a18; --paper: {newsroom.paper}; --paper-2: #fffdf7; --muted: #6f6a61;
-      --faint: #9b958a; --rule: #d9d3c6; --hairline: #e7e1d5; --hover: #efe9dd; --accent: {newsroom.accent};
+      --faint: #6d675f; --rule: #d9d3c6; --hairline: #e7e1d5; --hover: #efe9dd; --accent: {newsroom.accent};
       --serif: {newsroom.serif};
       --nameplate: {newsroom.nameplate};
       --mono: {newsroom.mono};
@@ -620,7 +620,7 @@ def render_person_page(
   <style>
     :root {{
       --ink: #1b1a18; --paper: {newsroom.paper}; --paper-2: #fffdf7;
-      --muted: #6f6a61; --faint: #9b958a; --rule: #d9d3c6;
+      --muted: #6f6a61; --faint: #6d675f; --rule: #d9d3c6;
       --hairline: #e7e1d5; --hover: #efe9dd; --accent: {newsroom.accent};
       --serif: {newsroom.serif};
       --nameplate: {newsroom.nameplate};

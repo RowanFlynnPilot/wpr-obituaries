@@ -143,6 +143,17 @@ export default function App() {
 
 function LoadingSkeleton() {
   return (
+    <>
+      <p className="sr-only" role="status">
+        Loading obituaries…
+      </p>
+      <SkeletonRows />
+    </>
+  );
+}
+
+function SkeletonRows() {
+  return (
     <div className="skeleton" aria-hidden="true">
       {Array.from({ length: 6 }).map((_, i) => (
         <div className="skeleton__row" key={i}>

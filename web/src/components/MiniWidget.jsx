@@ -42,6 +42,9 @@ export default function MiniWidget() {
   const [error, setError] = useState(null);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  // A manual choice stops the auto-advance for good — hover/focus pause never
+  // fires on touch, so tapping an arrow or dot is the only pause a phone has.
+  const [interacted, setInteracted] = useState(false);
   const timer = useRef(null);
 
   useEffect(() => {
@@ -65,7 +68,7 @@ export default function MiniWidget() {
   }, [data]);
 
   useEffect(() => {
-    if (paused || picks.length < 2) return undefined;
+    if (paused || interacted || picks.length < 2) return undefined;
     // Honour reduced-motion: no auto-advance (the dots still let you step through).
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
     timer.current = setInterval(
@@ -73,7 +76,7 @@ export default function MiniWidget() {
       ADVANCE_MS
     );
     return () => clearInterval(timer.current);
-  }, [paused, picks.length]);
+  }, [paused, interacted, picks.length]);
 
   if (error) {
     return (
@@ -104,7 +107,14 @@ export default function MiniWidget() {
   const span = lifespan(ob);
   const sponsors = sponsor?.sponsors || [];
   const allUrl = registerUrl();
-  const go = (delta) => setIndex((i) => (i + delta + picks.length) % picks.length);
+  const go = (delta) => {
+    setInteracted(true);
+    setIndex((i) => (i + delta + picks.length) % picks.length);
+  };
+  const pick = (i) => {
+    setInteracted(true);
+    setIndex(i);
+  };
 
   return (
     <aside
@@ -155,7 +165,7 @@ export default function MiniWidget() {
                 className={`mini__dot${i === index ? " is-active" : ""}`}
                 aria-label={p.name}
                 aria-current={i === index}
-                onClick={() => setIndex(i)}
+                onClick={() => pick(i)}
               />
             ))}
           </div>

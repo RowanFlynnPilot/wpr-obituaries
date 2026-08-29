@@ -33,19 +33,23 @@ export default function FeaturedCarousel({ obituaries }) {
 
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  // A manual choice (arrow/dot) stops the auto-advance for good — hover/focus
+  // pause never fires on touch, so tapping is the only pause a phone has, and
+  // nobody who picked a card wants it swapped out from under them seconds later.
+  const [interacted, setInteracted] = useState(false);
 
   // Reset if the underlying set changes (e.g. fresh data load).
   useEffect(() => setIndex(0), [featured.length]);
 
   useEffect(() => {
-    if (featured.length <= 1 || paused) return;
+    if (featured.length <= 1 || paused || interacted) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const t = setInterval(
       () => setIndex((i) => (i + 1) % featured.length),
       INTERVAL
     );
     return () => clearInterval(t);
-  }, [featured.length, paused]);
+  }, [featured.length, paused, interacted]);
 
   if (featured.length === 0) return null;
 
@@ -53,7 +57,10 @@ export default function FeaturedCarousel({ obituaries }) {
   const ob = featured[i];
   const span = lifespan(ob);
   const href = `${BASE}o/${ob.slug}.html`;
-  const go = (n) => setIndex((n + featured.length) % featured.length);
+  const go = (n) => {
+    setInteracted(true);
+    setIndex((n + featured.length) % featured.length);
+  };
 
   return (
     <section

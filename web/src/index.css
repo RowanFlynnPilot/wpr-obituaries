@@ -9,7 +9,8 @@
   --paper: #f6f2ea;
   --paper-2: #fffdf7;
   --muted: #6f6a61;
-  --faint: #78726a; /* darkened from #9b958a so labels clear the contrast floor */
+  --faint: #6d675f; /* darkest "faint": its uses are tiny text, which needs the
+                       full 4.5:1 AA ratio on --paper, not the 3:1 large-text floor */
   --rule: #d9d3c6;
   --hairline: #e7e1d5;
   --accent: #7c2e36;       /* oxblood — dignified, ties to the sponsor crimson */
@@ -23,6 +24,19 @@
 
 * {
   box-sizing: border-box;
+}
+
+/* Screen-reader-only text (the loading announcement — the skeleton is aria-hidden). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 html {
@@ -324,7 +338,9 @@ body {
   background-clip: content-box;
   border: 0;
   border-radius: 50%;
-  background-color: var(--rule);
+  /* --faint, not --rule: an inactive dot is a UI affordance and needs the 3:1
+     non-text minimum against the paper — --rule is a 1.3:1 hairline tone. */
+  background-color: var(--faint);
   cursor: pointer;
   transition: background-color 0.15s ease, transform 0.15s ease;
 }
