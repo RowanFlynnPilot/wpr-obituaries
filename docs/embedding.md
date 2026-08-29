@@ -44,8 +44,8 @@ gas-prices widget). A live preview of both, exactly as embedded, is at
 How it works: the widget posts its rendered height to the page whenever its
 layout changes (`web/src/lib/frame.js`), and this script stretches the iframe to
 match — so the tool reads as part of the page, never a scrollbox. The
-`e.source` check ties the listener to this exact iframe, so it keeps working
-unchanged when the tool moves to the custom subdomain.
+`e.source` check ties the listener to this exact iframe rather than any origin,
+so the snippet works unchanged wherever the tool is served from.
 
 ## 2 — Mini widget (articles / sidebar)
 

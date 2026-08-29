@@ -62,6 +62,20 @@ class Obituary:
             digest = hashlib.sha1(self.source_url.encode()).hexdigest()[:6]
             object.__setattr__(self, "slug", f"{slugify(self.name)}-{stamp}-{digest}")
 
+    def lifespan(self) -> str:
+        """'1950 – 2026', the death year alone, or '' when nothing is dated.
+
+        The one lifespan formatter — the share card and every template use it,
+        so the OG image and the page can never drift apart.
+        """
+        birth = self.birth_date[:4] if self.birth_date else ""
+        death = (
+            self.death_date[:4]
+            if self.death_date
+            else (str(self.death_year) if self.death_year else "")
+        )
+        return f"{birth} – {death}" if birth and death else death
+
     def excerpt(self, limit: int = 200) -> str:
         """The opening of the obituary body, trimmed at a word boundary.
 

@@ -1,13 +1,4 @@
-import { lifespan, photoSrc } from "../lib/format.js";
-
-function initials(name) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join("");
-}
+import { initials, lifespan, photoSrc } from "../lib/format.js";
 
 export default function ObituaryRow({ ob }) {
   const span = lifespan(ob);

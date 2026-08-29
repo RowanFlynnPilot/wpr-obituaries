@@ -17,6 +17,11 @@ const escapeHtml = (s) =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 
+// The deployed origin (e.g. https://obituaries.wausaupilotandreview.com), set in
+// CI for the real build. The homepage is the sitemap's first URL, so it gets a
+// canonical when we know the origin; a local dev build simply omits the tag.
+const publicBaseUrl = (process.env.PUBLIC_BASE_URL || "").replace(/\/$/, "");
+
 // Privacy-first analytics loader for <head>, mirroring extract/analytics.py so the
 // widget and the static pages report to the same account. Empty when disabled.
 function analyticsHead(a) {
@@ -47,10 +52,17 @@ export default defineConfig({
       transformIndexHtml: {
         order: "pre",
         handler(html) {
-          const { identity, branding } = newsroom;
+          const { identity, branding, copy } = newsroom;
           return html
             .replace(/%NEWSROOM_NAME%/g, escapeHtml(identity.name))
             .replace(/%NEWSROOM_SHORT%/g, escapeHtml(identity.shortName))
+            .replace(/%DESCRIPTION%/g, escapeHtml(copy.lede))
+            .replace(
+              /%CANONICAL%/g,
+              publicBaseUrl
+                ? `<link rel="canonical" href="${escapeHtml(publicBaseUrl)}/" />`
+                : ""
+            )
             .replace(/%FONTS_URL%/g, escapeHtml(branding.fontsUrl))
             .replace(/%PAPER%/g, escapeHtml(branding.paper))
             .replace(/%ANALYTICS_HEAD%/g, analyticsHead(newsroom.analytics));

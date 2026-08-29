@@ -39,7 +39,11 @@ Source of truth → static output → embedded widget:
    and H1, schema.org `Obituary` structured data, canonical, and OG tags.
 4. `extract/store.py` — the **persistent master** (`data/obituaries_master.json`,
    `{posts, records}`). This is the source of truth that lets pages outlive the
-   fetch window. It is committed to the repo and grows over time.
+   fetch window. It is committed to the repo and grows over time. Each record
+   carries a `source` stamp (applied at upsert) so record ownership is
+   namespaced per write-source, and a **persisted `slug`** that is carried
+   forward across re-extractions — a correction (say, a death year the first
+   pass missed) can never move a published URL.
 5. `extract/main.py` — two phases:
    - **Sync** (skipped by `--render-only`): loop over every enabled write-source
      and extract only *new or changed* units (the `posts` map tracks each
@@ -58,12 +62,16 @@ Source of truth → static output → embedded widget:
    (and reaches every existing page after a template/brand change).
 6. `web/` — React 18 / Vite memorial register. The **browse + search** layer
    only. It fetches the JSON index and links each card to the static page. Vite
-   builds **two embeds** from this one app: `index.html` (the full register) and
+   builds **two embeds** from this one app: `index.html` (the full register,
+   paginated 60 rows at a time — "Show earlier obituaries" — so the embed's
+   height and portrait loads stay bounded as the catalogue grows) and
    `mini.html` (a compact article/sidebar carousel — `MiniWidget.jsx`, flips
    through recent obituaries, carries the sponsor logos, links back to the full
-   page via `?link=`). Both post their height to the parent (`lib/frame.js`) so
-   the WordPress iframes self-size; copy-paste snippets + a live `embed-test.html`
-   harness are in `docs/embedding.md`.
+   page via `?link=`, http(s)-validated; it fetches the small `data/recent.json`
+   feed, never the full index). Both post their height to the parent
+   (`lib/frame.js`, measured from `body.offsetHeight` so the frame can shrink
+   as well as grow); copy-paste snippets + a live `embed-test.html` harness are
+   in `docs/embedding.md`.
 7. `.github/workflows/extract.yml` — cron Mon/Wed/Fri 6 AM Central. Runs sync +
    render, commits the updated master back (`contents: write`), then builds the
    widget and deploys to Pages. A failed extract skips the deploy (the last good
@@ -133,7 +141,9 @@ Funeral-home scraping (`adapters.funeral_home_scrape`, `windowDays` in config)
 reads the homes' own sites directly. Per-home scrape config lives in
 `data/funeral_homes.json` (`platform` + its key). Two platforms are wired:
 **Tukios** (seven homes, keyed by `siteAlias`, JSON API) and **Tribute
-Technology** (four homes, keyed by `url`, RSS discovery + `Person` JSON-LD). The
+Technology** (four homes, keyed by `url`, sitemap discovery windowed on
+`lastmod` — which moves on edits, so corrections re-extract — + `Person`
+JSON-LD). The
 scraped-home list is also the republication permission list — full details, both
 platforms' mechanics, and the cross-source dedupe/overlap note are in
 `docs/funeral-home-scraping.md`.
@@ -146,11 +156,17 @@ platforms' mechanics, and the cross-source dedupe/overlap note are in
   playbook (sitemap, batch-post linking, when to trim batch posts) is in
   `docs/seo-batch-posts.md`.
 - **SEO domain (done)**: the site serves from `obituaries.wausaupilotandreview.com`
-  (Cloudflare `CNAME obituaries → rowanflynnpilot.github.io`, DNS-only; Pages custom
-  domain + enforced HTTPS; `base: "/"`; `PUBLIC_BASE_URL` variable set to the
-  subdomain). Ranking equity now accrues to the brand domain and the old
-  `github.io/wpr-obituaries` URLs 301-redirect here. Runbook: `docs/custom-subdomain.md`.
-  Follow-up: re-submit the sitemap in Search Console under the new domain.
+  (Cloudflare `CNAME obituaries → rowanflynnpilot.github.io`, **proxied** —
+  orange-cloud, not DNS-only; Pages custom domain + enforced HTTPS; `base: "/"`;
+  `PUBLIC_BASE_URL` variable set to the subdomain). Ranking equity now accrues
+  to the brand domain and the old `github.io/wpr-obituaries` URLs 301-redirect
+  here. Because the subdomain is proxied, Cloudflare's zone settings apply:
+  managed content signals **rewrite robots.txt in flight** (AI crawlers hard-
+  blocked; Google search still allowed) and plain non-browser fetchers get 403.
+  Runbook + what to verify in Search Console: `docs/custom-subdomain.md`.
+  Follow-ups: re-submit the sitemap in Search Console under the new domain, and
+  confirm Googlebot crawl health there (Cloudflare bot rules over Pages is
+  where over-blocking would silently cost rankings).
 - **Seeding the master**: the chosen migration is a one-time **6-month seed**,
   `python extract/main.py --days 180` (or workflow dispatch with `seed_days=180`)
   — ~73 posts, ~15-20 min, a few dollars. The full `--backfill` (every post since
@@ -172,14 +188,16 @@ platforms' mechanics, and the cross-source dedupe/overlap note are in
   restores the cards + manifest via `actions/cache` (key tracks config + master),
   so a clean checkout doesn't regenerate everything. This is the headroom that
   keeps render cheap as the catalogue grows.
-- **Vendored photos (done)**: `extract/photos.py` downloads each portrait once
+- **Vendored photos (done)**: `extract/photos.py` downloads each portrait
   (through the proxied session, since images sit behind the same Cloudflare),
   downscales to ~450px JPEG, and saves it to `web/public/assets/photos/<slug>.jpg`,
-  committed alongside the master. Vendoring runs in the sync phase, capped at
-  `PER_RUN_LIMIT` per run so a first-run backlog drains over a few runs; render
-  prefers the local copy and falls back to the remote URL for anything not yet
-  vendored. The widget's `photoSrc` prepends the base path for these repo-relative
-  photos.
+  committed alongside the master. A manifest (`data/photos.json`, slug → source
+  URL) makes a portrait *corrected upstream* re-vendor instead of staying stale;
+  suppressed records are never vendored. Vendoring runs in the sync phase,
+  capped at `PER_RUN_LIMIT` per run so a first-run backlog drains over a few
+  runs; render prefers the local copy and falls back to the remote URL for
+  anything not yet vendored. The widget's `photoSrc` prepends the base path for
+  these repo-relative photos.
 - **Cross-post dedupe (done)**: `main._dedupe_people` collapses the same person
   (name + death date) appearing in two posts to one canonical record for the
   index/feed/home pages/sitemap (the fullest body wins); the duplicate page still
@@ -187,7 +205,12 @@ platforms' mechanics, and the cross-source dedupe/overlap note are in
   split.
 - **Robustness (done)**: `wp_client._get` retries the fetch with exponential
   backoff (the Anthropic client also retries); `extractor.sanity_warnings` logs
-  implausible dates/ages (non-fatal); `extract/test_pipeline.py` is a no-dep
+  implausible dates/ages (non-fatal); a source's *discovery* failure is
+  quarantined like a per-unit failure (other sources still sync, the master
+  still saves); `save_master` writes atomically; the cron's commit-back push
+  rebases + retries so a human push mid-run can't reject it; runs are queued,
+  never cancelled (`cancel-in-progress: false` — a cancelled run loses paid
+  extractions or a staff submission); `extract/test_pipeline.py` is a no-dep
   regression suite run in CI before the extract step (a broken build never
   deploys).
 - **Open follow-up**: **Soft-failure deploys** — today any per-post failure skips

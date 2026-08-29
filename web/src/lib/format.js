@@ -46,6 +46,16 @@ export function monthLabel(monthKey) {
   });
 }
 
+// Two-letter monogram for the no-photo placeholder tile.
+export function initials(name) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join("");
+}
+
 const SUFFIXES = new Set(["jr", "jr.", "sr", "sr.", "ii", "iii", "iv", "v"]);
 
 export function lastNameInitial(name) {

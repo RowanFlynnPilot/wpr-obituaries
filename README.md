@@ -8,18 +8,25 @@ do the ranking.
 ## Layout
 
 ```
-extract/   Python pipeline: REST pull → Haiku extraction → persistent master → pages + sitemap
-web/       React 18 / Vite memorial-register widget (the iframe embed)
-data/      Committed source of truth: obituaries_master.json, plus manual.json / suppressed.json
-.github/   Mon/Wed/Fri cron that extracts, commits the master, and deploys to GitHub Pages
+extract/            Python pipeline: write-sources (WordPress scrape via Haiku, funeral-home
+                    scrape via Tukios/Tribute, reviewed intake) → persistent master → pages + sitemap
+web/                React 18 / Vite widget: the full register (index.html) and the compact
+                    article/sidebar carousel (mini.html), both iframe embeds
+data/               Committed source of truth: obituaries_master.json, funeral_homes.json,
+                    photos.json, manual.json / suppressed.json, intake/
+docs/               Runbooks: embedding, forking, funeral-home scraping, SEO, custom subdomain
+scripts/            bootstrap.py (fork a new newsroom), add_home.py (onboard a funeral home)
+newsroom.config.json  The one per-newsroom file — identity, branding, copy, enabled adapters
+.github/            Mon/Wed/Fri cron that extracts, commits the master, and deploys to GitHub Pages
 ```
 
 ## Prerequisites
 
 - Python 3.12+
 - Node 20+
-- A Webshare residential proxy (WPR sits behind Cloudflare)
-- An Anthropic API key
+- Only if the `wordpress_scrape` adapter is enabled (it is for WPR): an
+  Anthropic API key and a Webshare residential proxy (WPR sits behind
+  Cloudflare). An intake-only fork runs with no API keys at all.
 
 ## Setup
 
@@ -36,7 +43,7 @@ Set the environment (PowerShell):
 ```powershell
 $env:ANTHROPIC_API_KEY  = "sk-ant-..."
 $env:WEBSHARE_PROXY_URL = "http://user:pass@proxy.webshare.io:80"
-$env:PUBLIC_BASE_URL    = "https://rowanflynnpilot.github.io/wpr-obituaries"
+$env:PUBLIC_BASE_URL    = "https://obituaries.wausaupilotandreview.com"
 ```
 
 Set the sponsors in `web/public/data/sponsor.json`:
@@ -69,7 +76,7 @@ committed source of truth); the render phase rebuilds
 
 ```powershell
 cd web
-npm run dev      # http://localhost:5173/wpr-obituaries/
+npm run dev      # http://localhost:5173/ (base is "/" — the site serves from the domain root)
 ```
 
 The widget reads `web/public/data/obituaries.json`, a build artifact regenerated

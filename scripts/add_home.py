@@ -161,10 +161,10 @@ def main() -> int:
 
     elif platform == "tribute":
         session = make_session()
-        recent = [u for u, _ in itertools.islice(tribute.recent_urls(session, root, None), 1)]
+        recent = [u for u, _ in itertools.islice(tribute.all_urls(session, root), 1)]
         if not recent:
-            print(f"Tribute Technology detected at {page_url} but its RSS lists no "
-                  f"obituaries.", file=sys.stderr)
+            print(f"Tribute Technology detected at {page_url} but its obituary "
+                  f"sitemaps list no obituaries.", file=sys.stderr)
             return 1
         dup = _existing(url=root)
         if dup:

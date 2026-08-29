@@ -2,7 +2,8 @@ name: Build and deploy obituaries
 
 on:
   schedule:
-    # 11:00 UTC = 6:00 AM Central, after Mon/Wed/Fri publication.
+    # 11:00 UTC — 6:00 AM Central in summer (CDT), 5:00 AM in winter (CST);
+    # either way it's after the Mon/Wed/Fri publication.
     - cron: "0 11 * * 1,3,5"
   workflow_dispatch:
     inputs:

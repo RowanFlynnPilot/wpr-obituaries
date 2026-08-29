@@ -199,7 +199,7 @@ def render_home_page(
     name = html.escape(home["name"])
     items = []
     for r in records:
-        span = _lifespan(r)
+        span = r.lifespan()
         meta = f' <span class="meta">{span}</span>' if span else ""
         items.append(
             f'<li><a href="{base_url}/o/{r.slug}.html">{html.escape(r.name)}</a>{meta}</li>'
@@ -249,7 +249,7 @@ def render_home_page(
       <hr class="masthead__rule" />
     </header>
     <h1>{name}</h1>
-    <p class="count">{len(records)} obituaries on Wausau Pilot &amp; Review</p>
+    <p class="count">{len(records)} obituaries on {html.escape(newsroom.name)}</p>
     {website}
     <div class="rule"></div>
     <ul class="list">
@@ -304,7 +304,7 @@ def render_archive(
     for heading, group in groupby(ordered, key=lambda o: _month_heading(o.source_date)):
         items = []
         for r in group:
-            span = _lifespan(r)
+            span = r.lifespan()
             meta = f' <span class="meta">{span}</span>' if span else ""
             items.append(
                 f'<li><a href="{base_url}/o/{r.slug}.html">{html.escape(r.name)}</a>{meta}</li>'
@@ -432,16 +432,6 @@ def _structured_data(
     return _json_ld(data)
 
 
-def _lifespan(ob: Obituary) -> str:
-    birth = ob.birth_date[:4] if ob.birth_date else ""
-    death = ob.death_date[:4] if ob.death_date else (str(ob.death_year) if ob.death_year else "")
-    if birth and death:
-        return f"{birth} – {death}"
-    if death:
-        return death
-    return ""
-
-
 def _sponsor_lockup(s: dict, base_url: str, analytics: dict) -> str:
     """A single sponsor's logo (or name), linked to its site when present."""
     name = html.escape(s["name"])
@@ -476,11 +466,11 @@ def _sponsor_section(sponsor: dict, base_url: str, analytics: dict) -> str:
     </section>"""
 
 
-def _share_section(name: str, page_url: str) -> str:
+def _share_section(name: str, page_url: str, newsroom_name: str) -> str:
     """Facebook / copy-link / email / print — families share obituaries widely."""
     fb = f"https://www.facebook.com/sharer/sharer.php?u={quote(page_url, safe='')}"
     subject = quote(f"{name} Obituary")
-    body = quote(f"{name} — obituary on Wausau Pilot & Review:\n{page_url}")
+    body = quote(f"{name} — obituary on {newsroom_name}:\n{page_url}")
     copy_onclick = (
         "var b=this;navigator.clipboard&&navigator.clipboard.writeText(b.dataset.url)"
         ".then(function(){b.textContent='Link copied';"
@@ -501,7 +491,7 @@ def _related_section(related: list[Obituary], base_url: str) -> str:
         return ""
     items = []
     for r in related:
-        span = _lifespan(r)
+        span = r.lifespan()
         meta = f' <span class="more__span">{span}</span>' if span else ""
         items.append(
             f'<li><a href="{base_url}/o/{r.slug}.html">{html.escape(r.name)}</a>{meta}</li>'
@@ -561,7 +551,7 @@ def render_person_page(
     body_paragraphs = "\n".join(
         f"      <p>{html.escape(p)}</p>" for p in ob.body.split("\n\n") if p.strip()
     )
-    lifespan = _lifespan(ob)
+    lifespan = ob.lifespan()
     # Tap the portrait to enlarge (the markup is inert without the small script below).
     photo = (
         f'<img class="portrait" src="{html.escape(pic)}" '
@@ -578,7 +568,7 @@ def render_person_page(
     else:
         funeral_line = ""
     sponsor_section = _sponsor_section(sponsor, base_url, newsroom.analytics)
-    share_section = _share_section(ob.name, page_url)
+    share_section = _share_section(ob.name, page_url, newsroom.name)
     related_section = _related_section(related or [], base_url)
     # A bare "Name." summary (a hand-entered obit with no summary) makes a thin
     # SERP snippet and duplicates the title; fall back to the body's opening.

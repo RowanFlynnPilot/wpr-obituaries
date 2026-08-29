@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import config from "../config.js";
 import { trackEvent } from "../lib/analytics.js";
-import { lifespan, photoSrc } from "../lib/format.js";
+import { initials, lifespan, photoSrc } from "../lib/format.js";
 
 const BASE = import.meta.env.BASE_URL;
 const { identity } = config;
@@ -25,15 +25,6 @@ function shuffle(list) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
-}
-
-function initials(name) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join("");
 }
 
 export default function MiniWidget() {

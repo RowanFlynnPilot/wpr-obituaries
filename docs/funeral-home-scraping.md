@@ -14,7 +14,7 @@ scraping characteristics:
 | Platform | Homes | Discovery | Obituary body |
 |---|---|---|---|
 | **Tukios** | Brainard, Helke, Peterson/Kraemer, Ascend, Beste, Rembs, Taylor-Stine-Waid | JS-rendered listing, but a public JSON API enumerates everything | Fully structured in the API response |
-| **Tribute Technology** (Frazer) | Schmidt & Schulta, Buettgen (honorone.com), Mid-Wisconsin, Carlson | Server-rendered listing + obituary sitemaps/RSS | Embedded JSON / JSON-LD in the person-page HTML |
+| **Tribute Technology** (Frazer) | Schmidt & Schulta, Buettgen (honorone.com), Mid-Wisconsin, Carlson | Obituary sitemaps (every entry carries a `lastmod`) | Embedded JSON / JSON-LD in the person-page HTML |
 
 **Both platforms are implemented**, and both serve fully structured records, so
 there is *no model extraction* — one source record maps straight to one
@@ -23,10 +23,12 @@ there is *no model extraction* — one source record maps straight to one
 
 - **Tukios** (keyed by `siteAlias`): discovery and records come from one JSON
   API — name, both dates, age, city, full text, portrait, permanent URL.
-- **Tribute Technology** (keyed by the site `url`): discovery is the home's
-  Recent-Obituaries RSS (`/rss.xml`), windowed by pubDate, or the obituary
-  sitemaps for a `--backfill`; each person page carries a schema.org `Person`
-  JSON-LD with the full obituary, both dates, and the portrait. Tribute has no
+- **Tribute Technology** (keyed by the site `url`): discovery reads the home's
+  obituary sitemaps, windowed by `lastmod` (which moves when the home edits an
+  obituary — so corrections re-extract; the old RSS pubDate never changed, so
+  edits were invisible), with no cutoff for a `--backfill`; each person page
+  carries a schema.org `Person` JSON-LD with the full obituary, both dates,
+  and the portrait. Tribute has no
   structured city, so those records carry no town facet (summary is name + age +
   death date), and age is computed from the two dates.
 
@@ -77,7 +79,7 @@ python scripts/add_home.py https://www.example-fh.com --write  # also insert the
 It fetches the home's obituaries page (in Python, because the fetch is
 cross-origin and often Cloudflare-fronted — a browser can't make it), detects
 the platform, verifies it (Tukios: the `siteAlias` returns obituaries from the
-live API; Tribute: the RSS lists obituaries), and inserts a config line
+live API; Tribute: the obituary sitemaps list obituaries), and inserts a config line
 preserving the one-home-per-line format. Review the derived `match` token — it
 must be a lowercase substring of how the home names itself on its obituaries so
 scraped records link to the canonical home.

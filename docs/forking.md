@@ -22,13 +22,25 @@ shared. The architecture and the seams are described in
 
 3. **Drop in your assets**: a masthead seal at `web/public/<branding.sealPath>`
    and your sponsor logos referenced from `web/public/data/sponsor.json`.
-4. **Set the Pages URL** (the bootstrap can do this if `gh` is installed):
+4. **Replace `web/public/CNAME`** — it ships WPR's
+   `obituaries.wausaupilotandreview.com`, which GitHub will refuse (the domain
+   is already claimed). Put your own subdomain in it (see
+   [`custom-subdomain.md`](custom-subdomain.md)), or **delete the file** to
+   serve from `https://<you>.github.io/<repo>/` instead.
+5. **Match the base path to where the site serves.** The repo ships
+   `base: "/"` in `web/vite.config.js`, which is correct for a custom
+   subdomain (or `<you>.github.io` root). If you deleted CNAME and serve from
+   the `/<repo>/` project sub-path, change it to `base: "/<repo>/"` or the
+   asset URLs will 404.
+6. **Set the Pages URL** to wherever the site will actually serve (the
+   bootstrap can do this if `gh` is installed):
 
    ```
-   gh variable set PUBLIC_BASE_URL --body https://<you>.github.io/<repo>
+   gh variable set PUBLIC_BASE_URL --body https://obituaries.yourpaper.com
    ```
 
-5. **Enable GitHub Pages** (Settings → Pages → GitHub Actions) and run the
+   (or `https://<you>.github.io/<repo>` for the sub-path setup).
+7. **Enable GitHub Pages** (Settings → Pages → GitHub Actions) and run the
    **Build and deploy obituaries** workflow.
 
 ## Sources
@@ -63,8 +75,12 @@ cookieless, so no consent banner is needed. Set the `analytics` block in
 
 - **plausible** — set `domain`. Supports sponsor-click events.
 - **goatcounter** — set `site` (the `<code>` in `<code>.goatcounter.com`). Free; supports events.
-- **cloudflare** — set `site` (the beacon token). Free; pageviews only.
+- **cloudflare** — set `site` (the beacon token). Free; **pageviews only** —
+  sponsor-click events are silently not sent (Cloudflare's beacon has no
+  events API). Choose plausible or goatcounter if click counts matter to your
+  sponsor pitch.
 - **custom** — set `headHtml` to your own `<script>` (any other provider).
+  Like cloudflare, sponsor-click events are not wired for custom snippets.
 
 Both the static obituary pages and the embedded widget report to the same
 account. Leave `provider` empty to disable.

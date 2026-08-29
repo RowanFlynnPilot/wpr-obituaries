@@ -6,9 +6,14 @@ site updates on the next run of the workflow (or locally via
 `python extract/main.py --render-only`).
 
 ## `obituaries_master.json` — generated, do not hand-edit
-The accumulating source of truth, built automatically from the WPR batch posts.
-Each run adds new people and never drops old ones. Hand edits here are
-overwritten; use the two files below instead.
+The accumulating source of truth, built automatically from every enabled
+write-source (the WPR batch posts, the funeral-home scrapes, and approved
+intake submissions). Each run adds new people and never drops old ones. Hand
+edits here are overwritten; use the files below instead.
+
+## `photos.json` — generated, do not hand-edit
+The vendored-portrait manifest (slug → source URL). It is how a portrait that
+was corrected upstream gets re-downloaded instead of staying stale.
 
 ## `suppressed.json` — omit an obituary
 A list of pages to **never publish** (e.g. a family asked us not to). The page

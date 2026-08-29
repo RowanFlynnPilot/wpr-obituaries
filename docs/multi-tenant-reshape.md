@@ -23,9 +23,11 @@ the real serving location). A missing required key raises immediately.
 
 ```
 identity   { name, shortName, url, coverageArea, submissionsEmail }
-branding   { logoUrl, sealPath, accent, paper, fontsUrl, serif, nameplate, mono }
+branding   { logoUrl, logoPath?, sealPath, accent, paper, fontsUrl, serif, nameplate, mono }
 copy       { lede, footerTagline }          # widget editorial copy
+analytics  { provider, domain, site, headHtml }   # cookieless; empty provider = off
 adapters   { wordpress_scrape{enabled,apiBase,categorySlug,windowDays},
+             funeral_home_scrape{enabled,windowDays},
              intake{enabled,backend} }
 ```
 

@@ -190,12 +190,6 @@ def _write_index(records: list[Obituary], vendored: set[str], homes: list[dict])
     RECENT_FILE.write_text(json.dumps(recent, indent=2), encoding="utf-8")
 
 
-def _lifespan_str(ob: Obituary) -> str:
-    birth = ob.birth_date[:4] if ob.birth_date else ""
-    death = ob.death_date[:4] if ob.death_date else (str(ob.death_year) if ob.death_year else "")
-    return f"{birth} – {death}" if birth and death else death
-
-
 def _sponsor_line(sponsor: dict) -> str:
     names = [
         s["name"].split()[0]
@@ -280,7 +274,7 @@ def _og_brand_fingerprint(newsroom, sponsor_line: str) -> str:
 
 def _og_input_hash(ob: Obituary, portrait: Path | None, brand_fp: str) -> str:
     """Content hash of a card's inputs (brand, name, dates, portrait bytes)."""
-    parts = [brand_fp, ob.name, _lifespan_str(ob)]
+    parts = [brand_fp, ob.name, ob.lifespan()]
     if portrait and portrait.exists():
         parts.append(hashlib.sha1(portrait.read_bytes()).hexdigest())
     else:
@@ -345,7 +339,7 @@ def _write_pages(
         if og_cache.get(ob.slug) == digest and og_path.exists():
             og_kept += 1
         else:
-            render_card(ob.name, _lifespan_str(ob), portrait, og_path, newsroom, sponsor_line)
+            render_card(ob.name, ob.lifespan(), portrait, og_path, newsroom, sponsor_line)
             og_made += 1
         fresh_cache[ob.slug] = digest
         og_image = f"{base_url}/assets/og/{ob.slug}.png"
