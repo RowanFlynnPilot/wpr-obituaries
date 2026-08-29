@@ -17,7 +17,12 @@ export function reportHeightToParent() {
 
   let last = 0;
   const post = () => {
-    const height = document.documentElement.scrollHeight;
+    // Measure the body's laid-out height, NOT documentElement.scrollHeight:
+    // scrollHeight is floored at the viewport, and the parent stretches the
+    // iframe's viewport to whatever we last posted — so heights could only
+    // ever ratchet up. body.offsetHeight shrinks back when a filter narrows
+    // the register, letting the frame shrink with it.
+    const height = Math.ceil(document.body.offsetHeight);
     if (height && height !== last) {
       last = height;
       window.parent.postMessage({ type: TYPE, height }, "*");
@@ -25,7 +30,7 @@ export function reportHeightToParent() {
   };
 
   if (window.ResizeObserver) {
-    new ResizeObserver(post).observe(document.documentElement);
+    new ResizeObserver(post).observe(document.body);
   }
   window.addEventListener("load", post);
   setInterval(post, 300);

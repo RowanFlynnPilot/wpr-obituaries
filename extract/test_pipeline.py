@@ -98,6 +98,58 @@ def test_store_source_isolation():
     print("ok: store source isolation (cross-source ids, pre-source attribution)")
 
 
+def test_slug_stability():
+    # A correction that fills in a missing death year would change the derived
+    # slug — but the first URL is published and possibly indexed, so the store
+    # carries it forward across re-extractions.
+    m = store.Master()
+    m.upsert_post(
+        "wordpress_scrape", 5, "m1", [mk("Jane Doe", 5, "2026-01-10", death_year=None)]
+    )
+    old = m.records[0].slug
+    assert "-2026-" in old  # derived from the publication year at first extraction
+    m.upsert_post(
+        "wordpress_scrape", 5, "m2", [mk("Jane Doe", 5, "2026-01-10", death_year=2025)]
+    )
+    assert m.records[0].death_year == 2025 and m.records[0].slug == old
+    print("ok: slug stability (a correction can't move a published URL)")
+
+
+def test_photo_revendor():
+    import io as _io
+
+    import photos
+    from PIL import Image
+
+    class FakeResp:
+        def __init__(self, content):
+            self.content = content
+
+        def raise_for_status(self):
+            pass
+
+    class FakeSession:
+        def __init__(self):
+            self.fetched = []
+
+        def get(self, url, timeout=30):
+            self.fetched.append(url)
+            buf = _io.BytesIO()
+            Image.new("RGB", (10, 10)).save(buf, "JPEG")
+            return FakeResp(buf.getvalue())
+
+    with tempfile.TemporaryDirectory() as d:
+        pdir, man = Path(d) / "photos", Path(d) / "photos.json"
+        s = FakeSession()
+        first = mk("P P", 1, "2026-06-10", photo_url="http://cdn/a.jpg")
+        assert photos.vendor_photos([first], pdir, s, man) == 1
+        assert photos.vendor_photos([first], pdir, s, man) == 0  # unchanged: skipped
+        corrected = mk("P P", 1, "2026-06-10", photo_url="http://cdn/b.jpg")
+        assert photos.vendor_photos([corrected], pdir, s, man) == 1  # URL changed: refreshed
+        assert s.fetched == ["http://cdn/a.jpg", "http://cdn/b.jpg"]
+    print("ok: photo re-vendor (manifest detects a changed source URL)")
+
+
 def test_sync_discovery_failure():
     # A source whose discovery blows up is quarantined as a failure; the other
     # sources still sync, so their extractions reach save_master.

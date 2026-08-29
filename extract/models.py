@@ -41,17 +41,19 @@ class Obituary:
     # by the store at upsert so two sources can never collide on the same numeric
     # source_id. Empty only for records that never pass through the store (manual).
     source: str = ""
+    # The published URL fragment: name + death year disambiguates the common
+    # case; a short hash of the source post keeps two same-named people from the
+    # same year distinct. Derived once (below) and then persisted in the master —
+    # a correction that changes the derivation inputs (say a death year the first
+    # extraction missed) must never move a page Google has already indexed, so
+    # the store carries the original slug forward across re-extractions.
+    slug: str = ""
 
-    @property
-    def slug(self) -> str:
-        """Deterministic, collision-resistant URL slug for this person.
-
-        name + death year disambiguates the common case; a short hash of the
-        source post keeps two same-named people from the same year distinct.
-        """
-        stamp = str(self.death_year) if self.death_year else self.source_date[:4]
-        digest = hashlib.sha1(self.source_url.encode()).hexdigest()[:6]
-        return f"{slugify(self.name)}-{stamp}-{digest}"
+    def __post_init__(self) -> None:
+        if not self.slug:
+            stamp = str(self.death_year) if self.death_year else self.source_date[:4]
+            digest = hashlib.sha1(self.source_url.encode()).hexdigest()[:6]
+            object.__setattr__(self, "slug", f"{slugify(self.name)}-{stamp}-{digest}")
 
     def excerpt(self, limit: int = 200) -> str:
         """The opening of the obituary body, trimmed at a word boundary.

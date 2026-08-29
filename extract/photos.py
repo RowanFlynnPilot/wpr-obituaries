@@ -14,6 +14,7 @@ breaking a page.
 from __future__ import annotations
 
 import io
+import json
 import sys
 from pathlib import Path
 
@@ -37,15 +38,35 @@ def vendored_slugs(photos_dir: Path) -> set[str]:
     return {p.stem for p in photos_dir.glob("*.jpg")}
 
 
+def _load_manifest(path: Path) -> dict[str, str]:
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def vendor_photos(
-    records: list[Obituary], photos_dir: Path, session, limit: int = PER_RUN_LIMIT
+    records: list[Obituary],
+    photos_dir: Path,
+    session,
+    manifest_file: Path,
+    limit: int = PER_RUN_LIMIT,
 ) -> int:
-    """Download + downscale any not-yet-vendored portraits. Returns the count saved."""
+    """Download + downscale new or changed portraits. Returns the count saved.
+
+    The manifest (slug -> source URL, committed alongside the master) is what
+    lets a *corrected* upstream photo re-vendor: a vendored file whose recorded
+    source URL no longer matches the record's is stale and downloads again.
+    Photos vendored before the manifest existed adopt their current URL as the
+    baseline rather than re-downloading the whole catalogue.
+    """
     photos_dir.mkdir(parents=True, exist_ok=True)
     have = vendored_slugs(photos_dir)
+    manifest = _load_manifest(manifest_file)
     saved = 0
     for ob in records:
-        if not ob.photo_url or ob.slug in have:
+        if not ob.photo_url:
+            continue
+        if ob.slug in have and manifest.setdefault(ob.slug, ob.photo_url) == ob.photo_url:
             continue
         if saved >= limit:
             break
@@ -55,7 +76,12 @@ def vendor_photos(
             img = Image.open(io.BytesIO(resp.content)).convert("RGB")
             img.thumbnail((MAX_EDGE, MAX_EDGE), Image.LANCZOS)
             img.save(photos_dir / local_filename(ob.slug), "JPEG", quality=QUALITY, optimize=True)
+            manifest[ob.slug] = ob.photo_url
             saved += 1
         except Exception as exc:  # noqa: BLE001 — one bad image must not stop the rest
             print(f"  photo failed for {ob.slug}: {exc}", file=sys.stderr)
+    manifest_file.parent.mkdir(parents=True, exist_ok=True)
+    manifest_file.write_text(
+        json.dumps(dict(sorted(manifest.items())), indent=2), encoding="utf-8"
+    )
     return saved

@@ -12,6 +12,7 @@ web/dist/
 # extract/main.py (`--render-only` regenerates locally). The master itself IS
 # committed (it is the source of truth); these derivatives are not.
 web/public/data/obituaries.json
+web/public/data/recent.json
 web/public/sitemap.xml
 web/public/feed.xml
 web/public/robots.txt

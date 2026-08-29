@@ -45,8 +45,10 @@ export default function MiniWidget() {
   const timer = useRef(null);
 
   useEffect(() => {
+    // recent.json is the small feed of the freshest few records — the mini
+    // widget never needs the full (forever-growing) index.
     Promise.all([
-      fetch(`${BASE}data/obituaries.json`).then(ok),
+      fetch(`${BASE}data/recent.json`).then(ok),
       fetch(`${BASE}data/sponsor.json`).then(ok),
     ])
       .then(([idx, sp]) => {
@@ -81,10 +83,19 @@ export default function MiniWidget() {
       </aside>
     );
   }
-  if (!picks.length) {
+  if (!data) {
     return (
       <aside className="mini mini--loading" aria-busy="true" aria-label="Loading obituaries">
         <p className="mini__kicker">In Memoriam · {identity.shortName}</p>
+      </aside>
+    );
+  }
+  if (!picks.length) {
+    // Loaded but empty — show the quiet message, not a permanent skeleton.
+    return (
+      <aside className="mini mini--message" aria-label={`Recent obituaries from ${identity.name}`}>
+        <p className="mini__kicker">In Memoriam · {identity.shortName}</p>
+        <p className="mini__error">No recent obituaries to show.</p>
       </aside>
     );
   }

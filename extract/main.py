@@ -62,7 +62,10 @@ ROBOTS_FILE = ROOT / "web" / "public" / "robots.txt"
 ARCHIVE_FILE = ROOT / "web" / "public" / "archive.html"
 SPONSOR_FILE = DATA_DIR / "sponsor.json"
 INDEX_FILE = DATA_DIR / "obituaries.json"
+RECENT_FILE = DATA_DIR / "recent.json"
+RECENT_COUNT = 25  # the mini widget draws from the freshest few, never the full index
 MASTER_FILE = ROOT / "data" / "obituaries_master.json"
+PHOTO_MANIFEST_FILE = ROOT / "data" / "photos.json"
 MANUAL_FILE = ROOT / "data" / "manual.json"
 SUPPRESSED_FILE = ROOT / "data" / "suppressed.json"
 HOMES_FILE = ROOT / "data" / "funeral_homes.json"
@@ -181,6 +184,10 @@ def _write_index(records: list[Obituary], vendored: set[str], homes: list[dict])
         obituaries.append(record)
     payload = {"count": len(ordered), "obituaries": obituaries}
     INDEX_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    # The mini widget only ever shows the freshest few, so it gets its own small
+    # feed instead of downloading the full (forever-growing) index on every load.
+    recent = {"count": len(obituaries[:RECENT_COUNT]), "obituaries": obituaries[:RECENT_COUNT]}
+    RECENT_FILE.write_text(json.dumps(recent, indent=2), encoding="utf-8")
 
 
 def _lifespan_str(ob: Obituary) -> str:
@@ -302,6 +309,7 @@ def _prune_og_orphans(live_slugs: set[str]) -> None:
 
 def _write_pages(
     records: list[Obituary],
+    canonical: list[Obituary],
     sponsor: dict,
     base_url: str,
     vendored: set[str],
@@ -322,7 +330,9 @@ def _write_pages(
     og_cache = _load_og_cache()
     fresh_cache: dict[str, str] = {}
     og_made = og_kept = 0
-    recent = sorted(records, key=lambda r: r.source_date, reverse=True)[:7]
+    # From the deduped list — a person present via two sources must not appear
+    # twice (under two URLs) in every page's "more recent obituaries" links.
+    recent = sorted(canonical, key=lambda r: r.source_date, reverse=True)[:7]
     for ob in records:
         related = [r for r in recent if r.slug != ob.slug][:6]
         portrait = PHOTOS_DIR / f"{ob.slug}.jpg" if ob.slug in vendored else None
@@ -398,7 +408,7 @@ def render(master: Master, sponsor: dict, base_url: str, newsroom, allow_empty: 
     vendored = vendored_slugs(PHOTOS_DIR)
     homes = load_homes(HOMES_FILE)
     _write_index(canonical, vendored, homes)
-    _write_pages(records, sponsor, base_url, vendored, homes, primary_by_slug, newsroom)
+    _write_pages(records, canonical, sponsor, base_url, vendored, homes, primary_by_slug, newsroom)
     home_slugs = _write_home_pages(canonical, sponsor, base_url, homes, newsroom)
     ARCHIVE_FILE.write_text(
         render_archive(canonical, base_url, newsroom, sponsor), encoding="utf-8"
@@ -448,9 +458,11 @@ def main() -> int:
         sources = enabled_sources(newsroom)
         failures = sync(master, sources, backfill=args.backfill, days=args.days)
         save_master(master, MASTER_FILE)  # persist successes before anything can fail
-        saved = vendor_photos(master.records, PHOTOS_DIR, make_session())
+        suppressed = load_suppressed(SUPPRESSED_FILE)
+        vendorable = [r for r in master.records if r.slug not in suppressed]
+        saved = vendor_photos(vendorable, PHOTOS_DIR, make_session(), PHOTO_MANIFEST_FILE)
         if saved:
-            print(f"Vendored {saved} new portrait(s).")
+            print(f"Vendored {saved} new or changed portrait(s).")
 
     render(master, sponsor, base_url, newsroom, args.allow_empty)
 

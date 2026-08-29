@@ -59,6 +59,20 @@ class Master:
         id that happens to equal a WordPress post id can't delete its records.
         """
         people = [dataclasses.replace(p, source=source) for p in people]
+        # A re-extraction can derive a different slug (e.g. a death year the
+        # first pass missed changes the year stamp) — but the old URL is
+        # published and possibly indexed, so the same person keeps their slug.
+        prior_slugs = {
+            slugify(r.name): r.slug
+            for r in self.records
+            if r.source == source and r.source_id == unit_id
+        }
+        people = [
+            dataclasses.replace(p, slug=prior_slugs[slugify(p.name)])
+            if slugify(p.name) in prior_slugs
+            else p
+            for p in people
+        ]
         self.records = [
             r for r in self.records if not (r.source == source and r.source_id == unit_id)
         ]
