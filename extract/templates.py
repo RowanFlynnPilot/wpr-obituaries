@@ -29,6 +29,16 @@ def _rfc822(date_str: str) -> str:
     return dt.strftime("%a, %d %b %Y %H:%M:%S +0000")
 
 
+def _json_ld(data: dict) -> str:
+    """Serialize for an inline <script type="application/ld+json"> block.
+
+    Values here include third-party content (names, URLs), and the HTML parser
+    ends a script element at the first "</" regardless of JSON quoting — so a
+    value containing "</script>" would break out of the block and inject markup.
+    """
+    return json.dumps(data, indent=2).replace("</", "<\\/")
+
+
 def render_feed(
     obituaries: list[Obituary], base_url: str, newsroom: Newsroom, limit: int = 50
 ) -> str:
@@ -310,7 +320,7 @@ def render_archive(
         f"Browse every obituary published on {newsroom.name} for "
         f"{newsroom.coverage_area}, organized by month."
     )
-    collection = json.dumps(
+    collection = _json_ld(
         {
             "@context": "https://schema.org",
             "@type": "CollectionPage",
@@ -318,8 +328,7 @@ def render_archive(
             "url": page_url,
             "inLanguage": "en-US",
             "isPartOf": {"@type": "WebSite", "name": newsroom.name, "url": newsroom.url},
-        },
-        indent=2,
+        }
     )
     return f"""<!doctype html>
 <html lang="en-US">
@@ -420,7 +429,7 @@ def _structured_data(
         orgs.append(org)
     if orgs:
         data["sponsor"] = orgs if len(orgs) > 1 else orgs[0]
-    return json.dumps(data, indent=2)
+    return _json_ld(data)
 
 
 def _lifespan(ob: Obituary) -> str:
@@ -515,7 +524,7 @@ def _breadcrumb_json(ob: Obituary, page_url: str, base_url: str) -> str:
             {"@type": "ListItem", "position": 2, "name": ob.name, "item": page_url},
         ],
     }
-    return json.dumps(data, indent=2)
+    return _json_ld(data)
 
 
 def _image_meta(og_image: str | None, pic: str | None, name: str = "") -> str:

@@ -10,11 +10,12 @@ const SHOW = 10; // …and flip through this many
 const ADVANCE_MS = 6000;
 
 // Where "View all obituaries" points: the WordPress page hosting the full tool,
-// passed by the embed snippet as ?link= (URL-encoded). Falls back to this
-// deployment's own register until that page exists.
+// passed by the embed snippet as ?link= (URL-encoded). Only http(s) URLs are
+// accepted — the value is attacker-reachable and lands in a target="_top" href.
+// Falls back to this deployment's own register until that page exists.
 function registerUrl() {
   const link = new URLSearchParams(window.location.search).get("link");
-  return link || BASE;
+  return link && /^https?:\/\//i.test(link) ? link : BASE;
 }
 
 function shuffle(list) {

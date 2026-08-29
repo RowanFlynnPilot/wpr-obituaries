@@ -66,7 +66,14 @@ jobs:
             echo "No change (duplicate submission) — nothing to commit."
           else
             git commit -m "data: add manual obituary [skip ci]"
-            git push
+            # Rebase onto the current tip first — a push to main since checkout
+            # would otherwise reject this push and lose the submission.
+            for attempt in 1 2 3; do
+              git pull --rebase origin main
+              if git push; then break; fi
+              if [ "$attempt" = "3" ]; then exit 1; fi
+              sleep 10
+            done
           fi
 
       # Same OG share-card cache as the extract workflow, so render only composes

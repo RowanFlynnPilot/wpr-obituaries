@@ -111,17 +111,23 @@ def sync(
             window = days
         else:
             window = getattr(source, "default_window", DEFAULT_WINDOW_DAYS)
-        for unit in source.units(window):
-            if master.is_processed(unit.source, unit.unit_id, unit.modified):
-                skipped += 1
-                continue
-            try:
-                people = unit.extract()
-            except Exception as exc:  # noqa: BLE001 — quarantine and report loudly
-                failures.append((unit.ref, str(exc)))
-                continue
-            master.upsert_post(unit.source, unit.unit_id, unit.modified, people)
-            extracted += len(people)
+        try:
+            for unit in source.units(window):
+                if master.is_processed(unit.source, unit.unit_id, unit.modified):
+                    skipped += 1
+                    continue
+                try:
+                    people = unit.extract()
+                except Exception as exc:  # noqa: BLE001 — quarantine and report loudly
+                    failures.append((unit.ref, str(exc)))
+                    continue
+                master.upsert_post(unit.source, unit.unit_id, unit.modified, people)
+                extracted += len(people)
+        except Exception as exc:  # noqa: BLE001 — a source's *discovery* failing
+            # (its API down, a malformed file) must not abort the run: the other
+            # sources still sync, and everything upserted above still reaches
+            # save_master instead of being discarded and re-billed next run.
+            failures.append((f"{source.name} (discovery)", str(exc)))
 
     print(f"Extracted {extracted} obituaries from new/changed units; {skipped} unchanged.")
     return failures

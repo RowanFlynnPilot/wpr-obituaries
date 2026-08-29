@@ -20,9 +20,12 @@ permissions:
   pages: write
   id-token: write
 
+# Never cancel an in-flight run: a cancelled extract loses paid Haiku calls, and
+# a cancelled add-obituary run loses a staff submission. The shared group still
+# serializes runs (and deploys) — later runs just wait their turn.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -87,7 +90,16 @@ jobs:
             echo "Nothing to commit."
           else
             git commit -m "data: update obituaries master and photos [skip ci]"
-            git push
+            # The checkout is minutes old by now; a human push to main in the
+            # meantime would reject a plain push (non-fast-forward) and lose
+            # this run's extractions. Rebase onto the current tip, retrying in
+            # case another push lands in between.
+            for attempt in 1 2 3; do
+              git pull --rebase origin main
+              if git push; then break; fi
+              if [ "$attempt" = "3" ]; then exit 1; fi
+              sleep 10
+            done
           fi
 
       - uses: actions/setup-node@v4

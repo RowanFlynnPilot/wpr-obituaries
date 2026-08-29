@@ -18,12 +18,15 @@ On-disk shape (`data/obituaries_master.json`):
 `posts` records *every* processed unit — including ones that yielded zero
 obituaries — so we never re-spend an extraction call on an unchanged unit. The
 key is namespaced by source (`wordpress_scrape:12345`) so two write-sources can
-never collide on the same numeric id. v1 files (bare `<unit_id>` keys, all from
-the WordPress scraper) are migrated on load.
+never collide on the same numeric id, and each record carries a `source` stamp
+so record ownership is namespaced the same way. v1 files (bare `<unit_id>` keys,
+all from the WordPress scraper) are migrated on load, as are records from before
+the `source` stamp (attributed via the posts map).
 """
 
 from __future__ import annotations
 
+import dataclasses
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -51,10 +54,14 @@ class Master:
 
         Dropping the unit's prior records first makes re-extraction (a correction
         to a batch) idempotent, and recording the unit even when `people` is empty
-        stops us from re-extracting a person-less unit every run. The processed
-        key is namespaced by source so sources can't collide on the same id.
+        stops us from re-extracting a person-less unit every run. Both the
+        processed key and record ownership are namespaced by source, so an intake
+        id that happens to equal a WordPress post id can't delete its records.
         """
-        self.records = [r for r in self.records if r.source_id != unit_id]
+        people = [dataclasses.replace(p, source=source) for p in people]
+        self.records = [
+            r for r in self.records if not (r.source == source and r.source_id == unit_id)
+        ]
         self.records.extend(people)
         self.posts[f"{source}:{unit_id}"] = modified
 
@@ -72,16 +79,48 @@ def _migrate_posts(posts: dict[str, str], version: int) -> dict[str, str]:
     }
 
 
+def _attribute_sources(records: list[Obituary], posts: dict[str, str]) -> list[Obituary]:
+    """Stamp `source` onto records saved before records carried one.
+
+    The posts map knows which source processed every unit, so a record's source
+    is recoverable from its source_id — unless two sources claim the same unit
+    id, in which case attribution is ambiguous and we refuse loudly (that master
+    predates the collision this stamp exists to prevent).
+    """
+    if all(r.source for r in records):
+        return records
+    by_unit: dict[str, str] = {}
+    for key in posts:
+        source, _, unit_id = key.partition(":")
+        if by_unit.get(unit_id, source) != source:
+            raise ValueError(
+                f"Unit id {unit_id} is claimed by both '{by_unit[unit_id]}' and "
+                f"'{source}'; cannot attribute pre-source records safely."
+            )
+        by_unit[unit_id] = source
+    out = []
+    for r in records:
+        if r.source:
+            out.append(r)
+            continue
+        source = by_unit.get(str(r.source_id))
+        if not source:
+            raise ValueError(
+                f"Record '{r.slug}' (source_id {r.source_id}) matches no processed "
+                "unit; cannot attribute its source."
+            )
+        out.append(dataclasses.replace(r, source=source))
+    return out
+
+
 def load_master(path: Path) -> Master:
     """Read the master store, or return an empty one if it does not exist yet."""
     if not path.exists():
         return Master()
     data = json.loads(path.read_text(encoding="utf-8"))
     posts = _migrate_posts(dict(data.get("posts", {})), int(data.get("version", 1)))
-    return Master(
-        posts=posts,
-        records=[Obituary.from_record_dict(r) for r in data.get("records", [])],
-    )
+    records = [Obituary.from_record_dict(r) for r in data.get("records", [])]
+    return Master(posts=posts, records=_attribute_sources(records, posts))
 
 
 def _post_sort_key(item: tuple[str, str]) -> tuple:

@@ -37,6 +37,10 @@ class Obituary:
     photo_url: str | None
     summary: str  # one respectful sentence for cards and meta description
     body: str  # full obituary text for this person, paragraphs split by "\n\n"
+    # Which write-source produced this record (e.g. "wordpress_scrape") — stamped
+    # by the store at upsert so two sources can never collide on the same numeric
+    # source_id. Empty only for records that never pass through the store (manual).
+    source: str = ""
 
     @property
     def slug(self) -> str:

@@ -72,6 +72,59 @@ def test_store_migration():
     print("ok: store migration (v1 bare ids -> namespaced)")
 
 
+def test_store_source_isolation():
+    # Two sources sharing a numeric unit id must not delete each other's records.
+    m = store.Master()
+    m.upsert_post("wordpress_scrape", 7, "m1", [mk("A A", 7, "2026-06-10")])
+    m.upsert_post("intake", 7, "m1", [mk("B B", 7, "2026-06-11")])
+    assert {(r.name, r.source) for r in m.records} == {
+        ("A A", "wordpress_scrape"), ("B B", "intake")
+    }
+    # Records saved before the `source` stamp are attributed from the posts map.
+    m2 = store.Master()
+    m2.upsert_post("wordpress_scrape", 8, "m1", [mk("C C", 8, "2026-06-10")])
+    m2.upsert_post("intake", 9, "m1", [mk("D D", 9, "2026-06-11")])
+    with tempfile.TemporaryDirectory() as d:
+        p = Path(d) / "master.json"
+        store.save_master(m2, p)
+        data = json.loads(p.read_text(encoding="utf-8"))
+        for r in data["records"]:
+            del r["source"]  # simulate a pre-stamp master
+        p.write_text(json.dumps(data), encoding="utf-8")
+        loaded = store.load_master(p)
+        assert {(r.name, r.source) for r in loaded.records} == {
+            ("C C", "wordpress_scrape"), ("D D", "intake")
+        }
+    print("ok: store source isolation (cross-source ids, pre-source attribution)")
+
+
+def test_sync_discovery_failure():
+    # A source whose discovery blows up is quarantined as a failure; the other
+    # sources still sync, so their extractions reach save_master.
+    from adapters import Unit
+
+    class Broken:
+        name = "broken"
+        default_window = 7
+
+        def units(self, window):
+            raise RuntimeError("api down")
+            yield  # makes this a generator, so the raise happens mid-iteration
+
+    class Good:
+        name = "good"
+        default_window = 7
+
+        def units(self, window):
+            yield Unit("good", 1, "m1", "ref", lambda: [mk("G G", 1, "2026-06-10")])
+
+    m = store.Master()
+    failures = main.sync(m, [Broken(), Good()], backfill=False, days=None)
+    assert len(failures) == 1 and failures[0][0].startswith("broken")
+    assert [(r.name, r.source) for r in m.records] == [("G G", "good")]
+    print("ok: sync discovery failure (quarantined, later sources still run)")
+
+
 def test_homes():
     hs = homes.load_homes(main.HOMES_FILE)
     assert resolve(hs, "Brainard Funeral Home - Everest Chapel")["url"]
@@ -482,6 +535,19 @@ def test_archive():
     assert html_out.count('/o/') == 3  # a link for every person
     assert 'rel="canonical" href="http://b/archive.html"' in html_out
     print("ok: archive (month sections, links every record, canonical)")
+
+
+def test_json_ld_escaping():
+    # Third-party text must not be able to close the ld+json <script> block:
+    # the HTML parser ends a script element at the first "</" it sees.
+    assert "</" not in templates._json_ld({"name": "x</script><script>alert(1)"})
+    ob = mk("Eve </script><script>alert(1)</script>", 1, "2026-06-10")
+    page = templates.render_person_page(
+        ob, {"sponsors": []}, "http://b", NEWSROOM, [], None,
+        "http://b/og.png", None, f"http://b/o/{ob.slug}.html",
+    )
+    assert "</script><script>alert" not in page
+    print("ok: json-ld escaping (third-party </script> cannot break out)")
 
 
 def test_sanity_warnings():
