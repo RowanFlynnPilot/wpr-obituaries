@@ -5,11 +5,18 @@ from __future__ import annotations
 import dataclasses
 import hashlib
 import re
+import unicodedata
 from dataclasses import dataclass
 
 
 def slugify(value: str) -> str:
-    """Lowercase, hyphenated, ASCII-only slug fragment."""
+    """Lowercase, hyphenated, ASCII-only slug fragment.
+
+    Accents fold to their base letters ("José" -> "jose") rather than passing
+    through: \\w is Unicode-aware, and a non-ASCII slug is an invalid character
+    in sitemap <loc> URLs and fragile in filenames.
+    """
+    value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode()
     value = value.lower().strip()
     value = re.sub(r"[^\w\s-]", "", value)
     value = re.sub(r"[\s_-]+", "-", value)
@@ -105,6 +112,14 @@ class Obituary:
         name = (d.get("name") or "").strip()
         if not name:
             raise ValueError(f"Record with no name: {d}")
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", source_date or ""):
+            # Fail here, where the bad entry is attributable — a malformed date
+            # that reaches render would fail the *whole* site (feed/archive
+            # parse every record's date), the opposite of one-bad-record safety.
+            raise ValueError(
+                f"Record '{name}' has invalid source_date {source_date!r} "
+                "(need YYYY-MM-DD)"
+            )
         summary = (d.get("summary") or f"{name}.").strip()
         body = (d.get("body") or summary).strip()
         return cls(

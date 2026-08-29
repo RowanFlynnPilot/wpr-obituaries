@@ -222,7 +222,7 @@ class FuneralHomeScrape:
             if platform == "tukios":
                 yield from self._tukios_units(home, cutoff)
             elif platform == "tribute":
-                yield from self._tribute_units(home, cutoff, backfill=window is None)
+                yield from self._tribute_units(home, cutoff)
             else:
                 raise RuntimeError(
                     f"{NAME}: home '{home['name']}' has unsupported platform "
@@ -250,23 +250,23 @@ class FuneralHomeScrape:
             )
         print(f"  {NAME}: {home['name']} — {count} obituaries in window.")
 
-    def _tribute_units(self, home: dict, cutoff: str | None, backfill: bool) -> Iterator[Unit]:
+    def _tribute_units(self, home: dict, cutoff: str | None) -> Iterator[Unit]:
         url = home.get("url")
         if not url:
             raise RuntimeError(
                 f"{NAME}: home '{home['name']}' is platform tribute but has no url."
             )
         session = make_session()
-        found = tribute.all_urls(session, url) if backfill else tribute.recent_urls(session, url, cutoff)
         count = 0
-        for page_url, stamp in found:
+        for page_url, stamp in tribute.all_urls(session, url, cutoff):
             oid = tribute.obid(page_url)
             if not oid:
                 continue
             count += 1
-            # The revision (RSS pubDate / sitemap lastmod) comes from discovery, so
-            # is_processed skips unchanged obituaries without fetching the page; the
-            # person page is fetched only when the unit is new or changed.
+            # The revision (sitemap lastmod) comes from discovery, so is_processed
+            # skips unchanged obituaries without fetching the page — and because
+            # lastmod moves when the home edits an obituary, a correction shows up
+            # as a changed revision and re-extracts.
             yield Unit(
                 source=self.name,
                 unit_id=int(oid),

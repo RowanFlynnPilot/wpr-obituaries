@@ -37,8 +37,14 @@ permissions:
 jobs:
   add-home:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Dispatch inputs reach the shell only via env vars — interpolating
+      # ${{ inputs.* }} into run: is a script-injection surface.
+      HOME_URL: ${{ inputs.url }}
+      HOME_NAME: ${{ inputs.name }}
+      HOME_MATCH: ${{ inputs.match }}
     steps:
       - uses: actions/checkout@v4
 
@@ -56,10 +62,10 @@ jobs:
           # Merge stderr into the capture: add_home prints its "why it couldn't
           # add" diagnostics to stderr, and that text is what makes the review
           # issue actionable.
-          python scripts/add_home.py "${{ inputs.url }}" \
-            ${{ inputs.name && format('--name "{0}"', inputs.name) || '' }} \
-            ${{ inputs.match && format('--match "{0}"', inputs.match) || '' }} \
-            --write 2>&1 | tee out.txt
+          args=()
+          if [ -n "$HOME_NAME" ]; then args+=(--name "$HOME_NAME"); fi
+          if [ -n "$HOME_MATCH" ]; then args+=(--match "$HOME_MATCH"); fi
+          python scripts/add_home.py "$HOME_URL" "${args[@]}" --write 2>&1 | tee out.txt
           code=${PIPESTATUS[0]}
           set -e
           {
@@ -85,16 +91,16 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
           git add data/funeral_homes.json
-          git commit -m "data: add funeral home from ${{ inputs.url }}"
+          git commit -m "data: add funeral home from $HOME_URL"
           git push -u origin "$branch"
           gh pr create --base main --head "$branch" \
-            --title "Add funeral home: ${{ inputs.url }}" \
+            --title "Add funeral home: $HOME_URL" \
             --body "$(printf 'Onboarded via the Add funeral home workflow.\n\n```\n%s\n```\n\nReview the `match` token before merging — it must be a lowercase substring of the home name on its obituaries so scraped records link to the canonical home.' "$(cat out.txt)")"
 
       - name: Flag unrecognized home for review
         if: steps.detect.outputs.code != '0'
         run: |
-          url="${{ inputs.url }}"
+          url="$HOME_URL"
           out="$(cat out.txt)"
           # De-dupe: if an open review issue for this URL already exists, comment on it.
           existing=$(gh issue list --state open --search "in:title \"$url\"" --json number --jq '.[0].number // empty' 2>/dev/null || true)

@@ -86,7 +86,7 @@ def _require_base_url() -> str:
     if not base_url:
         raise RuntimeError(
             "PUBLIC_BASE_URL is not set. This is where the pages are served and "
-            "indexed, e.g. https://rowanflynnpilot.github.io/wpr-obituaries"
+            "indexed, e.g. https://obituaries.wausaupilotandreview.com"
         )
     return base_url.rstrip("/")
 
@@ -197,7 +197,11 @@ def _lifespan_str(ob: Obituary) -> str:
 
 
 def _sponsor_line(sponsor: dict) -> str:
-    names = [s["name"].split()[0] for s in (sponsor.get("sponsors") or []) if s.get("name")]
+    names = [
+        s["name"].split()[0]
+        for s in (sponsor.get("sponsors") or [])
+        if s.get("name", "").strip()
+    ]
     return "Obituaries  ·  " + " + ".join(names) if names else "Obituaries"
 
 
@@ -447,6 +451,8 @@ def main() -> int:
     )
     parser.add_argument("--allow-empty", action="store_true", help="permit a 0-record render")
     args = parser.parse_args()
+    if args.render_only and (args.backfill or args.days is not None):
+        parser.error("--render-only never fetches, so --days/--backfill would be ignored")
 
     sponsor = _load_sponsor()
     newsroom = load_newsroom()

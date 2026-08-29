@@ -113,8 +113,11 @@ def fetch_batch_posts(
     page = 1
     while True:
         resp = _get(session, f"{api_base}/posts", {**params, "page": page})
-        if resp.status_code == 400:
-            # WordPress returns 400 once page exceeds the available range.
+        if resp.status_code == 400 and page > 1:
+            # WordPress returns 400 once page exceeds the available range. Only
+            # past page 1, though — a 400 on the *first* page is a genuinely bad
+            # request (e.g. WP rejecting a param after an upgrade), and treating
+            # it as "no posts" would be a silent gap instead of a loud failure.
             break
         resp.raise_for_status()
         batch = resp.json()

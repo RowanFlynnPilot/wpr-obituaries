@@ -30,6 +30,10 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # A normal run is a few minutes; a hung proxy fetch must not burn the
+    # 6-hour default. Generous enough for a --days 180 seed; a full --backfill
+    # is a supervised one-off (bump this temporarily if ever needed).
+    timeout-minutes: 60
     env:
       # ANTHROPIC_API_KEY + WEBSHARE_PROXY_URL are only needed when the
       # wordpress_scrape source is enabled (Haiku extraction + the proxied
@@ -66,12 +70,16 @@ jobs:
       - name: Run pipeline tests
         run: python extract/test_pipeline.py
 
+      # Inputs pass through env vars, never interpolated into the shell script.
       - name: Extract obituaries and render site
+        env:
+          BACKFILL: ${{ inputs.backfill }}
+          SEED_DAYS: ${{ inputs.seed_days }}
         run: |
-          if [ "${{ inputs.backfill }}" = "true" ]; then
+          if [ "$BACKFILL" = "true" ]; then
             python extract/main.py --backfill
-          elif [ -n "${{ inputs.seed_days }}" ]; then
-            python extract/main.py --days "${{ inputs.seed_days }}"
+          elif [ -n "$SEED_DAYS" ]; then
+            python extract/main.py --days "$SEED_DAYS"
           else
             python extract/main.py
           fi

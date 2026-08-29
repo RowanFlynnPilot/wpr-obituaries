@@ -381,20 +381,28 @@ def test_tribute_client():
     person = tribute._parse_person_ld(_PERSON_LD)
     assert person["name"] == "Diane V. Dombeck" and person["deathDate"] == "June 24, 2026"
 
-    # RSS discovery yields newest-first and stops at the cutoff — no network
-    rss = (b'<?xml version="1.0"?><rss><channel>'
-           b'<item><link>https://x/obituaries/A?obId=101</link><pubDate>Fri, 26 Jun 2026 08:00:00 -0500</pubDate></item>'
-           b'<item><link>https://x/obituaries/B?obId=102</link><pubDate>Wed, 10 Jun 2026 08:00:00 -0500</pubDate></item>'
-           b'<item><link>https://x/obituaries/C?obId=103</link><pubDate>Sun, 01 May 2026 08:00:00 -0500</pubDate></item>'
-           b'</channel></rss>')
+    # Sitemap discovery windows on lastmod (which moves when a home edits an
+    # obituary, so corrections re-enter the window) — no network
+    idx = (b'<?xml version="1.0"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+           b'<sitemap><loc>https://x/static-sitemap.xml</loc></sitemap>'
+           b'<sitemap><loc>https://x/obituaries-sitemap/1.xml.gz</loc></sitemap>'
+           b'</sitemapindex>')
+    sub = (b'<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+           b'<url><loc>https://x/obituaries/A?obId=101</loc><lastmod>2026-06-26</lastmod></url>'
+           b'<url><loc>https://x/obituaries/B?obId=102</loc><lastmod>2026-06-10</lastmod></url>'
+           b'<url><loc>https://x/obituaries/C?obId=103</loc><lastmod>2026-05-01</lastmod></url>'
+           b'</urlset>')
+    pages = {"https://x/sitemap.xml": idx, "https://x/obituaries-sitemap/1.xml.gz": sub}
     orig = tribute._get
-    tribute._get = lambda session, url: type("R", (), {"content": rss, "text": ""})()
+    tribute._get = lambda session, url: type("R", (), {"content": pages[url], "text": ""})()
     try:
-        got = [tribute.obid(u) for u, _ in tribute.recent_urls(None, "https://x", cutoff="2026-06-01")]
+        windowed = [tribute.obid(u) for u, _ in tribute.all_urls(None, "https://x", cutoff="2026-06-01")]
+        everything = [tribute.obid(u) for u, _ in tribute.all_urls(None, "https://x")]
     finally:
         tribute._get = orig
-    assert got == ["101", "102"], got  # stops before the May item
-    print("ok: tribute client (obid, date parse, body unescape, JSON-LD, RSS window)")
+    assert windowed == ["101", "102"], windowed  # the May item falls outside the window
+    assert everything == ["101", "102", "103"]
+    print("ok: tribute client (obid, date parse, body unescape, JSON-LD, sitemap window)")
 
 
 def test_tribute_mapping():

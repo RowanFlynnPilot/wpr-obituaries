@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import dataclasses
 import json
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -157,7 +158,11 @@ def save_master(master: Master, path: Path) -> None:
         "posts": dict(sorted(master.posts.items(), key=_post_sort_key)),
         "records": [r.to_record_dict() for r in ordered],
     }
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    # Atomic replace: a crash mid-write must never leave a truncated master for
+    # CI to auto-commit — the temp file either fully lands or never exists.
+    tmp = path.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    os.replace(tmp, path)
 
 
 def load_suppressed(path: Path) -> set[str]:
