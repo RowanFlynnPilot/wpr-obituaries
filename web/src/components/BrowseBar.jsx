@@ -2,6 +2,9 @@ import { useMemo } from "react";
 import { monthKey, monthLabel, lastNameInitial } from "../lib/format.js";
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+// One chip per month grows forever with the catalogue — cap the row at a year
+// and put everything older in the "Earlier months" select that follows it.
+const MONTH_CHIPS = 12;
 
 export default function BrowseBar({ obituaries, filter, onFilter, recentMonths = 3 }) {
   const months = useMemo(() => {
@@ -32,8 +35,19 @@ export default function BrowseBar({ obituaries, filter, onFilter, recentMonths =
 
   const isMonth = (k) => filter.kind === "month" && filter.value === k;
   const isLetter = (l) => filter.kind === "letter" && filter.value === l;
+  // Clearing a select lands on the Recent default, matching what clearing the
+  // search does — never a surprise dump into the entire catalogue.
   const onSelect = (kind) => (e) =>
-    onFilter(e.target.value ? { kind, value: e.target.value } : { kind: "none" });
+    onFilter(
+      e.target.value
+        ? { kind, value: e.target.value }
+        : { kind: "recent", value: recentMonths }
+    );
+
+  const chipMonths = months.slice(0, MONTH_CHIPS);
+  const olderMonths = months.slice(MONTH_CHIPS);
+  const olderActive =
+    filter.kind === "month" && olderMonths.some((m) => m.key === filter.value);
 
   return (
     <div className="browse">
@@ -54,7 +68,7 @@ export default function BrowseBar({ obituaries, filter, onFilter, recentMonths =
         >
           All
         </button>
-        {months.map((m) => (
+        {chipMonths.map((m) => (
           <button
             key={m.key}
             type="button"
@@ -64,6 +78,23 @@ export default function BrowseBar({ obituaries, filter, onFilter, recentMonths =
             {monthLabel(m.key)} <span className="browse__count">{m.count}</span>
           </button>
         ))}
+        {olderMonths.length > 0 && (
+          <label className="browse__select">
+            <select
+              aria-label="Earlier months"
+              className={olderActive ? "is-active" : ""}
+              value={olderActive ? filter.value : ""}
+              onChange={onSelect("month")}
+            >
+              <option value="">Earlier…</option>
+              {olderMonths.map((m) => (
+                <option key={m.key} value={m.key}>
+                  {monthLabel(m.key)} ({m.count})
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
       </div>
 
       <div className="browse__row browse__row--az">
