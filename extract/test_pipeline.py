@@ -597,6 +597,34 @@ def test_archive():
     print("ok: archive (month sections, links every record, canonical)")
 
 
+def test_wp_fetch_retries_cloudflare_block():
+    # A Cloudflare bot-check 403 on one proxy exit IP retries (the next attempt
+    # gets a fresh IP); a real, persistent 403 still surfaces to the caller.
+    import wp_client
+
+    class Resp:
+        def __init__(self, code):
+            self.status_code = code
+
+    class FlakySession:
+        def __init__(self, codes):
+            self.codes = list(codes)
+
+        def get(self, url, params=None, timeout=None):
+            return Resp(self.codes.pop(0))
+
+    orig_sleep = wp_client.time.sleep
+    wp_client.time.sleep = lambda s: None
+    try:
+        assert wp_client._get(FlakySession([403, 403, 200]), "u", {}).status_code == 200
+        assert wp_client._get(FlakySession([400]), "u", {}).status_code == 400  # not retried
+        always = wp_client._get(FlakySession([403] * (wp_client.RETRIES + 1)), "u", {})
+        assert always.status_code == 403  # exhausted: caller raises the real status
+    finally:
+        wp_client.time.sleep = orig_sleep
+    print("ok: wp fetch retries a Cloudflare 403, passes 400 through, surfaces a real block")
+
+
 def test_json_ld_escaping():
     # Third-party text must not be able to close the ld+json <script> block:
     # the HTML parser ends a script element at the first "</" it sees.

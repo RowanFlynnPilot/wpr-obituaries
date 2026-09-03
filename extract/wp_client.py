@@ -18,23 +18,33 @@ TIMEOUT = 30
 RETRIES = 5  # the residential proxy + Cloudflare are flaky (incl. TLS blips); ride them out
 
 
-def _get(session: requests.Session, url: str, params: dict) -> requests.Response:
-    """GET with bounded exponential backoff on transport errors and 5xx.
+# Cloudflare answers a bot-check or rate-limit with these; the residential proxy
+# hands out a different exit IP per connection, so a retry is a genuinely new
+# roll of the dice, not the same request again.
+RETRY_STATUSES = {403, 429}
 
-    Returns 4xx responses as-is (the caller distinguishes the 400 that marks the
-    end of pagination); only server errors and exceptions are retried.
+
+def _get(session: requests.Session, url: str, params: dict) -> requests.Response:
+    """GET with bounded exponential backoff on transport errors, 5xx, and
+    Cloudflare's 403/429.
+
+    Other 4xx responses return as-is (the caller distinguishes the 400 that
+    marks the end of pagination). A 403 that survives every retry is raised as
+    the response's HTTPError by the caller, so a real block still fails loudly.
     """
     last_error: Exception | None = None
     for attempt in range(RETRIES + 1):
         try:
             resp = session.get(url, params=params, timeout=TIMEOUT)
-            if resp.status_code < 500:
+            if resp.status_code < 500 and resp.status_code not in RETRY_STATUSES:
                 return resp
             last_error = RuntimeError(f"{resp.status_code} from {url}")
+            if attempt == RETRIES:
+                return resp  # let the caller raise with the real status
         except Exception as exc:  # noqa: BLE001 — network/proxy/TLS blips
             last_error = exc
         if attempt < RETRIES:
-            wait = 2**attempt  # 1s, 2s, 4s
+            wait = 2**attempt  # 1s … 16s
             print(f"  fetch retry {attempt + 1}/{RETRIES} after {wait}s: {last_error}", file=sys.stderr)
             time.sleep(wait)
     raise last_error
