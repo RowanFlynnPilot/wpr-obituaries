@@ -72,11 +72,18 @@ jobs:
         run: python extract/test_pipeline.py
 
       # Inputs pass through env vars, never interpolated into the shell script.
+      #
+      # Exit codes: 0 = clean; 2 = rendered fine but some units were quarantined
+      # (data/failures.json) — the good catalogue still deploys and the `report`
+      # job below goes red with the details; anything else = the run itself
+      # broke (exception), so nothing deploys and the last good deploy stays live.
       - name: Extract obituaries and render site
+        id: extract
         env:
           BACKFILL: ${{ inputs.backfill }}
           SEED_DAYS: ${{ inputs.seed_days }}
         run: |
+          set +e
           if [ "$BACKFILL" = "true" ]; then
             python extract/main.py --backfill
           elif [ -n "$SEED_DAYS" ]; then
@@ -84,11 +91,18 @@ jobs:
           else
             python extract/main.py
           fi
+          code=$?
+          set -e
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          if [ "$code" = "2" ]; then
+            echo "::warning::Some units failed to extract — deploying the rest; see the report job."
+            exit 0
+          fi
+          exit "$code"
 
       # Persist the accumulating master and any newly-vendored portraits even when
       # extraction exits non-zero, so a single failed post never loses the records
-      # that did succeed. A failed extract still stops the build below, so no
-      # deploy happens that run.
+      # that did succeed.
       - name: Persist master and vendored photos
         if: always()
         run: |
@@ -125,6 +139,9 @@ jobs:
         with:
           path: web/dist
 
+    outputs:
+      extract_code: ${{ steps.extract.outputs.code }}
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -134,3 +151,27 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Quarantined units make this job — and so the workflow — red, while the deploy
+  # above still ships everything that did extract. Persistent failures therefore
+  # stay visible run after run without ever holding the catalogue hostage.
+  report:
+    needs: build
+    if: needs.build.outputs.extract_code == '2'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main  # the build job committed data/failures.json back to main
+      - name: Report quarantined extractions
+        run: |
+          {
+            echo "## Quarantined extractions"
+            echo "These units failed to extract this run (the rest of the catalogue deployed):"
+            echo '```json'
+            cat data/failures.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          cat data/failures.json
+          exit 1

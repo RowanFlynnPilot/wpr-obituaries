@@ -14,7 +14,7 @@ scraping characteristics:
 | Platform | Homes | Discovery | Obituary body |
 |---|---|---|---|
 | **Tukios** | Brainard, Helke, Peterson/Kraemer, Ascend, Beste, Rembs, Taylor-Stine-Waid | JS-rendered listing, but a public JSON API enumerates everything | Fully structured in the API response |
-| **Tribute Technology** (Frazer) | Schmidt & Schulta, Buettgen (honorone.com), Mid-Wisconsin, Carlson | Obituary sitemaps (every entry carries a `lastmod`) | Embedded JSON / JSON-LD in the person-page HTML |
+| **Tribute Technology** (Frazer) | Schmidt & Schulta, Buettgen (honorone.com), Mid-Wisconsin, Carlson | RSS for recency + obituary sitemaps (`lastmod`) for revisions | Embedded JSON / JSON-LD in the person-page HTML |
 
 **Both platforms are implemented**, and both serve fully structured records, so
 there is *no model extraction* — one source record maps straight to one
@@ -23,12 +23,16 @@ there is *no model extraction* — one source record maps straight to one
 
 - **Tukios** (keyed by `siteAlias`): discovery and records come from one JSON
   API — name, both dates, age, city, full text, portrait, permanent URL.
-- **Tribute Technology** (keyed by the site `url`): discovery reads the home's
-  obituary sitemaps, windowed by `lastmod` (which moves when the home edits an
-  obituary — so corrections re-extract; the old RSS pubDate never changed, so
-  edits were invisible), with no cutoff for a `--backfill`; each person page
-  carries a schema.org `Person` JSON-LD with the full obituary, both dates,
-  and the portrait. Tribute has no
+- **Tribute Technology** (keyed by the site `url`): windowed discovery takes
+  *membership* from the Recent-Obituaries RSS (`/rss.xml`, pubDate = the
+  publication date) and each unit's *revision* from the obituary sitemaps'
+  `lastmod` (which moves when the home edits an obituary, so corrections
+  re-extract). Neither works alone: pubDate never changes so RSS can't see
+  edits, and the platform bumps `lastmod` in bulk on decades-old entries so
+  the sitemap can't judge recency (one 45-day window once surfaced 100
+  obituaries from 1934–2024). A `--backfill` reads only the sitemaps. Each
+  person page carries a schema.org `Person` JSON-LD with the full obituary,
+  both dates, and the portrait. Tribute has no
   structured city, so those records carry no town facet (summary is name + age +
   death date), and age is computed from the two dates.
 

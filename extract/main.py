@@ -473,10 +473,13 @@ def main() -> int:
             encoding="utf-8",
         )
     if failures:
+        # Exit 2 = "rendered fine, but some units were quarantined": the workflow
+        # deploys the good catalogue and reports the failures in their own red
+        # job. Exit 1 (an uncaught exception) still means nothing deploys.
         print(f"\n{len(failures)} post(s) failed to extract:", file=sys.stderr)
         for url, err in failures:
             print(f"::error::extract failed for {url}: {err}", file=sys.stderr)
-        return 1
+        return 2
     return 0
 
 

@@ -2,13 +2,21 @@
 
 The second scrape platform, behind Schmidt & Schulta, John J. Buettgen
 (honorone.com), Mid-Wisconsin Cremation Society, and Carlson. Mirror image of
-Tukios: discovery reads the obituary sitemaps (every entry carries a `lastmod`
-that moves when the home edits an obituary — so a windowed poll picks up both
-new posts *and* corrections, which the old Recent-Obituaries RSS could not:
-its pubDate never changes), and each person page carries a schema.org `Person`
+Tukios: discovery is cheap, and each person page carries a schema.org `Person`
 JSON-LD block with the complete obituary text, both dates, and the portrait —
 so, like Tukios, there is no model extraction; the adapter maps the parsed
 record straight to an `Obituary`.
+
+Discovery uses two feeds, each for the one thing it is trustworthy for:
+
+- The Recent-Obituaries RSS says *what is recent*: its pubDate is the
+  publication date and never moves.
+- The obituary sitemaps say *what changed*: every entry's `lastmod` moves when
+  the home edits an obituary, so it is the unit revision and corrections
+  re-extract. It cannot window on its own — the platform bumps `lastmod` in
+  bulk on decades-old entries (one 45-day window surfaced 100 obituaries from
+  1934–2024), and the RSS cannot see edits. A full backfill reads only the
+  sitemaps.
 
 Discovery is keyed by the home's own site URL (no per-site token). Some of these
 sites are Cloudflare-fronted and some are plain IIS; the shared curl_cffi
@@ -25,6 +33,7 @@ import sys
 import time
 from collections.abc import Iterator
 from datetime import datetime
+from email.utils import parsedate_to_datetime
 from xml.etree import ElementTree as ET
 
 from bs4 import BeautifulSoup
@@ -60,21 +69,66 @@ def _get(session, url: str):
     raise last_error
 
 
+def _rfc822_to_iso(value: str | None) -> str | None:
+    if not value:
+        return None
+    try:
+        return parsedate_to_datetime(value).date().isoformat()
+    except (TypeError, ValueError):
+        return None
+
+
 def _maybe_gunzip(data: bytes) -> bytes:
     return gzip.decompress(data) if data[:2] == b"\x1f\x8b" else data
 
 
-def all_urls(
-    session, base: str, cutoff: str | None = None
-) -> Iterator[tuple[str, str | None]]:
-    """(person_url, lastmod_iso) from the obituary sitemaps.
+def _rss_urls(session, base: str, cutoff: str) -> Iterator[tuple[str, str | None]]:
+    """(person_url, pubdate_iso) from the Recent-Obituaries RSS, newest first,
+    stopping at the first item published before `cutoff`.
 
-    With a `cutoff` (ISO date), only entries whose lastmod is on/after it are
-    yielded — and since lastmod moves when the home edits an obituary, a
-    windowed poll surfaces corrections too, not just new posts. An entry with
-    no lastmod can't be windowed, so it is always yielded (its unit revision
-    is then stable, so it still only extracts once). No cutoff = full backfill.
+    If the feed runs out before reaching the cutoff, the window reaches past
+    the feed — warn, because a busier home could have obituaries in that gap
+    (the Mon/Wed/Fri cron makes this a non-issue in practice, but a silent gap
+    would not be honest).
     """
+    resp = _get(session, base.rstrip("/") + "/rss.xml")
+    root = ET.fromstring(resp.content)
+    reached_cutoff = False
+    for item in root.iter("item"):
+        link = (item.findtext("link") or "").strip()
+        iso = _rfc822_to_iso(item.findtext("pubDate"))
+        if iso and iso < cutoff:
+            reached_cutoff = True
+            break
+        if link:
+            yield link, iso
+    if not reached_cutoff:
+        print(
+            f"  tribute: RSS feed for {base} ran out before the {cutoff} cutoff — "
+            f"older obituaries in the window may be missed until the next run.",
+            file=sys.stderr,
+        )
+
+
+def recent_urls(session, base: str, cutoff: str) -> Iterator[tuple[str, str | None]]:
+    """(person_url, revision) for obituaries published on/after `cutoff`.
+
+    Membership comes from the RSS (publication date); the revision comes from
+    the sitemap `lastmod` for that obituary, so an edit re-extracts. An
+    obituary the sitemap hasn't caught up with yet (it lags publication by
+    hours) carries its pubDate as the revision — the sitemap's lastmod then
+    replaces it on the next run, costing one extra page fetch, never a gap.
+    """
+    recent = list(_rss_urls(session, base, cutoff))
+    if not recent:
+        return
+    lastmod_by_id = {obid(u): stamp for u, stamp in all_urls(session, base)}
+    for url, pubdate in recent:
+        yield url, lastmod_by_id.get(obid(url)) or pubdate
+
+
+def all_urls(session, base: str) -> Iterator[tuple[str, str | None]]:
+    """(person_url, lastmod_iso) for every obituary, from the sitemaps."""
     idx = _get(session, base.rstrip("/") + "/sitemap.xml")
     index = ET.fromstring(_maybe_gunzip(idx.content))
     sitemaps = [
@@ -92,12 +146,8 @@ def all_urls(
                     loc = child.text
                 elif child.tag.endswith("lastmod"):
                     lastmod = child.text
-            if not (loc and "obId=" in loc):
-                continue
-            stamp = lastmod[:10] if lastmod else None
-            if cutoff and stamp and stamp < cutoff:
-                continue
-            yield loc, stamp
+            if loc and "obId=" in loc:
+                yield loc, (lastmod[:10] if lastmod else None)
 
 
 def _iter_ld(page_html: str) -> Iterator[dict]:

@@ -141,9 +141,10 @@ Funeral-home scraping (`adapters.funeral_home_scrape`, `windowDays` in config)
 reads the homes' own sites directly. Per-home scrape config lives in
 `data/funeral_homes.json` (`platform` + its key). Two platforms are wired:
 **Tukios** (seven homes, keyed by `siteAlias`, JSON API) and **Tribute
-Technology** (four homes, keyed by `url`, sitemap discovery windowed on
-`lastmod` — which moves on edits, so corrections re-extract — + `Person`
-JSON-LD). The
+Technology** (four homes, keyed by `url`; the RSS `pubDate` decides what is
+recent, the sitemap `lastmod` — which moves on edits — is the unit revision so
+corrections re-extract; `lastmod` alone can't window, the platform bumps it on
+decades-old entries; + `Person` JSON-LD). The
 scraped-home list is also the republication permission list — full details, both
 platforms' mechanics, and the cross-source dedupe/overlap note are in
 `docs/funeral-home-scraping.md`.
@@ -213,9 +214,11 @@ platforms' mechanics, and the cross-source dedupe/overlap note are in
   extractions or a staff submission); `extract/test_pipeline.py` is a no-dep
   regression suite run in CI before the extract step (a broken build never
   deploys).
-- **Open follow-up**: **Soft-failure deploys** — today any per-post failure skips
-  the deploy that run; a follow-up could deploy the good catalogue and surface
-  failures via a separate red report job.
+- **Soft-failure deploys (done)**: `main.py` exits **2** when units were
+  quarantined but the render succeeded; the workflow deploys the good catalogue
+  and a separate `report` job goes red with `data/failures.json`, so a
+  persistently broken upstream page can never hold the catalogue hostage. Exit
+  1 (an exception) still skips the deploy.
 - **Editorial controls** (`data/`, documented in `data/README.md`):
   `manual.json` adds hand-entered obituaries that don't come through the WPR
   batches (a stray notice, an out-of-town home) — each becomes a full page, merged

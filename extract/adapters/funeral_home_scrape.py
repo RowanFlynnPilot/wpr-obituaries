@@ -257,8 +257,13 @@ class FuneralHomeScrape:
                 f"{NAME}: home '{home['name']}' is platform tribute but has no url."
             )
         session = make_session()
+        found = (
+            tribute.all_urls(session, url)  # backfill: everything ever published
+            if cutoff is None
+            else tribute.recent_urls(session, url, cutoff)
+        )
         count = 0
-        for page_url, stamp in tribute.all_urls(session, url, cutoff):
+        for page_url, stamp in found:
             oid = tribute.obid(page_url)
             if not oid:
                 continue
