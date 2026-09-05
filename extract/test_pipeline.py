@@ -432,7 +432,7 @@ def test_tribute_mapping():
     assert ob.source_id == 48850499 and ob.funeral_home.startswith("Schmidt")
     assert ob.body == "Diane V. Dombeck, 73, of Eland, passed away."
     # town recovered from the opening line (age-anchored) flows into the summary
-    assert ob.summary == "Diane V. Dombeck, age 73, of Eland passed away on June 24, 2026."
+    assert ob.summary == "Diane V. Dombeck, age 73, of Eland, passed away on June 24, 2026."
     assert main._derive_town(ob.summary) == "Eland"
     # a prose opener without an age before "of" yields no false town
     assert fhs._city_from_body("In loving memory of Elizabeth, who was 44.") is None

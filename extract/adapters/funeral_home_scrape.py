@@ -13,9 +13,10 @@ extraction — one source record maps directly to one `Obituary`):
   Ascend) plus outer-ring Beste, Rembs, Taylor-Stine-Waid. Discovery + records
   come from one JSON API keyed by a per-site `siteAlias`.
 - **Tribute Technology** — Schmidt & Schulta, Buettgen, Mid-Wisconsin, Carlson.
-  Discovery is the site's Recent-Obituaries RSS (or the obituary sitemaps on a
-  backfill); each person page carries a schema.org `Person` JSON-LD with the full
-  record. Keyed by the home's own site `url`.
+  Windowed discovery takes membership from the site's Recent-Obituaries RSS and
+  each unit's revision from the obituary sitemaps' `lastmod` (a backfill reads
+  only the sitemaps); each person page carries a schema.org `Person` JSON-LD
+  with the full record. Keyed by the home's own site `url`.
 
 See docs/funeral-home-scraping.md. A configured home is a trusted source, so
 scraped records publish like the WPR batch scrape; `data/suppressed.json`
@@ -88,15 +89,31 @@ def _photo_url(row: dict) -> str | None:
     return sizes.get("lg") or row.get("default_image") or None
 
 
-def _summary(name: str, age, city: str | None, formatted_dod: str | None) -> str:
-    """One respectful line, shaped so the town facet can read "of <City>"."""
+def _long_date(iso: str | None) -> str | None:
+    """'2026-06-02' -> 'June 2, 2026': one date style across both platforms
+    (Tukios hands us an abbreviated month; Tribute a long one)."""
+    if not iso:
+        return None
+    d = date.fromisoformat(iso)
+    return f"{d:%B} {d.day}, {d.year}"
+
+
+def _summary(name: str, age, city: str | None, death_date: str | None) -> str:
+    """One respectful line, shaped so the town facet can read "of <City>":
+
+        Jane Q. Doe, age 84, of Weston, passed away on June 2, 2026.
+
+    Appositive commas close before the verb — without them the line read
+    "age 80 passed away" whenever the town was missing.
+    """
     parts = [name]
     if age is not None:
         parts.append(f", age {age}")
     if city:
         parts.append(f", of {city}")
-    if formatted_dod:
-        parts.append(f" passed away on {formatted_dod}")
+    when = _long_date(death_date)
+    if when:
+        parts.append(f", passed away on {when}")
     return "".join(parts) + "."
 
 
@@ -131,7 +148,7 @@ def to_obituary(row: dict, home_name: str) -> Obituary | None:
         # and shows a town where the home should be. The home name is canonical.
         funeral_home=home_name,
         photo_url=_photo_url(row),
-        summary=_summary(name, age, city, row.get("formatted_date_of_death")),
+        summary=_summary(name, age, city, dod),
         body=_html_to_paragraphs(row.get("obituary_text", "")),
     )
 
@@ -158,19 +175,6 @@ def _city_from_body(body: str) -> str | None:
     return m.group(1).strip(" ,.") if m else None
 
 
-def _tribute_summary(name: str, age: int | None, city: str | None, death_str: str | None) -> str:
-    """One respectful line, shaped like the Tukios summary so the town facet
-    (_derive_town) reads "of <City>" when we could recover the town."""
-    parts = [name]
-    if age is not None:
-        parts.append(f", age {age}")
-    if city:
-        parts.append(f", of {city}")
-    if death_str:
-        parts.append(f" passed away on {death_str.strip()}")
-    return "".join(parts) + "."
-
-
 def tribute_to_obituary(rec: dict, home_name: str) -> Obituary | None:
     """Map one Tribute person record (parsed JSON-LD) to an Obituary, or None."""
     name = (rec.get("name") or "").strip()
@@ -194,7 +198,7 @@ def tribute_to_obituary(rec: dict, home_name: str) -> Obituary | None:
         age=age,
         funeral_home=home_name,
         photo_url=rec.get("image"),
-        summary=_tribute_summary(name, age, _city_from_body(body), rec.get("deathDate")),
+        summary=_summary(name, age, _city_from_body(body), death_date),
         body=body,
     )
 

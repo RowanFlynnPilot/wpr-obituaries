@@ -178,10 +178,11 @@ _SECONDARY_CSS = """
     .back { display: inline-block; margin-top: 34px; font-family: var(--mono); font-size: 12.5px;
       color: var(--accent); text-decoration: none; }
     .back:hover { text-decoration: underline; }
-    .index-link { margin: 32px 0 0; font-family: var(--mono); font-size: 13px; }
-    .index-link a { color: var(--accent); text-decoration: none; }
-    .index-link a:hover { text-decoration: underline; }
-    .index-link + .back { margin-top: 10px; }
+    .foot-nav { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px;
+      margin: 34px 0 0; font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.04em; }
+    .foot-nav a { color: var(--accent); text-decoration: none; }
+    .foot-nav a:hover { text-decoration: underline; }
+    .foot-nav__dot { color: var(--rule); }
     @media print {
       body { background: #fff; color: #000; }
       .wrap { max-width: 100%; padding: 0; }
@@ -256,8 +257,11 @@ def render_home_page(
       {links}
     </ul>
     {_sponsor_section(sponsor, base_url, newsroom.analytics)}
-    <p class="index-link"><a href="{base_url}/archive.html">Browse the full obituary index &rarr;</a></p>
-    <a class="back" href="{base_url}/">&larr; All obituaries</a>
+    <nav class="foot-nav" aria-label="More obituaries">
+      <a href="{base_url}/">&larr; All obituaries</a>
+      <span class="foot-nav__dot" aria-hidden="true">&middot;</span>
+      <a href="{base_url}/archive.html">Browse the full index &rarr;</a>
+    </nav>
   </main>
   {event_script(newsroom.analytics)}
 </body>
@@ -722,10 +726,11 @@ def render_person_page(
       text-decoration: none;
     }}
     .back:hover {{ text-decoration: underline; }}
-    .index-link {{ margin: 30px 0 0; font-family: var(--mono); font-size: 13px; }}
-    .index-link a {{ color: var(--accent); text-decoration: none; }}
-    .index-link a:hover {{ text-decoration: underline; }}
-    .index-link + .back {{ margin-top: 10px; }}
+    .foot-nav {{ display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px;
+      margin: 34px 0 0; font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.04em; }}
+    .foot-nav a {{ color: var(--accent); text-decoration: none; }}
+    .foot-nav a:hover {{ text-decoration: underline; }}
+    .foot-nav__dot {{ color: var(--rule); }}
     @media (max-width: 480px) {{
       .wrap {{ padding: 32px 18px 64px; }}
       .portrait {{ float: none; width: 100%; max-width: 100%; margin: 0 0 18px; }}
@@ -751,7 +756,7 @@ def render_person_page(
       .arrangements {{ text-align: center; }}
       .arrangements a {{ color: #000; text-decoration: none; }}
       /* Drop the interactive chrome — keep the name, dates, portrait, and text. */
-      .topnav, .share, .sponsor-card, .more, .back, .index-link, .lightbox {{ display: none !important; }}
+      .topnav, .share, .sponsor-card, .more, .back, .foot-nav, .lightbox {{ display: none !important; }}
     }}
   </style>
 </head>
@@ -779,8 +784,11 @@ def render_person_page(
     {share_section}
     {sponsor_section}
     {related_section}
-    <p class="index-link"><a href="{base_url}/archive.html">Browse the full obituary index &rarr;</a></p>
-    <a class="back" href="{base_url}/">&larr; All obituaries</a>
+    <nav class="foot-nav" aria-label="More obituaries">
+      <a href="{base_url}/">&larr; All obituaries</a>
+      <span class="foot-nav__dot" aria-hidden="true">&middot;</span>
+      <a href="{base_url}/archive.html">Browse the full index &rarr;</a>
+    </nav>
   </main>
   <div class="lightbox" id="lightbox" hidden><img class="lightbox__img" alt="" /></div>
   <script>
