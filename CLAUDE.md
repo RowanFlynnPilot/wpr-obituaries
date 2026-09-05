@@ -42,8 +42,11 @@ Source of truth → static output → embedded widget:
    fetch window. It is committed to the repo and grows over time. Each record
    carries a `source` stamp (applied at upsert) so record ownership is
    namespaced per write-source, and a **persisted `slug`** that is carried
-   forward across re-extractions — a correction (say, a death year the first
-   pass missed) can never move a published URL.
+   forward across re-extractions — a correction (a death year the first pass
+   missed, a fixed middle initial, an added nickname) can never move a
+   published URL: one-person units carry the slug unconditionally, multi-person
+   batches match people by first + last name (`models.name_key`, shared with
+   the cross-source dedupe).
 5. `extract/main.py` — two phases:
    - **Sync** (skipped by `--render-only`): loop over every enabled write-source
      and extract only *new or changed* units (the `posts` map tracks each
@@ -74,8 +77,9 @@ Source of truth → static output → embedded widget:
    in `docs/embedding.md`.
 7. `.github/workflows/extract.yml` — cron Mon/Wed/Fri 6 AM Central. Runs sync +
    render, commits the updated master back (`contents: write`), then builds the
-   widget and deploys to Pages. A failed extract skips the deploy (the last good
-   deploy stays live) but still persists the master.
+   widget and deploys to Pages. Quarantined units (exit 2) still deploy the rest
+   and go red in a separate `report` job; a crashed extract (exit 1) skips the
+   deploy (the last good deploy stays live) but still persists the master.
 
 The React widget is the iframe embed on WordPress. The static `o/*.html` pages
 are what actually get crawled and ranked. Do not collapse these two layers —
@@ -193,8 +197,9 @@ platforms' mechanics, and the cross-source dedupe/overlap note are in
   (through the proxied session, since images sit behind the same Cloudflare),
   downscales to ~450px JPEG, and saves it to `web/public/assets/photos/<slug>.jpg`,
   committed alongside the master. A manifest (`data/photos.json`, slug → source
-  URL) makes a portrait *corrected upstream* re-vendor instead of staying stale;
-  suppressed records are never vendored. Vendoring runs in the sync phase,
+  URL) makes a portrait *corrected upstream* re-vendor instead of staying stale,
+  and a portrait *removed* upstream is deleted locally on the next sync;
+  suppressed records are never vendored, manual one-offs are. Vendoring runs in the sync phase,
   capped at `PER_RUN_LIMIT` per run so a first-run backlog drains over a few
   runs; render prefers the local copy and falls back to the remote URL for
   anything not yet vendored. The widget's `photoSrc` prepends the base path for
@@ -216,9 +221,12 @@ platforms' mechanics, and the cross-source dedupe/overlap note are in
   deploys).
 - **Soft-failure deploys (done)**: `main.py` exits **2** when units were
   quarantined but the render succeeded; the workflow deploys the good catalogue
-  and a separate `report` job goes red with `data/failures.json`, so a
-  persistently broken upstream page can never hold the catalogue hostage. Exit
-  1 (an exception) still skips the deploy.
+  and a separate `report` job goes red with `data/failures.json` (handed over as
+  a workflow artifact — the file is gitignored build state, never on `main`), so
+  a persistently broken upstream page can never hold the catalogue hostage. Exit
+  1 (an exception) still skips the deploy. Inside the funeral-home source, one
+  home's feed being down is isolated too: the other homes still yield, and the
+  outage is raised once, after the loop.
 - **Editorial controls** (`data/`, documented in `data/README.md`):
   `manual.json` adds hand-entered obituaries that don't come through the WPR
   batches (a stray notice, an out-of-town home) — each becomes a full page, merged

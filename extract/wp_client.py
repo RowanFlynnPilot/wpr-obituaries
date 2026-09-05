@@ -71,7 +71,8 @@ def _session() -> requests.Session:
 
 
 def make_session() -> requests.Session:
-    """Browser-impersonating session for vendoring photos, proxied *when available*.
+    """Browser-impersonating session for everything but the WP post fetch — portrait
+    vendoring, the Tukios/Tribute scrapes, add_home — proxied *when available*.
 
     WPR's portraits sit behind the same Cloudflare as its posts, so they need the
     residential proxy; a fork whose images are plainly reachable (e.g. intake

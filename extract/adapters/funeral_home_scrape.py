@@ -221,17 +221,28 @@ class FuneralHomeScrape:
     def units(self, window: int | None) -> Iterator[Unit]:
         """Yield one work-unit per recent obituary across every enabled home."""
         cutoff = self._cutoff(window)
+        failed: list[str] = []
         for home in self.homes:
             platform = home["platform"]
             if platform == "tukios":
-                yield from self._tukios_units(home, cutoff)
+                units = self._tukios_units(home, cutoff)
             elif platform == "tribute":
-                yield from self._tribute_units(home, cutoff)
+                units = self._tribute_units(home, cutoff)
             else:
                 raise RuntimeError(
                     f"{NAME}: home '{home['name']}' has unsupported platform "
                     f"'{platform}' (implemented: tukios, tribute)."
                 )
+            # One home's feed being down must not cost every home after it in the
+            # list: keep yielding the others, then raise once so the run still
+            # reports the outage (sync keeps everything upserted before a raise).
+            try:
+                yield from units
+            except Exception as exc:  # noqa: BLE001 — a home's discovery failed
+                print(f"  {NAME}: {home['name']} — discovery failed: {exc}", file=sys.stderr)
+                failed.append(f"{home['name']}: {exc}")
+        if failed:
+            raise RuntimeError(f"{NAME}: discovery failed for {len(failed)} home(s): " + "; ".join(failed))
 
     def _tukios_units(self, home: dict, cutoff: str | None) -> Iterator[Unit]:
         alias = home.get("siteAlias")

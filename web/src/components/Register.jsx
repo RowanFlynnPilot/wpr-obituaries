@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import ObituaryRow from "./ObituaryRow.jsx";
 import { dateLabel } from "../lib/format.js";
 
@@ -8,10 +8,10 @@ import { dateLabel } from "../lib/format.js";
 const PAGE_SIZE = 60;
 
 export default function Register({ obituaries, query }) {
+  // App keys this component on the search/filter identity, so a new result set
+  // mounts fresh at the first page — no frame of the old page size, no stale
+  // height posted to the embedding page.
   const [limit, setLimit] = useState(PAGE_SIZE);
-
-  // A new search/filter result starts back at the first page.
-  useEffect(() => setLimit(PAGE_SIZE), [obituaries]);
 
   if (obituaries.length === 0) {
     return (
@@ -46,6 +46,9 @@ export default function Register({ obituaries, query }) {
           </ol>
         </section>
       ))}
+      <p className="sr-only" role="status">
+        Showing {visible.length} of {obituaries.length} obituaries
+      </p>
       {remaining > 0 && (
         <button
           type="button"

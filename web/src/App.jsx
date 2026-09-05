@@ -131,7 +131,11 @@ export default function App() {
               recentMonths={RECENT_MONTHS}
             />
           )}
-          <Register obituaries={displayed} query={query} />
+          <Register
+            key={`${query}|${filter.kind}|${filter.value ?? ""}`}
+            obituaries={displayed}
+            query={query}
+          />
         </>
       ) : (
         <LoadingSkeleton />

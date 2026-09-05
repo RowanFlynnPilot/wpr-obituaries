@@ -36,6 +36,6 @@ def enabled_sources(newsroom: Newsroom) -> list:
             sources.append(IntakeManual())
         else:
             raise RuntimeError(
-                f"intake backend '{backend}' is not supported yet (Step 5: supabase)."
+                f"intake backend '{backend}' is not supported (only 'manual' is built)."
             )
     return sources

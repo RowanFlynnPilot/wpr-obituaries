@@ -60,7 +60,9 @@ export default defineConfig({
             .replace(
               /%CANONICAL%/g,
               publicBaseUrl
-                ? `<link rel="canonical" href="${escapeHtml(publicBaseUrl)}/" />`
+                ? `<link rel="canonical" href="${escapeHtml(publicBaseUrl)}/" />\n` +
+                  `    <meta property="og:url" content="${escapeHtml(publicBaseUrl)}/" />\n` +
+                  `    <meta property="og:image" content="${escapeHtml(publicBaseUrl)}/${escapeHtml(branding.sealPath)}" />`
                 : ""
             )
             .replace(/%FONTS_URL%/g, escapeHtml(branding.fontsUrl))

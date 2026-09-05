@@ -65,6 +65,12 @@ def vendor_photos(
     saved = 0
     for ob in records:
         if not ob.photo_url:
+            if ob.slug in have:
+                # The portrait was removed upstream (or a re-extraction dropped
+                # it) — a memorial must not keep showing a photo nobody publishes.
+                (photos_dir / local_filename(ob.slug)).unlink()
+                manifest.pop(ob.slug, None)
+                have.discard(ob.slug)
             continue
         if ob.slug in have and manifest.setdefault(ob.slug, ob.photo_url) == ob.photo_url:
             continue

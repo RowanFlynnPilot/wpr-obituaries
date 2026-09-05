@@ -96,7 +96,7 @@ def build_record(raw: dict) -> dict:
             raise SystemExit(f"error: age must be a whole number (got {age_raw!r})")
 
     town = _opt(raw, "town")
-    death_year = int((death_date or source_date)[:4])
+    death_year = int(death_date[:4]) if death_date else None  # never invent one from the publish date
     summary = _opt(raw, "summary") or _summary(name, age, town, death_date)
 
     return {

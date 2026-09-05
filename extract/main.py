@@ -13,7 +13,8 @@ The pipeline is split in two so that per-person pages outlive the fetch window:
              from the *entire* master. Rendering is free (no API), so the window
              only bounds extraction cost, never what stays published.
 
-Requires WEBSHARE_PROXY_URL and ANTHROPIC_API_KEY for sync (not for --render-only).
+WEBSHARE_PROXY_URL and ANTHROPIC_API_KEY are needed only when the wordpress_scrape
+source is enabled (never for --render-only); an intake-only fork runs keyless.
 A post that fails to extract is quarantined to `data/failures.json` and the run
 exits non-zero, but the master is still saved and the site still rendered — so a
 single bad post never costs us the rest of the catalogue.
@@ -32,7 +33,7 @@ from pathlib import Path
 from adapters import enabled_sources
 from config import load_newsroom
 from homes import load_homes, resolve_home
-from models import Obituary
+from models import Obituary, name_key
 from og import render_card
 from photos import vendor_photos, vendored_slugs
 from store import Master, load_manual, load_master, load_suppressed, save_master
@@ -55,7 +56,7 @@ OG_DIR = ROOT / "web" / "public" / "assets" / "og"
 # slug -> input hash; lets render skip unchanged cards. Kept outside the deployed
 # public/ tree (it's build state, not site output) but cached in CI alongside og/.
 OG_CACHE_FILE = ROOT / ".cache" / "og-cards.json"
-OG_CARD_VERSION = "1"  # bump when og.render_card's output changes, to force regen
+OG_CARD_VERSION = "2"  # v2: long single-token names shrink/hyphenate instead of overrunning  # bump when og.render_card's output changes, to force regen
 SITEMAP_FILE = ROOT / "web" / "public" / "sitemap.xml"
 FEED_FILE = ROOT / "web" / "public" / "feed.xml"
 ROBOTS_FILE = ROOT / "web" / "public" / "robots.txt"
@@ -178,7 +179,6 @@ def _write_index(records: list[Obituary], vendored: set[str], homes: list[dict])
         record = r.to_index_dict()
         record["photoUrl"] = _index_photo(r, vendored)
         home = resolve_home(r.funeral_home, homes)
-        record["funeralHomeUrl"] = f"funeral-home/{home['slug']}.html" if home else None
         record["homeName"] = home["name"] if home else None  # canonical, for the facet
         record["town"] = _derive_town(r.summary)
         obituaries.append(record)
@@ -197,28 +197,6 @@ def _sponsor_line(sponsor: dict) -> str:
         if s.get("name", "").strip()
     ]
     return "Obituaries  ·  " + " + ".join(names) if names else "Obituaries"
-
-
-_NAME_SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
-
-
-def _name_key(name: str) -> str:
-    """First + last name, lowercased, stripping middles, initials, suffixes, and
-    punctuation.
-
-    The same person reaches us from two sources under slightly different names —
-    a WPR batch may say "Ryan Johnson" where the funeral home says "Ryan Paul
-    Johnson", or one carries a middle initial, suffix, or quoted nickname the
-    other drops. Keying on first + last collapses those to one person; the death
-    date in the dedupe key keeps two different same-named people apart.
-    """
-    tokens = re.sub(r"[^\w\s]", " ", name.lower()).split()
-    tokens = [t for t in tokens if t not in _NAME_SUFFIXES]
-    if not tokens:
-        return name.lower().strip()
-    if len(tokens) == 1:
-        return tokens[0]
-    return f"{tokens[0]} {tokens[-1]}"
 
 
 def _reconcile_year_only(groups: dict[tuple, list[Obituary]]) -> None:
@@ -254,7 +232,7 @@ def _dedupe_people(
     groups: dict[tuple, list[Obituary]] = {}
     for r in records:
         stamp = r.death_date or (str(r.death_year) if r.death_year else r.source_date)
-        groups.setdefault((_name_key(r.name), stamp), []).append(r)
+        groups.setdefault((name_key(r.name), stamp), []).append(r)
     _reconcile_year_only(groups)
     canonical: list[Obituary] = []
     primary_by_slug: dict[str, Obituary] = {}
@@ -459,7 +437,11 @@ def main() -> int:
         failures = sync(master, sources, backfill=args.backfill, days=args.days)
         save_master(master, MASTER_FILE)  # persist successes before anything can fail
         suppressed = load_suppressed(SUPPRESSED_FILE)
-        vendorable = [r for r in master.records if r.slug not in suppressed]
+        # Manual one-offs are merged at render, but their portraits should be
+        # vendored (and reach the share card) like everyone else's.
+        vendorable = [
+            r for r in master.records + load_manual(MANUAL_FILE) if r.slug not in suppressed
+        ]
         saved = vendor_photos(vendorable, PHOTOS_DIR, make_session(), PHOTO_MANIFEST_FILE)
         if saved:
             print(f"Vendored {saved} new or changed portrait(s).")

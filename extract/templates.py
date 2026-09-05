@@ -143,8 +143,8 @@ _SECONDARY_CSS = """
       text-decoration: none; margin-bottom: 24px; }
     .topnav:hover { background: var(--hover); }
     .masthead { text-align: center; margin-bottom: 30px; }
-    .masthead__logo img { height: 30px; mix-blend-mode: multiply; }
-    .masthead__seal { display: block; width: 46px; height: 46px; border-radius: 50%; margin: 12px auto 0; }
+    .masthead__logo img { height: 34px; mix-blend-mode: multiply; }
+    .masthead__seal { display: block; width: 58px; height: 58px; border-radius: 50%; margin: 12px auto 0; }
     .kicker { margin: 16px 0 0; font-family: var(--mono); font-size: 11.5px;
       letter-spacing: 0.26em; text-transform: uppercase; color: var(--accent); }
     .masthead__rule { height: 0; border: 0; border-top: 3px double var(--rule); margin: 22px auto 0; }
@@ -167,12 +167,12 @@ _SECONDARY_CSS = """
       text-transform: uppercase; color: var(--muted); margin: 32px 0 2px; }
     .archive__group:first-of-type .archive__month { margin-top: 4px; }
     .sponsor-card { text-align: center; background: var(--paper-2); border: 1px solid var(--rule);
-      border-top: 3px solid var(--accent); border-radius: 2px; padding: 26px 24px 28px; margin: 44px 0 0; }
-    .sponsor-card__label { margin: 0 0 16px; font-family: var(--mono); font-size: 11px;
+      border-top: 3px solid var(--accent); border-radius: 2px; padding: 30px 28px 32px; margin: 44px 0 0; }
+    .sponsor-card__label { margin: 0 0 18px; font-family: var(--mono); font-size: 11px;
       letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); }
     .sponsor-card__logos { display: flex; flex-wrap: wrap; align-items: center;
-      justify-content: center; gap: 20px 38px; }
-    .sponsor-card__logo img { height: 64px; width: auto; max-width: 100%; }
+      justify-content: center; gap: 22px 40px; }
+    .sponsor-card__logo img { height: 80px; width: auto; max-width: 100%; }
     .sponsor-card__name { font-family: var(--nameplate); font-size: 1.2rem; font-weight: 600; margin: 0; }
     .sponsor-card__name a { color: var(--ink); text-decoration: none; }
     .back { display: inline-block; margin-top: 34px; font-family: var(--mono); font-size: 12.5px;
@@ -183,6 +183,8 @@ _SECONDARY_CSS = """
     .foot-nav a { color: var(--accent); text-decoration: none; }
     .foot-nav a:hover { text-decoration: underline; }
     .foot-nav__dot { color: var(--rule); }
+    a:focus-visible, button:focus-visible, [role="button"]:focus-visible {
+      outline: 2px solid var(--accent); outline-offset: 2px; }
     @media print {
       body { background: #fff; color: #000; }
       .wrap { max-width: 100%; padding: 0; }
@@ -389,8 +391,12 @@ def render_archive(
 def _structured_data(
     ob: Obituary, page_url: str, sponsor: dict, base_url: str, newsroom: Newsroom,
     photo_url: str | None = None,
+    og_image: str | None = None,
 ) -> str:
-    image = photo_url or ob.photo_url
+    portrait = photo_url or ob.photo_url
+    # The branded 1200×630 card is always generated, so every page has a top-level
+    # image (Google's most-cited missing Article field); the portrait follows.
+    images = [u for u in (og_image, portrait) if u]
     publisher = {
         "@type": "NewsMediaOrganization",
         "name": newsroom.name,
@@ -410,15 +416,13 @@ def _structured_data(
         # "<name> obituary <area>" query intent without inventing a place.
         "contentLocation": {"@type": "Place", "name": newsroom.coverage_area},
         "publisher": publisher,
-        # Top-level image (Google's most-cited missing Article field); the branded
-        # 1200×630 card is always generated, so there is always one to point at.
-        **({"image": image} if image else {}),
+        **({"image": images} if images else {}),
         "about": {
             "@type": "Person",
             "name": ob.name,
             **({"birthDate": ob.birth_date} if ob.birth_date else {}),
             **({"deathDate": ob.death_date} if ob.death_date else {}),
-            **({"image": image} if image else {}),
+            **({"image": portrait} if portrait else {}),
         },
     }
     orgs = []
@@ -601,7 +605,7 @@ def render_person_page(
   <meta property="og:url" content="{canonical}" />
   {_image_meta(og_image, pic, ob.name)}
   <script type="application/ld+json">
-{_structured_data(ob, page_url, sponsor, base_url, newsroom, pic)}
+{_structured_data(ob, page_url, sponsor, base_url, newsroom, pic, og_image)}
   </script>
   <script type="application/ld+json">
 {_breadcrumb_json(ob, page_url, base_url)}
@@ -635,8 +639,8 @@ def render_person_page(
     }}
     .topnav:hover {{ background: var(--hover); }}
     .masthead {{ text-align: center; margin-bottom: 30px; }}
-    .masthead__logo img {{ height: 30px; width: auto; mix-blend-mode: multiply; }}
-    .masthead__seal {{ display: block; width: 46px; height: 46px; border-radius: 50%; margin: 12px auto 0; }}
+    .masthead__logo img {{ height: 34px; width: auto; mix-blend-mode: multiply; }}
+    .masthead__seal {{ display: block; width: 58px; height: 58px; border-radius: 50%; margin: 12px auto 0; }}
     .kicker {{
       margin: 16px 0 0; font-family: var(--mono); font-size: 11.5px;
       letter-spacing: 0.26em; text-transform: uppercase; color: var(--accent);
@@ -719,6 +723,7 @@ def render_person_page(
       cursor: zoom-out; z-index: 50;
     }}
     .lightbox[hidden] {{ display: none; }}
+    .lightbox:focus {{ outline: none; }}
     .lightbox__img {{ max-width: 92vw; max-height: 92vh; border: 4px solid var(--paper); }}
     .back {{
       display: inline-block; margin-top: 36px; font-family: var(--mono);
@@ -731,6 +736,8 @@ def render_person_page(
     .foot-nav a {{ color: var(--accent); text-decoration: none; }}
     .foot-nav a:hover {{ text-decoration: underline; }}
     .foot-nav__dot {{ color: var(--rule); }}
+    a:focus-visible, button:focus-visible, [role="button"]:focus-visible {{
+      outline: 2px solid var(--accent); outline-offset: 2px; }}
     @media (max-width: 480px) {{
       .wrap {{ padding: 32px 18px 64px; }}
       .portrait {{ float: none; width: 100%; max-width: 100%; margin: 0 0 18px; }}
@@ -790,19 +797,20 @@ def render_person_page(
       <a href="{base_url}/archive.html">Browse the full index &rarr;</a>
     </nav>
   </main>
-  <div class="lightbox" id="lightbox" hidden><img class="lightbox__img" alt="" /></div>
+  <div class="lightbox" id="lightbox" hidden tabindex="-1" role="dialog" aria-modal="true" aria-label="Portrait, enlarged. Press Escape to close."><img class="lightbox__img" alt="" /></div>
   <script>
     (function () {{
       var p = document.querySelector('.portrait'), lb = document.getElementById('lightbox');
       if (!p || !lb) return;
       var img = lb.querySelector('img');
-      function open() {{ img.src = p.src; img.alt = p.alt; lb.hidden = false; }}
+      function open() {{ img.src = p.src; img.alt = p.alt; lb.hidden = false; lb.focus(); }}
+      function close() {{ if (lb.hidden) return; lb.hidden = true; img.src = ''; p.focus(); }}
       p.addEventListener('click', open);
       p.addEventListener('keydown', function (e) {{
         if (e.key === 'Enter' || e.key === ' ') {{ e.preventDefault(); open(); }}
       }});
-      lb.addEventListener('click', function () {{ lb.hidden = true; img.src = ''; }});
-      document.addEventListener('keydown', function (e) {{ if (e.key === 'Escape') {{ lb.hidden = true; }} }});
+      lb.addEventListener('click', close);
+      document.addEventListener('keydown', function (e) {{ if (e.key === 'Escape') close(); }});
     }})();
   </script>
   {event_script(newsroom.analytics)}

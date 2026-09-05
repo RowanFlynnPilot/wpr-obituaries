@@ -9,6 +9,27 @@ import unicodedata
 from dataclasses import dataclass
 
 
+_NAME_SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
+
+
+def name_key(name: str) -> str:
+    """First + last name, lowercased, stripping middles, initials, suffixes, and
+    punctuation.
+
+    The same person reaches us from two sources (or two extractions) under
+    slightly different names — "Ryan Johnson" vs "Ryan Paul Johnson", a middle
+    initial, a suffix, a quoted nickname. Keying on first + last collapses those
+    to one person; callers add the death date to keep two same-named people apart.
+    """
+    tokens = re.sub(r"[^\w\s]", " ", name.lower()).split()
+    tokens = [t for t in tokens if t not in _NAME_SUFFIXES]
+    if not tokens:
+        return name.lower().strip()
+    if len(tokens) == 1:
+        return tokens[0]
+    return f"{tokens[0]} {tokens[-1]}"
+
+
 def slugify(value: str) -> str:
     """Lowercase, hyphenated, ASCII-only slug fragment.
 
@@ -25,7 +46,8 @@ def slugify(value: str) -> str:
 
 @dataclass(frozen=True)
 class Obituary:
-    """One person, extracted from a daily batch post.
+    """One person, as produced by any write-source (a WordPress batch post,
+    a funeral home's own site, a reviewed intake submission).
 
     name and source are required. Everything a real obituary may omit
     (dates, age, photo, funeral home) is nullable — absent data is not an
@@ -33,9 +55,9 @@ class Obituary:
     """
 
     name: str
-    source_id: int  # WordPress post id of the batch this person came from
+    source_id: int  # unit id within its source: WP post id, Tukios hash, Tribute obId, intake id
     source_url: str
-    source_date: str  # ISO date of the batch post, e.g. "2026-06-19"
+    source_date: str  # ISO date that orders the register: batch post date, or death date for scraped/intake
     death_year: int | None
     birth_date: str | None
     death_date: str | None

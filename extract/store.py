@@ -32,7 +32,7 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from models import Obituary, slugify
+from models import Obituary, name_key, slugify
 
 VERSION = 2
 
@@ -63,17 +63,22 @@ class Master:
         # A re-extraction can derive a different slug (e.g. a death year the
         # first pass missed changes the year stamp) — but the old URL is
         # published and possibly indexed, so the same person keeps their slug.
-        prior_slugs = {
-            slugify(r.name): r.slug
-            for r in self.records
-            if r.source == source and r.source_id == unit_id
-        }
-        people = [
-            dataclasses.replace(p, slug=prior_slugs[slugify(p.name)])
-            if slugify(p.name) in prior_slugs
-            else p
-            for p in people
-        ]
+        prior = [r for r in self.records if r.source == source and r.source_id == unit_id]
+        if len(prior) == 1 and len(people) == 1:
+            # One person per unit (every funeral-home and intake unit): the same
+            # unit is the same person whatever the name correction did — carry
+            # the slug unconditionally.
+            people = [dataclasses.replace(people[0], slug=prior[0].slug)]
+        else:
+            # A multi-person batch: match people by first + last name, so a fixed
+            # middle initial or an added nickname still keeps its URL.
+            prior_slugs = {name_key(r.name): r.slug for r in prior}
+            people = [
+                dataclasses.replace(p, slug=prior_slugs[name_key(p.name)])
+                if name_key(p.name) in prior_slugs
+                else p
+                for p in people
+            ]
         self.records = [
             r for r in self.records if not (r.source == source and r.source_id == unit_id)
         ]

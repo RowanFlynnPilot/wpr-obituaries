@@ -13,7 +13,8 @@ submission re-emits it automatically — no manual version bumping.
 
 Backends:
 - "manual": read approved submission files from `data/intake/` (review by merge).
-- "supabase": (Step 5) pull approved rows from the submissions table.
+- "supabase": not built — a hosted intake backend was shelved in favour of the
+  file-based path above; the config value is reserved.
 """
 
 from __future__ import annotations

@@ -19,7 +19,7 @@ import homes
 import main
 import store
 import templates
-from models import Obituary
+from models import Obituary, name_key
 
 NEWSROOM = config.load_newsroom()
 
@@ -112,7 +112,16 @@ def test_slug_stability():
         "wordpress_scrape", 5, "m2", [mk("Jane Doe", 5, "2026-01-10", death_year=2025)]
     )
     assert m.records[0].death_year == 2025 and m.records[0].slug == old
-    print("ok: slug stability (a correction can't move a published URL)")
+    # A name correction on a one-person unit (every funeral-home unit) keeps the URL too.
+    m.upsert_post("wordpress_scrape", 5, "m3", [mk("Jane Q. Doe", 5, "2026-01-10", death_year=2025)])
+    assert m.records[0].name == "Jane Q. Doe" and m.records[0].slug == old
+    # In a multi-person batch, first + last name is what carries it.
+    m.upsert_post("wordpress_scrape", 6, "m1", [mk("Sam Lee", 6, "2026-02-01"), mk("Pat Roe", 6, "2026-02-01")])
+    before = {name_key(r.name): r.slug for r in m.records if r.source_id == 6}
+    m.upsert_post("wordpress_scrape", 6, "m2", [mk("Sam J. Lee Jr.", 6, "2026-02-01"), mk("Pat Roe", 6, "2026-02-01")])
+    after = {name_key(r.name): r.slug for r in m.records if r.source_id == 6}
+    assert after == before, (before, after)
+    print("ok: slug stability (year, name, and batch corrections can't move a published URL)")
 
 
 def test_photo_revendor():
@@ -199,10 +208,10 @@ def test_dedupe():
     assert primary_by_slug[full.slug].slug == full.slug
 
     # name normalization for cross-source dedupe
-    assert main._name_key("Ryan Paul Johnson") == "ryan johnson"        # middle dropped
-    assert main._name_key("James Erdman Sr.") == "james erdman"          # suffix dropped
-    assert main._name_key('Mildred "Milly" Mary Anne Pries') == "mildred pries"  # nickname dropped
-    assert main._name_key("Cher") == "cher"
+    assert main.name_key("Ryan Paul Johnson") == "ryan johnson"        # middle dropped
+    assert main.name_key("James Erdman Sr.") == "james erdman"          # suffix dropped
+    assert main.name_key('Mildred "Milly" Mary Anne Pries') == "mildred pries"  # nickname dropped
+    assert main.name_key("Cher") == "cher"
 
     # a WPR "Ryan Johnson" and a funeral-home "Ryan Paul Johnson" (same death
     # date) collapse to one; the fuller record wins

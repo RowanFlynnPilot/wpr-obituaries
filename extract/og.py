@@ -49,18 +49,30 @@ def _cover(img: Image.Image, w: int, h: int) -> Image.Image:
 
 
 def _wrap(draw: ImageDraw.ImageDraw, text: str, font, max_width: int) -> list[str]:
+    """Greedy word wrap; a hyphenated token that overflows on its own may break
+    after a hyphen ("Knippel-" / "Stachowiak") before the caller shrinks the type."""
     lines, cur = [], ""
     for word in text.split():
         trial = f"{cur} {word}".strip()
         if draw.textlength(trial, font=font) <= max_width:
             cur = trial
-        else:
-            if cur:
-                lines.append(cur)
-            cur = word
+            continue
+        if cur:
+            lines.append(cur)
+        cur = word
+        while "-" in cur[:-1] and draw.textlength(cur, font=font) > max_width:
+            head, _, tail = cur.rpartition("-")
+            if draw.textlength(head + "-", font=font) > max_width:
+                break
+            lines.append(head + "-")
+            cur = tail
     if cur:
         lines.append(cur)
     return lines
+
+
+def _fits(draw: ImageDraw.ImageDraw, lines: list[str], font, max_width: int) -> bool:
+    return len(lines) <= 3 and all(draw.textlength(l, font=font) <= max_width for l in lines)
 
 
 def render_card(
@@ -91,7 +103,9 @@ def render_card(
 
     name_font = _font("Merriweather-Bold.ttf", 66)
     lines = _wrap(draw, name, name_font, text_w)
-    while len(lines) > 3 and name_font.size > 42:
+    # Shrink on too many lines OR any line still wider than the column (a single
+    # long surname can't wrap and used to run past the right margin).
+    while not _fits(draw, lines, name_font, text_w) and name_font.size > 42:
         name_font = _font("Merriweather-Bold.ttf", name_font.size - 6)
         lines = _wrap(draw, name, name_font, text_w)
     y = 168

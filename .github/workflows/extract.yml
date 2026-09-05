@@ -100,6 +100,15 @@ jobs:
           fi
           exit "$code"
 
+      # data/failures.json is gitignored (build state), so hand it to the report
+      # job as an artifact rather than expecting it on main.
+      - name: Save quarantined-extraction list
+        if: steps.extract.outputs.code == '2'
+        uses: actions/upload-artifact@v4
+        with:
+          name: failures
+          path: data/failures.json
+
       # Persist the accumulating master and any newly-vendored portraits even when
       # extraction exits non-zero, so a single failed post never loses the records
       # that did succeed.
@@ -161,17 +170,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         with:
-          ref: main  # the build job committed data/failures.json back to main
+          name: failures
       - name: Report quarantined extractions
         run: |
           {
             echo "## Quarantined extractions"
             echo "These units failed to extract this run (the rest of the catalogue deployed):"
             echo '```json'
-            cat data/failures.json
+            cat failures.json
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          cat data/failures.json
+          cat failures.json
           exit 1
