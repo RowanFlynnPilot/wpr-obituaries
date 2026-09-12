@@ -11,17 +11,29 @@ from dataclasses import dataclass
 
 _NAME_SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
 
+# A nickname in parentheses or quotes is not part of the name, and a *trailing*
+# one would otherwise be read as the surname: the funeral home's "Patrick
+# Michael McFaul (Coach Mac)" keyed as "patrick mac" and so never matched the
+# same man arriving from the newsroom's batch as "Patrick Michael McFaul".
+# Removing the span beats blanking its punctuation, which is what let the
+# nickname's own words become tokens.
+_NICKNAME = re.compile(r"[(\[][^)\]]*[)\]]|[\"“”'‘’][^\"“”'‘’]*[\"“”'‘’]")
+
 
 def name_key(name: str) -> str:
-    """First + last name, lowercased, stripping middles, initials, suffixes, and
-    punctuation.
+    """First + last name, lowercased, stripping middles, initials, suffixes,
+    nicknames, and punctuation.
 
     The same person reaches us from two sources (or two extractions) under
     slightly different names — "Ryan Johnson" vs "Ryan Paul Johnson", a middle
-    initial, a suffix, a quoted nickname. Keying on first + last collapses those
-    to one person; callers add the death date to keep two same-named people apart.
+    initial, a suffix, a quoted or parenthesized nickname. Keying on first +
+    last collapses those to one person; callers add the death date to keep two
+    same-named people apart.
     """
-    tokens = re.sub(r"[^\w\s]", " ", name.lower()).split()
+    bare = _NICKNAME.sub(" ", name)
+    if not bare.strip():  # a record that is only a nickname keeps what it has
+        bare = name
+    tokens = re.sub(r"[^\w\s]", " ", bare.lower()).split()
     tokens = [t for t in tokens if t not in _NAME_SUFFIXES]
     if not tokens:
         return name.lower().strip()

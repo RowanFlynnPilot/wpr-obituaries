@@ -42,6 +42,23 @@ def test_models():
     print("ok: models (slug, record round-trip, excerpt)")
 
 
+def test_name_key():
+    key = name_key
+    # the same person from two sources: the funeral home carries the nickname
+    assert key("Patrick Michael McFaul (Coach Mac)") == key("Patrick Michael McFaul")
+    assert key("Patrick Michael McFaul") == "patrick mcfaul"
+    # a nickname mid-name was already handled; keep it that way
+    assert key('Rosemary "Rosy" M. Schmitt') == key("Rosemary Schmitt")
+    assert key("William “Bill” Charles Shnowske") == "william shnowske"
+    # middles, initials and suffixes still collapse; unrelated people stay apart
+    assert key("Ryan Paul Johnson") == key("Ryan Johnson") == "ryan johnson"
+    assert key("George S. Bouldin Jr.") == "george bouldin"
+    assert key("Ryan Johnson") != key("Ryan Jones")
+    # degenerate input must not raise or key to nothing
+    assert key("(Coach Mac)") and key("") == ""
+    print("ok: name key (nicknames, middles, suffixes, degenerate names)")
+
+
 def test_store():
     src = "wordpress_scrape"
     m = store.Master()
