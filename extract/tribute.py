@@ -150,13 +150,21 @@ def all_urls(session, base: str) -> Iterator[tuple[str, str | None]]:
                 yield loc, (lastmod[:10] if lastmod else None)
 
 
+# The platform drops obituary text into JSON-LD without escaping backslashes
+# ("Secretary\ Treasurer" ships as a bare "\ "), which is invalid JSON and
+# used to hide the whole Person block. A backslash not starting a valid escape
+# is doubled before parsing; valid escapes are untouched, so this is safe to
+# apply to every block.
+_BAD_ESCAPE = re.compile(r'\\(?!["\\/bfnrtu])')
+
+
 def _iter_ld(page_html: str) -> Iterator[dict]:
-    """Every JSON-LD object on a page; malformed blocks are skipped."""
+    """Every JSON-LD object on a page; a still-malformed block is skipped."""
     for block in re.findall(
         r'<script[^>]*application/ld\+json[^>]*>(.*?)</script>', page_html, re.S
     ):
         try:
-            data = json.loads(block.strip())
+            data = json.loads(_BAD_ESCAPE.sub(r"\\\\", block.strip()), strict=False)  # noqa: W605 — r"\\\\" is one escaped backslash
         except json.JSONDecodeError:
             continue  # a malformed block never sinks the whole page
         yield from data if isinstance(data, list) else [data]

@@ -389,6 +389,11 @@ def test_tribute_client():
     # Person JSON-LD is pulled out past sibling/broken blocks
     person = tribute._parse_person_ld(_PERSON_LD)
     assert person["name"] == "Diane V. Dombeck" and person["deathDate"] == "June 24, 2026"
+    # ...and survives the platform's unescaped backslashes inside obituary text
+    bad = ('<script type="application/ld+json">{"@type":"Person","name":"R. Olsen",'
+           '"description":"Secretary\\ Treasurer of the cemetery"}</script>')  # one literal backslash
+    got = tribute._parse_person_ld(bad)
+    assert got and got["description"] == "Secretary\\ Treasurer of the cemetery", got
 
     # Windowed discovery: the RSS (pubDate) decides what is recent; the sitemap
     # (lastmod, which moves on edits) supplies each unit's revision. Old entries
