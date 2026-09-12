@@ -1,7 +1,7 @@
 """Tribute Technology (Frazer / Tribute Center Online) obituary client.
 
-The second scrape platform, behind Schmidt & Schulta, John J. Buettgen
-(honorone.com), Mid-Wisconsin Cremation Society, and Carlson. Mirror image of
+The second scrape platform, behind Schmidt & Schulta and Carlson (Buettgen and
+Mid-Wisconsin moved to Tukios in Sept 2026). Mirror image of
 Tukios: discovery is cheap, and each person page carries a schema.org `Person`
 JSON-LD block with the complete obituary text, both dates, and the portrait —
 so, like Tukios, there is no model extraction; the adapter maps the parsed

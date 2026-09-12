@@ -10,9 +10,9 @@ Two platforms are implemented, both serving fully structured records (no model
 extraction — one source record maps directly to one `Obituary`):
 
 - **Tukios** — the core Wausau-area homes (Brainard, Helke, Peterson/Kraemer,
-  Ascend) plus outer-ring Beste, Rembs, Taylor-Stine-Waid. Discovery + records
+  Ascend, Buettgen, Mid-Wisconsin) plus outer-ring Beste, Rembs, Taylor-Stine-Waid. Discovery + records
   come from one JSON API keyed by a per-site `siteAlias`.
-- **Tribute Technology** — Schmidt & Schulta, Buettgen, Mid-Wisconsin, Carlson.
+- **Tribute Technology** — Schmidt & Schulta and Carlson.
   Windowed discovery takes membership from the site's Recent-Obituaries RSS and
   each unit's revision from the obituary sitemaps' `lastmod` (a backfill reads
   only the sitemaps); each person page carries a schema.org `Person` JSON-LD

@@ -13,8 +13,8 @@ scraping characteristics:
 
 | Platform | Homes | Discovery | Obituary body |
 |---|---|---|---|
-| **Tukios** | Brainard, Helke, Peterson/Kraemer, Ascend, Beste, Rembs, Taylor-Stine-Waid | JS-rendered listing, but a public JSON API enumerates everything | Fully structured in the API response |
-| **Tribute Technology** (Frazer) | Schmidt & Schulta, Buettgen (honorone.com), Mid-Wisconsin, Carlson | RSS for recency + obituary sitemaps (`lastmod`) for revisions | Embedded JSON / JSON-LD in the person-page HTML |
+| **Tukios** | Brainard, Helke, Peterson/Kraemer, Ascend, Beste, Rembs, Taylor-Stine-Waid, Buettgen (honorone.com), Mid-Wisconsin (both moved here from Tribute, Sept 2026) | JS-rendered listing, but a public JSON API enumerates everything | Fully structured in the API response |
+| **Tribute Technology** (Frazer) | Schmidt & Schulta, Carlson | RSS for recency + obituary sitemaps (`lastmod`) for revisions | Embedded JSON / JSON-LD in the person-page HTML |
 
 **Both platforms are implemented**, and both serve fully structured records, so
 there is *no model extraction* — one source record maps straight to one
@@ -107,9 +107,8 @@ By hand: the **siteAlias** is an 8-hex-char key printed in the home's
 `/obituaries` page source as `siteAlias = '…'` or `SiteAlias: '…'` (it is *not*
 the `login?site_id=` value); `tukios.find_site_alias()` extracts it. A Tribute
 home just needs `platform: "tribute"` and its `url`. A home without `platform` is
-name-canonicalized only, never scraped. The current scraped set is the seven
-Tukios homes plus four Tribute homes (Schmidt & Schulta, Buettgen, Mid-Wisconsin,
-Carlson).
+name-canonicalized only, never scraped. The current scraped set is the nine
+Tukios homes plus two Tribute homes (Schmidt & Schulta, Carlson).
 
 The list of scraped homes doubles as the **republication permission list** —
 only add a home the newsroom has an arrangement with.

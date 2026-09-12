@@ -144,8 +144,9 @@ A Pages project sub-path would instead need `/wpr-obituaries/`.
 Funeral-home scraping (`adapters.funeral_home_scrape`, `windowDays` in config)
 reads the homes' own sites directly. Per-home scrape config lives in
 `data/funeral_homes.json` (`platform` + its key). Two platforms are wired:
-**Tukios** (seven homes, keyed by `siteAlias`, JSON API) and **Tribute
-Technology** (four homes, keyed by `url`; the RSS `pubDate` decides what is
+**Tukios** (nine homes, keyed by `siteAlias`, JSON API — Buettgen and Mid-Wisconsin
+migrated here from Tribute in Sept 2026) and **Tribute
+Technology** (two homes, keyed by `url`; the RSS `pubDate` decides what is
 recent, the sitemap `lastmod` — which moves on edits — is the unit revision so
 corrections re-extract; `lastmod` alone can't window, the platform bumps it on
 decades-old entries; + `Person` JSON-LD). The
