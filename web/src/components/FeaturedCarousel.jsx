@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { lifespan, photoSrc } from "../lib/format.js";
 
 const BASE = import.meta.env.BASE_URL;
 const DAYS = 7; // draw from the past week
-const MAX = 10; // a random handful, fresh on each load
+const MAX = 5; // this week's faces, newest first — a handful, not a gallery
 const INTERVAL = 6500; // gentle, dignified cadence
 
 function withinDays(sourceDate, days) {
@@ -15,20 +15,16 @@ function withinDays(sourceDate, days) {
   return when >= cutoff;
 }
 
+// `obituaries` arrives newest death first (App sorts once), so the pool reads
+// as "this week" and a returning visitor sees the same set — not a shuffle.
+// On a quiet stretch (nothing photographed in the window) it falls back to the
+// most recent portraits so the strip never vanishes. Hidden on phones (CSS):
+// there the first name has to land within a screen of the search.
 export default function FeaturedCarousel({ obituaries }) {
   const featured = useMemo(() => {
-    // filter()/slice() return fresh arrays, so shuffling in place is safe.
     const photographed = obituaries.filter((o) => o.photoUrl);
     const recent = photographed.filter((o) => withinDays(o.sourceDate, DAYS));
-    // Prefer the past week; but on a quiet stretch (nothing photographed in the
-    // window) fall back to the most recent portraits so the hero never vanishes.
-    const pool = recent.length ? recent : photographed.slice(0, MAX * 2);
-    // Fisher–Yates shuffle, then take MAX — a unique selection each page load.
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-    return pool.slice(0, MAX);
+    return (recent.length ? recent : photographed).slice(0, MAX);
   }, [obituaries]);
 
   const [index, setIndex] = useState(0);
@@ -37,6 +33,7 @@ export default function FeaturedCarousel({ obituaries }) {
   // Pause control) — hover/focus pause never fires on touch, so an explicit,
   // visible control is the pause a phone reader has (WCAG 2.2.2).
   const [stopped, setStopped] = useState(false);
+  const dotsRef = useRef(null);
   const reduced =
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -63,6 +60,24 @@ export default function FeaturedCarousel({ obituaries }) {
   const go = (n) => {
     setStopped(true);
     setIndex((n + featured.length) % featured.length);
+  };
+
+  // The dots are ONE tab stop with a roving tabindex: arrow keys move between
+  // them, so the strip costs a keyboard reader four stops (prev, card, next,
+  // dots) plus Pause — not one per portrait.
+  const onDotsKey = (e) => {
+    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    let n;
+    if (step) n = i + step;
+    else if (e.key === "Home") n = 0;
+    else if (e.key === "End") n = featured.length - 1;
+    else return;
+    e.preventDefault();
+    n = (n + featured.length) % featured.length;
+    go(n);
+    // Every dot is already in the DOM; only its tabindex changes on render,
+    // so the new one can take focus synchronously.
+    dotsRef.current?.children[n]?.focus();
   };
 
   return (
@@ -126,7 +141,13 @@ export default function FeaturedCarousel({ obituaries }) {
 
       {featured.length > 1 && (
         <div className="featured__nav">
-          <div className="featured__dots" role="group" aria-label="Choose a featured obituary">
+          <div
+            className="featured__dots"
+            role="group"
+            aria-label="Choose a featured obituary (arrow keys)"
+            ref={dotsRef}
+            onKeyDown={onDotsKey}
+          >
             {featured.map((f, n) => (
               <button
                 key={f.slug}
@@ -134,6 +155,7 @@ export default function FeaturedCarousel({ obituaries }) {
                 className={`featured__dot${n === i ? " is-active" : ""}`}
                 aria-label={`Show ${f.name}`}
                 aria-current={n === i}
+                tabIndex={n === i ? 0 : -1}
                 onClick={() => go(n)}
               />
             ))}

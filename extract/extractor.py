@@ -8,6 +8,7 @@ person. The model only extracts what is present; it never invents detail.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from datetime import date
 
@@ -53,7 +54,8 @@ person, in the order they appear:
   "photo_url": "URL of this person's photo from the nearest preceding \
 [IMAGE] marker, or null",
   "summary": "One respectful sentence naming the person and, if present, \
-their age and town. No flourishes.",
+their age and town. If the town is not stated, leave it out entirely — never \
+write 'unspecified' or 'unknown'. No flourishes.",
   "body": "This person's full obituary text. Preserve paragraphs as \\n\\n. \
 Do not include other people's obituaries, sponsor lines, or funeral home \
 logos."
@@ -79,6 +81,21 @@ def _to_markered_text(content_html: str) -> str:
     text = soup.get_text("\n")
     lines = [line.strip() for line in text.splitlines()]
     return "\n".join(line for line in lines if line)
+
+
+# The model occasionally narrates an absence ("Jane Doe, 84, of an unspecified
+# town, passed away…"). That is a placeholder, not a fact, and it would be
+# published verbatim in the register — strip the clause.
+_ABSENT_TOWN = re.compile(
+    r",?\s*of (?:an? )?(?:unspecified|unknown|unnamed|undisclosed) (?:town|city|"
+    r"village|location|residence|hometown)\b",
+    re.IGNORECASE,
+)
+
+
+def clean_summary(summary: str) -> str:
+    """The model's one-line summary with any 'of an unspecified town' clause removed."""
+    return _ABSENT_TOWN.sub("", summary).strip()
 
 
 def _parse_response(raw: str) -> list[dict]:
@@ -125,7 +142,7 @@ def extract_obituaries(post: dict, client: Anthropic) -> list[Obituary]:
             age=r.get("age"),
             funeral_home=r.get("funeral_home"),
             photo_url=r.get("photo_url"),
-            summary=(r.get("summary") or "").strip(),
+            summary=clean_summary(r.get("summary") or ""),
             body=(r.get("body") or "").strip(),
         )
         for warning in sanity_warnings(ob):

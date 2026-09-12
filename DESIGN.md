@@ -338,9 +338,11 @@ oxblood outline (offset 2px) on keyboard focus.
   border, 2px corners, 6px 9px padding. A count sits after a hairline divider
   inside the chip ("June 2026 | 148").
 - **State**: hover → hover-wash with a muted border; active
-  (`{components.chip-active}`) → oxblood fill, white label. Letters in the A–Z
-  row are borderless 24px squares in muted, oxblood-filled when active,
-  hairline-colored when no names start with them.
+  (`{components.chip-active}`) → oxblood fill, paper-white label (every chip
+  carries `aria-pressed`). Letters in the last-name row are borderless 24px
+  squares in muted, oxblood-filled when active; only letters that begin a
+  surname are rendered — a shorter row reads as the index it is, an A–Z row
+  with invisible gaps reads as broken.
 
 ### Cards / Containers
 - **Corner Style:** square (`{rounded.none}`).
@@ -350,22 +352,37 @@ oxblood outline (offset 2px) on keyboard focus.
 - **Featured card**: portrait (132×168, ruled frame) beside name / lifespan /
   three-line excerpt / "Read the full obituary →" in oxblood mono; fades in
   over 0.5s when it changes; hover to hover-wash with the name turning oxblood.
-  Beside the dots sits a visible mono **Pause / Play** control (auto-advance
-  also stops for good after any arrow or dot choice), and a screen-reader
-  live region announces each card.
+  The strip holds **five** of this week's portraits, newest death first (the
+  same set on every visit — not a shuffle). The dots are one keyboard stop
+  with a roving tabindex (arrow keys move between them), so the strip costs a
+  keyboard reader five stops, not fourteen. Beside the dots sits a visible
+  mono **Pause / Play** control (28px tall; auto-advance also stops for good
+  after any arrow or dot choice), and a screen-reader live region announces
+  each card. **Hidden on phones**: there the first name must land within a
+  screen of the search, and the mini widget already puts a face in the article.
 - **Sponsor card**: centered label ("OBITUARIES MADE POSSIBLE BY", tracked mono
-  in muted) over 80px logos on the paper-white sheet.
+  in muted) over 80px logos on the paper-white sheet — the sponsors' full-size
+  placement, in the footer.
+- **Presented-by line**: the sponsors' second placement rides in the nameplate,
+  between the tagline and the ink rule, the way a newspaper section credits its
+  underwriter: the 11px tracked label beside 28px logos (24px on phones) on one
+  wrapping line. Nothing sits between the search and its results.
 
 ### Inputs / Fields
 - **Search** (`{components.input-search}`): the product's one primary control,
-  placed directly under the lede — before the sponsors, the carousel, and
-  everything else. A serif label at body size ("Find a name"), a drawn search
-  glyph inside the field, the serif at 1.1rem in a paper-white box with a **2px
-  muted border** (5.3:1 — a boundary a low-vision reader can find on cream;
-  the 1px rule was 1.5:1), italic placeholder; the live count in mono beneath
-  states the scope ("276 names · the last 3 months", or "2 names · 3 more
-  mentions"). Matching is by name token prefix, so "Allan Jensen" finds Allan
-  Guy Jensen; records that only *mention* the query list in a second tier.
+  placed directly under the lede with nothing between it and its results. A
+  serif label at body size ("Find a name"), a drawn search glyph inside the
+  field, the serif at 1.1rem in a paper-white box with a **2px muted border**
+  (5.3:1 — a boundary a low-vision reader can find on cream; the 1px rule was
+  1.5:1), italic placeholder; the browser's clear glyph is redrawn in muted ink
+  (oxblood on hover) so no off-palette pixel appears in the field. The live
+  count in mono beneath always states what the number is *of* ("276 names ·
+  the last 3 months", "36 names · last names beginning with J", "2 names · 3
+  more mentions"). Matching is by name token prefix, so "Allan Jensen" finds
+  Allan Guy Jensen; records that only *mention* the query list in a second
+  tier. Enter dismisses the phone keyboard (results are already live). The
+  search and any browse filter mirror into the URL (`?q=`, `?month=`,
+  `?letter=`, `?town=`, `?home=`) so Back and a shared link reopen the list.
 - **Form fields** (`{components.input-field}`): newsprint fill, rule border, 2px
   corners; labels above in mono caps.
 - **Focus**: a 2px oxblood outline offset 2px (inputs also switch the border to
@@ -374,16 +391,19 @@ oxblood outline (offset 2px) on keyboard focus.
 
 ### Navigation
 The masthead *is* the navigation: the flag (seal 52px beside the 34px
-wordmark, one link home) over the tagline and the thick-over-thin ink rule,
-then the surface's kicker and title. Static pages add a small mono "← All
+wordmark, one link home) over the tagline, the sponsors' presented-by line,
+and the thick-over-thin ink rule, then the surface's kicker and title. Static pages add a small mono "← All
 obituaries" box top-left and a mono footer row ("← All obituaries · Browse the
 full index →"), then the colophon. Browse on the register is a secondary path
 and lives behind **one disclosure** ("Browse by month, last name, town or
 funeral home" — an oxblood mono link with a small ruled +/– mark), closed
-unless a filter is active; inside, the chip rows (Month, Last name) and two
-selects (Town, Funeral home) with 11px mono labels, no box around them. A
-letter browse lists surnames alphabetically under one heading. On phones the
-selects go full-width with their labels stacked above.
+unless a filter is active; inside, two rows — Month (Last 3 months · All · up
+to six month chips with three or more names, the rest in an "Earlier…"
+select) and Last name — with 11px mono labels and no box around them, then a
+second-tier line ("More ways to browse: town, funeral home") that reveals the
+two selects, so the open panel is two rows, not a control deck. A letter
+browse lists surnames alphabetically under one heading. On phones the selects
+go full-width with their labels stacked above.
 
 ### Register row (signature)
 A 66px square portrait in a ruled frame (or a monogram tile: serif 700 initials
@@ -446,7 +466,8 @@ SemiBold over the sponsor line at the foot.
 - **Do** set every control in Courier Prime caps inside a 1px rule box with 2px corners; primary actions get the single oxblood fill.
 - **Do** keep portraits rectangular in a ruled frame with the light desaturation, and never crop them to circles.
 - **Do** keep the flag intact on every surface: seal beside wordmark linking home, tagline, thick-over-thin ink rule, the surface's own title below it.
-- **Do** honor reduced motion (the featured and mini fades are the only authored motion; all other transitions are 120–150ms and disable under `prefers-reduced-motion`).
+- **Do** honor reduced motion (the featured and mini fades are the only authored motion; the loading skeleton is a still hairline block, not a shimmer; all other transitions are 120–150ms and disable under `prefers-reduced-motion`).
+- **Do** keep the smallest type on the register and the pages at 11px (the tagline, sponsor labels, funeral-home captions, the colophon — only the mini widget, at card scale, runs smaller) and every control at a 24px minimum target, even when its visible mark is smaller.
 - **Do** design the print state of a person page as a keepsake.
 
 ### Don't:

@@ -21,20 +21,37 @@ gas-prices widget). A live preview of both, exactly as embedded, is at
 ```html
 <!-- Wausau Pilot & Review — Obituaries -->
 <iframe id="wpr-obits-embed"
-        src="https://obituaries.wausaupilotandreview.com/"
         title="Wausau area obituaries"
         style="display:block;width:100%;border:0;min-height:800px"
         loading="lazy"></iframe>
 <script>
   (function () {
     var frame = document.getElementById("wpr-obits-embed");
+    var tool = "https://obituaries.wausaupilotandreview.com/";
+    // Forward a search or browse state carried on this page's URL
+    // (?q=, ?month=, ?letter=, ?town=, ?home=) into the widget, so a shared
+    // link reopens the same list.
+    var keys = ["q", "month", "letter", "town", "home"];
+    var inbound = new URLSearchParams(window.location.search);
+    var forward = new URLSearchParams();
+    keys.forEach(function (k) { if (inbound.get(k)) forward.set(k, inbound.get(k)); });
+    frame.src = tool + (forward.toString() ? "?" + forward.toString() : "");
+
     window.addEventListener("message", function (e) {
-      if (
-        frame && e.source === frame.contentWindow &&
-        e.data && e.data.type === "wpr-obituaries:height"
-      ) {
+      if (!frame || e.source !== frame.contentWindow || !e.data) return;
+      if (e.data.type === "wpr-obituaries:height") {
         frame.style.height = e.data.height + "px";
         frame.style.minHeight = "0";
+      }
+      // Mirror the widget's state onto this page's URL (replace, never push,
+      // so the reader's Back button still leaves the page).
+      if (e.data.type === "wpr-obituaries:state" && typeof e.data.search === "string") {
+        var url = new URL(window.location.href);
+        keys.forEach(function (k) { url.searchParams.delete(k); });
+        new URLSearchParams(e.data.search).forEach(function (v, k) {
+          if (keys.indexOf(k) !== -1) url.searchParams.set(k, v);
+        });
+        window.history.replaceState(null, "", url.toString());
       }
     });
   })();
@@ -43,9 +60,13 @@ gas-prices widget). A live preview of both, exactly as embedded, is at
 
 How it works: the widget posts its rendered height to the page whenever its
 layout changes (`web/src/lib/frame.js`), and this script stretches the iframe to
-match — so the tool reads as part of the page, never a scrollbox. The
-`e.source` check ties the listener to this exact iframe rather than any origin,
-so the snippet works unchanged wherever the tool is served from.
+match — so the tool reads as part of the page, never a scrollbox. The widget
+also posts its search/browse state (`wpr-obituaries:state`, the same query
+string it keeps on its own URL — `web/src/lib/urlState.js`), and the script
+mirrors it onto the WordPress page's URL and forwards it back into the iframe
+on load, so Back from a person page and a copied link both reopen the same
+list. The `e.source` check ties the listener to this exact iframe rather than
+any origin, so the snippet works unchanged wherever the tool is served from.
 
 ## 2 — Mini widget (articles / sidebar)
 

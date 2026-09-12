@@ -115,7 +115,7 @@ body {
 .masthead__tagline {
   margin: 10px 0 0;
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: 11px;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--muted);
@@ -158,25 +158,6 @@ body {
   line-height: 1.6;
 }
 
-.masthead__submit {
-  max-width: 46ch;
-  margin: 12px auto 0;
-  font-weight: 300;
-  font-size: 0.92rem;
-  line-height: 1.55;
-  color: var(--muted);
-}
-
-.masthead__submit a {
-  color: var(--accent);
-  text-decoration-color: rgba(124, 46, 54, 0.4);
-  text-underline-offset: 2px;
-}
-
-.masthead__submit a:hover {
-  text-decoration-color: var(--accent);
-}
-
 /* Hairline closing the masthead block; the flag rule above carries the weight. */
 .masthead__rule {
   height: 0;
@@ -186,20 +167,24 @@ body {
   max-width: 100%;
 }
 
-.masthead__sponsors {
+/* The "presented by" line: sponsors ride in the nameplate, above the ink rule,
+   the way a newspaper section credits its underwriter — so nothing sits between
+   the search and its results. The footer card is their full-size placement. */
+.masthead__presented {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
-  margin-top: 26px;
+  justify-content: center;
+  gap: 8px 18px;
+  margin-top: 14px;
 }
 
 .masthead__sponsor-label {
   font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.24em;
+  font-size: 11px;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--muted);
 }
 
 .masthead__sponsor-logos {
@@ -207,11 +192,11 @@ body {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 18px 32px;
+  gap: 8px 22px;
 }
 
 .masthead__sponsor-logo img {
-  height: 40px;
+  height: 28px;
   width: auto;
   max-width: 100%;
   display: block;
@@ -227,6 +212,10 @@ body {
   .masthead__seal { width: 44px; height: 44px; }
   .masthead__wordmark { height: 27px; }
   .masthead__tagline { letter-spacing: 0.2em; }
+  .masthead__sponsor-logo img { height: 24px; }
+  /* The strip's job on a phone — a face within reach — is done by the mini
+     widget in the article; here it only pushed the first name off the screen. */
+  .featured { display: none; }
 }
 
 /* ---------- Featured carousel ---------- */
@@ -383,7 +372,8 @@ body {
   background: none;
   border: 1px solid var(--rule);
   border-radius: 2px;
-  padding: 4px 8px;
+  min-height: 28px;
+  padding: 6px 10px;
   cursor: pointer;
   transition: background-color 0.12s ease, color 0.12s ease;
 }
@@ -467,6 +457,24 @@ body {
   transition: border-color 0.15s ease;
 }
 
+/* The browser's blue × was the only off-palette pixel on the page: redraw it
+   in the muted ink. */
+.search__input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-left: 6px;
+  background: var(--muted);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 2l10 10M12 2L2 12' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2 2l10 10M12 2L2 12' stroke='%23000' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  cursor: pointer;
+}
+
+.search__input::-webkit-search-cancel-button:hover {
+  background: var(--accent);
+}
+
 .search__input::placeholder {
   color: var(--faint);
   font-style: italic;
@@ -494,8 +502,9 @@ body {
 
 .browse__toggle {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
+  text-align: left;
   text-align: left;
   font-family: var(--mono);
   font-size: 12.5px;
@@ -588,7 +597,7 @@ body {
 .browse__chip.is-active {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--paper-2);
 }
 
 /* Hairline divider sets the count off from the month name: "June 2026 | 134". */
@@ -633,12 +642,40 @@ body {
 
 .browse__letter.is-active {
   background: var(--accent);
-  color: #fff;
+  color: var(--paper-2);
 }
 
-.browse__letter.is-disabled {
-  color: var(--hairline);
-  cursor: default;
+/* Town and funeral home sit behind a second line so the open panel is two
+   rows — month and last name — not a control deck. */
+.browse__row--more {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--hairline);
+}
+
+.browse__more {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  min-height: 24px;
+  cursor: pointer;
+}
+
+.browse__more:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.browse__row--more .browse__row--selects {
+  padding-top: 0;
+  border-top: 0;
+  width: 100%;
 }
 
 .browse__select {
@@ -752,6 +789,7 @@ body {
 .register__more:focus-visible,
 .register__action:focus-visible,
 .browse__toggle:focus-visible,
+.browse__more:focus-visible,
 .featured__pause:focus-visible,
 .submit__open:focus-visible,
 .submit__send:focus-visible,
@@ -985,9 +1023,11 @@ body {
   margin: 0;
   font-family: var(--mono);
   font-size: 12.5px;
-  padding-top: 9px;
+  padding-top: 1px;
 }
 .footer__index a {
+  display: inline-block;
+  padding: 8px 0; /* a 13px line is not a target; this makes it one */
   color: var(--accent);
   text-decoration: none;
 }
@@ -1007,6 +1047,10 @@ body {
   width: 44px;
   height: 44px;
   border-radius: 50%;
+}
+
+.footer__lines {
+  max-width: 72ch;
 }
 
 .footer__lines p {
@@ -1069,23 +1113,7 @@ body {
 
 .skeleton__photo,
 .skeleton__line {
-  background: linear-gradient(
-    90deg,
-    var(--hairline) 25%,
-    var(--hover) 37%,
-    var(--hairline) 63%
-  );
-  background-size: 400% 100%;
-  animation: skeleton-shimmer 1.4s ease infinite;
-}
-
-@keyframes skeleton-shimmer {
-  0% {
-    background-position: 100% 0;
-  }
-  100% {
-    background-position: 0 0;
-  }
+  background: var(--hairline);
 }
 
 /* ---------- States ---------- */
@@ -1117,30 +1145,6 @@ body {
   }
   .sponsor-card__logo img {
     height: 74px;
-  }
-  .featured__card {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 16px;
-    padding: 20px 18px 22px;
-  }
-  .featured__photo {
-    flex-basis: auto;
-    width: 128px;
-    height: 160px;
-  }
-  .featured__name {
-    font-size: 1.3rem;
-  }
-  .featured__more {
-    padding-top: 14px;
-  }
-  .featured__arrow--prev {
-    left: -6px;
-  }
-  .featured__arrow--next {
-    right: -6px;
   }
 }
 

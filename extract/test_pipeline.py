@@ -671,6 +671,24 @@ def test_sanity_warnings():
     print("ok: sanity warnings (flag bad, pass good)")
 
 
+def test_clean_summary():
+    cases = {
+        "Mark R. Jackson, 69, of unspecified town, passed away on July 20, 2026.":
+            "Mark R. Jackson, 69, passed away on July 20, 2026.",
+        "Donna Jean Srb, 84, of an unspecified town, passed away on July 14, 2026.":
+            "Donna Jean Srb, 84, passed away on July 14, 2026.",
+        "Jane Doe, 90, of Unknown City, died on May 1, 2026.":
+            "Jane Doe, 90, died on May 1, 2026.",
+        # a real town is untouched, as is a name that merely contains the word
+        "Diane V. Dombeck, age 73, of Eland, passed away on June 24, 2026.":
+            "Diane V. Dombeck, age 73, of Eland, passed away on June 24, 2026.",
+        "Tina Andrasek, 56, passed away unexpectedly.": "Tina Andrasek, 56, passed away unexpectedly.",
+    }
+    for raw, expected in cases.items():
+        assert extractor.clean_summary(raw) == expected, (raw, extractor.clean_summary(raw))
+    print("ok: clean summary (placeholder town clause stripped, real towns kept)")
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):

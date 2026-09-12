@@ -89,9 +89,8 @@ export default function Register({
           </ol>
         </section>
       ))}
-      <p className="sr-only" role="status">
-        Showing {visible.length} of {obituaries.length} obituaries
-      </p>
+      {/* No live region here: the search bar's count line is the one announcer
+          for a new result set, so a keystroke never triggers two readouts. */}
       {remaining > 0 && (
         <button
           type="button"

@@ -6,8 +6,10 @@ import SearchBar from "./components/SearchBar.jsx";
 import BrowseBar from "./components/BrowseBar.jsx";
 import Register from "./components/Register.jsx";
 import Footer from "./components/Footer.jsx";
-import { eventDate, monthKey, lastNameInitial } from "./lib/format.js";
+import { eventDate, monthKey, monthLabel, lastNameInitial } from "./lib/format.js";
 import { bySurname, searchObituaries } from "./lib/search.js";
+import { readState, writeState } from "./lib/urlState.js";
+import { reportStateToParent } from "./lib/frame.js";
 
 const BASE = import.meta.env.BASE_URL;
 const RECENT_MONTHS = 3; // default view: the current month plus the prior two
@@ -35,12 +37,33 @@ function recentMonthKeys(obituaries, n) {
   return keys;
 }
 
+// What the count line says the number is *of* — always, not only by default,
+// so "36 names" never floats free of the filter that produced it.
+function scopeLabel(filter) {
+  switch (filter.kind) {
+    case "recent":
+      return `the last ${filter.value} months`;
+    case "month":
+      return monthLabel(filter.value);
+    case "letter":
+      return `last names beginning with ${filter.value}`;
+    case "town":
+    case "home":
+      return filter.value;
+    default:
+      return "every year";
+  }
+}
+
 export default function App() {
+  // A shared or bookmarked URL (?q=, ?month=, ?letter=, ?town=, ?home=) reopens
+  // the same list; otherwise the register opens on the recent months.
+  const [seeded] = useState(() => readState());
   const [data, setData] = useState(null);
   const [sponsor, setSponsor] = useState(null);
   const [error, setError] = useState(null);
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState(NO_FILTER);
+  const [query, setQuery] = useState(seeded?.query ?? "");
+  const [filter, setFilter] = useState(seeded?.filter ?? NO_FILTER);
   const [browseOpen, setBrowseOpen] = useState(false);
   const [submitOpen, setSubmitOpen] = useState(false);
   const browseRef = useRef(null);
@@ -57,13 +80,19 @@ export default function App() {
         setSponsor(sponsorConfig);
         // Default the register to the most recent few months so the embed opens
         // at a readable height instead of listing the whole catalogue.
-        if (index.obituaries.length) setFilter(RECENT);
+        if (index.obituaries.length && !seeded) setFilter(RECENT);
       })
       .catch((e) => {
         console.error("Obituary index failed to load:", e);
         setError(e.message);
       });
-  }, []);
+  }, [seeded]);
+
+  // Mirror the state into the URL (and to the embedding page) once the data is
+  // in, so Back from a person page lands here, not on an empty default.
+  useEffect(() => {
+    if (data) reportStateToParent(writeState(query, filter));
+  }, [data, query, filter]);
 
   // Search and browse are independent narrowings; activating one clears the other.
   // Clearing the search returns to the default view — carousel and all.
@@ -122,8 +151,6 @@ export default function App() {
   }
 
   const isDefault = !query && filter.kind === "recent" && !browseOpen;
-  const scope =
-    !query && filter.kind === "recent" ? `the last ${filter.value} months` : "";
 
   return (
     <main className="page">
@@ -136,7 +163,7 @@ export default function App() {
               onChange={onSearch}
               count={results.names.length}
               mentions={results.mentions.length}
-              scope={scope}
+              scope={query ? "" : scopeLabel(filter)}
             />
           ) : null
         }

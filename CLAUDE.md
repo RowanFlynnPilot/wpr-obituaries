@@ -25,7 +25,9 @@ Source of truth → static output → embedded widget:
 2. `extract/extractor.py` — Claude Haiku reads each batch post and returns one
    structured record per person. Regex parsing is wrong here: obituary
    formatting varies too much. The model extracts only what is present and
-   never invents detail. `wp_client` + `extractor` are wrapped by
+   never invents detail (`clean_summary` strips the one placeholder it has
+   been seen to narrate — "of an unspecified town" — so an absence is never
+   published as a fact). `wp_client` + `extractor` are wrapped by
    `extract/adapters/wordpress_scrape.py` behind the generic *write-source*
    contract (`adapters/base.Unit`): a source yields units of work, the sync loop
    never knows where a record came from. This is the seam that makes the tool a
@@ -70,8 +72,18 @@ Source of truth → static output → embedded widget:
    Jensen; diacritics folded; records that only *mention* the query list in a
    second tier), and the register is grouped by **date of death** (`eventDate`,
    falling back to the publication date for the 2% without one) with honest
-   "Died …" / "Published …" headings. Browse (month / last name / town / home)
-   is a secondary path behind one disclosure. Vite
+   "Died …" / "Published …" headings. Browse (month / last name, with town /
+   home behind a second-tier line) is a secondary path behind one disclosure.
+   The search or filter mirrors into the widget's URL (`lib/urlState.js`:
+   `?q=`, `?month=`, `?letter=`, `?town=`, `?home=`, validated on read) so Back
+   from a person page and a shared link reopen the same list; embedded, the
+   same search string is posted to the parent (`wpr-obituaries:state`) and the
+   embed snippet mirrors it onto the WordPress URL and forwards it back into
+   the iframe on load. The sponsor logos ride in the masthead as a
+   "presented by" line above the ink rule (the footer card is the full-size
+   placement), so nothing sits between the search and its results; the
+   featured strip (five of the week's portraits, newest first) is hidden on
+   phones. Vite
    builds **two embeds** from this one app: `index.html` (the full register,
    paginated 60 rows at a time — "Show earlier obituaries" — so the embed's
    height and portrait loads stay bounded as the catalogue grows) and

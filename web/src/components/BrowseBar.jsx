@@ -1,22 +1,32 @@
-import { forwardRef, useEffect, useMemo } from "react";
+import { forwardRef, useEffect, useMemo, useState } from "react";
 import { eventDate, monthKey, monthLabel, lastNameInitial } from "../lib/format.js";
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-// One chip per month grows forever with the catalogue — cap the row at a year
-// and put everything older in the "Earlier months" select that follows it.
-const MONTH_CHIPS = 12;
+// The chip row is half a year; everything older lives in the "Earlier…"
+// select. A month with only a stray record or two (a late notice, a
+// correction) reads as a broken catalogue if it gets a chip of its own, so it
+// goes to the select as well — nothing is unreachable, just not headlined.
+const MONTH_CHIPS = 6;
+const MIN_CHIP_COUNT = 3;
 
 // Browse is a secondary path (the reader's first move is to type a name), so
-// its 39 controls stay behind one disclosure until asked for — or until a
-// filter is active, when the panel must be visible to show what is selected.
+// it stays behind one disclosure until asked for — or until a filter is active,
+// when the panel must be visible to show what is selected. Inside, month and
+// last name are the first tier; town and funeral home sit behind a second
+// "More ways to browse" line, so the open panel is two rows, not a control deck.
 const BrowseBar = forwardRef(function BrowseBar(
   { obituaries, filter, onFilter, open, onOpenChange, recentMonths = 3 },
   ref
 ) {
   const filtered = filter.kind !== "recent" && filter.kind !== "none";
+  const facetActive = filter.kind === "town" || filter.kind === "home";
+  const [moreOpen, setMoreOpen] = useState(facetActive);
   useEffect(() => {
     if (filtered) onOpenChange(true);
   }, [filtered, onOpenChange]);
+  useEffect(() => {
+    if (facetActive) setMoreOpen(true);
+  }, [facetActive]);
 
   const months = useMemo(() => {
     const counts = new Map();
@@ -29,10 +39,12 @@ const BrowseBar = forwardRef(function BrowseBar(
       .map(([key, count]) => ({ key, count }));
   }, [obituaries]);
 
-  const present = useMemo(() => {
+  // Only the letters that begin a surname: an A–Z row with invisible gaps
+  // reads as broken, a shorter row reads as the index it is.
+  const letters = useMemo(() => {
     const s = new Set();
     for (const o of obituaries) s.add(lastNameInitial(o.name));
-    return s;
+    return LETTERS.filter((l) => s.has(l));
   }, [obituaries]);
 
   // Town is derived best-effort from the summary, so the long count-1 tail holds
@@ -55,8 +67,8 @@ const BrowseBar = forwardRef(function BrowseBar(
         : { kind: "recent", value: recentMonths }
     );
 
-  const chipMonths = months.slice(0, MONTH_CHIPS);
-  const olderMonths = months.slice(MONTH_CHIPS);
+  const chipMonths = months.slice(0, MONTH_CHIPS).filter((m) => m.count >= MIN_CHIP_COUNT);
+  const olderMonths = months.filter((m) => !chipMonths.includes(m));
   const olderActive =
     filter.kind === "month" && olderMonths.some((m) => m.key === filter.value);
 
@@ -77,11 +89,12 @@ const BrowseBar = forwardRef(function BrowseBar(
 
       {open && (
         <div className="browse__panel" id="browse-panel">
-          <div className="browse__row">
+          <div className="browse__row" role="group" aria-label="Month">
             <span className="browse__label">Month</span>
             <button
               type="button"
               className={`browse__chip${filter.kind === "recent" ? " is-active" : ""}`}
+              aria-pressed={filter.kind === "recent"}
               onClick={() => onFilter({ kind: "recent", value: recentMonths })}
             >
               Last {recentMonths} months
@@ -89,6 +102,7 @@ const BrowseBar = forwardRef(function BrowseBar(
             <button
               type="button"
               className={`browse__chip${filter.kind === "none" ? " is-active" : ""}`}
+              aria-pressed={filter.kind === "none"}
               onClick={() => onFilter({ kind: "none" })}
             >
               All
@@ -98,6 +112,7 @@ const BrowseBar = forwardRef(function BrowseBar(
                 key={m.key}
                 type="button"
                 className={`browse__chip${isMonth(m.key) ? " is-active" : ""}`}
+                aria-pressed={isMonth(m.key)}
                 onClick={() => onFilter({ kind: "month", value: m.key })}
               >
                 {monthLabel(m.key)} <span className="browse__count">{m.count}</span>
@@ -124,61 +139,70 @@ const BrowseBar = forwardRef(function BrowseBar(
 
           <div className="browse__row browse__row--az" role="group" aria-label="Last name begins with">
             <span className="browse__label">Last name</span>
-            {LETTERS.map((l) =>
-              present.has(l) ? (
-                <button
-                  key={l}
-                  type="button"
-                  className={`browse__letter${isLetter(l) ? " is-active" : ""}`}
-                  aria-pressed={isLetter(l)}
-                  onClick={() => onFilter({ kind: "letter", value: l })}
-                >
-                  {l}
-                </button>
-              ) : (
-                <span key={l} className="browse__letter is-disabled" aria-hidden="true">
-                  {l}
-                </span>
-              )
-            )}
+            {letters.map((l) => (
+              <button
+                key={l}
+                type="button"
+                className={`browse__letter${isLetter(l) ? " is-active" : ""}`}
+                aria-pressed={isLetter(l)}
+                onClick={() => onFilter({ kind: "letter", value: l })}
+              >
+                {l}
+              </button>
+            ))}
           </div>
 
-          <div className="browse__row browse__row--selects">
-            {towns.length > 0 && (
-              <label className="browse__select">
-                <span className="browse__label">Town</span>
-                <select
-                  className={filter.kind === "town" ? "is-active" : ""}
-                  value={filter.kind === "town" ? filter.value : ""}
-                  onChange={onSelect("town")}
-                >
-                  <option value="">All towns</option>
-                  {towns.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.value} ({t.count})
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-            {homes.length > 0 && (
-              <label className="browse__select">
-                <span className="browse__label">Funeral home</span>
-                <select
-                  className={filter.kind === "home" ? "is-active" : ""}
-                  value={filter.kind === "home" ? filter.value : ""}
-                  onChange={onSelect("home")}
-                >
-                  <option value="">All funeral homes</option>
-                  {homes.map((h) => (
-                    <option key={h.value} value={h.value}>
-                      {h.value} ({h.count})
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
-          </div>
+          {(towns.length > 0 || homes.length > 0) && (
+            <div className="browse__row browse__row--more">
+              <button
+                type="button"
+                className="browse__more"
+                aria-expanded={moreOpen}
+                aria-controls="browse-more"
+                onClick={() => setMoreOpen((v) => !v)}
+              >
+                {moreOpen ? "Fewer ways to browse" : "More ways to browse: town, funeral home"}
+              </button>
+              {moreOpen && (
+                <div className="browse__row browse__row--selects" id="browse-more">
+                  {towns.length > 0 && (
+                    <label className="browse__select">
+                      <span className="browse__label">Town</span>
+                      <select
+                        className={filter.kind === "town" ? "is-active" : ""}
+                        value={filter.kind === "town" ? filter.value : ""}
+                        onChange={onSelect("town")}
+                      >
+                        <option value="">All towns</option>
+                        {towns.map((t) => (
+                          <option key={t.value} value={t.value}>
+                            {t.value} ({t.count})
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
+                  {homes.length > 0 && (
+                    <label className="browse__select">
+                      <span className="browse__label">Funeral home</span>
+                      <select
+                        className={filter.kind === "home" ? "is-active" : ""}
+                        value={filter.kind === "home" ? filter.value : ""}
+                        onChange={onSelect("home")}
+                      >
+                        <option value="">All funeral homes</option>
+                        {homes.map((h) => (
+                          <option key={h.value} value={h.value}>
+                            {h.value} ({h.count})
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

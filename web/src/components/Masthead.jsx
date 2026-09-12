@@ -5,9 +5,11 @@ import { sponsorHref } from "../lib/sponsor.js";
 const BASE = import.meta.env.BASE_URL;
 const { identity, branding, copy } = config;
 
-// The order is the argument: the newsroom's flag, the title, one line of
-// context, then the search — the reader's task — before anything the newsroom
-// wants (sponsors). Submissions live in the footer.
+// The order is the argument: the newsroom's flag with its "presented by" line
+// (the sponsors ride in the nameplate, the way a newspaper section credits its
+// underwriter), the ink rule, the title, one line of context, then the search —
+// the reader's task — with nothing between it and its results. Submissions live
+// in the footer; the footer card is the sponsors' full-size placement.
 export default function Masthead({ sponsor, search = null }) {
   const sponsors = sponsor?.sponsors || [];
   return (
@@ -33,15 +35,9 @@ export default function Masthead({ sponsor, search = null }) {
         />
       </a>
       {identity.tagline && <p className="masthead__tagline">{identity.tagline}</p>}
-      <div className="masthead__flag-rule" aria-hidden="true" />
-      <p className="masthead__eyebrow">In Memoriam</p>
-      <h1 className="masthead__title">Obituaries</h1>
-      <p className="masthead__lede">{copy.lede}</p>
-
-      {search}
 
       {sponsors.length > 0 && (
-        <div className="masthead__sponsors">
+        <div className="masthead__presented">
           <span className="masthead__sponsor-label">
             {sponsor.label || "Made possible by"}
           </span>
@@ -52,6 +48,13 @@ export default function Masthead({ sponsor, search = null }) {
           </div>
         </div>
       )}
+
+      <div className="masthead__flag-rule" aria-hidden="true" />
+      <p className="masthead__eyebrow">In Memoriam</p>
+      <h1 className="masthead__title">Obituaries</h1>
+      <p className="masthead__lede">{copy.lede}</p>
+
+      {search}
 
       <hr className="masthead__rule" />
     </header>

@@ -26,18 +26,31 @@
         widget.</p>
 
       <!-- ===== FULL TOOL EMBED (same snippet as docs/embedding.md) ===== -->
-      <iframe id="wpr-obits-embed" src="./" title="Wausau area obituaries"
+      <iframe id="wpr-obits-embed" title="Wausau area obituaries"
               style="min-height:800px" loading="lazy"></iframe>
       <script>
         (function () {
           var frame = document.getElementById("wpr-obits-embed");
+          var tool = "./";
+          var keys = ["q", "month", "letter", "town", "home"];
+          var inbound = new URLSearchParams(window.location.search);
+          var forward = new URLSearchParams();
+          keys.forEach(function (k) { if (inbound.get(k)) forward.set(k, inbound.get(k)); });
+          frame.src = tool + (forward.toString() ? "?" + forward.toString() : "");
+
           window.addEventListener("message", function (e) {
-            if (
-              frame && e.source === frame.contentWindow &&
-              e.data && e.data.type === "wpr-obituaries:height"
-            ) {
+            if (!frame || e.source !== frame.contentWindow || !e.data) return;
+            if (e.data.type === "wpr-obituaries:height") {
               frame.style.height = e.data.height + "px";
               frame.style.minHeight = "0";
+            }
+            if (e.data.type === "wpr-obituaries:state" && typeof e.data.search === "string") {
+              var url = new URL(window.location.href);
+              keys.forEach(function (k) { url.searchParams.delete(k); });
+              new URLSearchParams(e.data.search).forEach(function (v, k) {
+                if (keys.indexOf(k) !== -1) url.searchParams.set(k, v);
+              });
+              window.history.replaceState(null, "", url.toString());
             }
           });
         })();
