@@ -371,8 +371,10 @@ oxblood outline (offset 2px) on keyboard focus.
   oxblood mono; fades in over 0.5s when it changes; hover to hover-wash with
   the name turning oxblood. It opens the default view, under the search, and
   stands down the moment the reader searches or browses. The strip holds
-  **five** of this week's portraits, newest death first — the same set on every
-  visit, not a shuffle. The dots are one keyboard stop with a roving tabindex
+  **five** faces drawn at random from the past month's notices, so a different
+  handful gets its moment on each visit; the draw happens once per visit, so the
+  strip stays put while the reader is on the page. The dots are one keyboard
+  stop with a roving tabindex
   (arrow keys move between them), so the strip costs a keyboard reader five
   stops, not fourteen. Beside them sits a visible mono **Pause / Resume**
   control (28px tall, its visible word contained in its accessible name;

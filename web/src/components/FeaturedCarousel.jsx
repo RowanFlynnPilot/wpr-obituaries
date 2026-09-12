@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { lifespan, photoSrc } from "../lib/format.js";
 
 const BASE = import.meta.env.BASE_URL;
-const DAYS = 7; // draw from the past week
-const MAX = 5; // this week's faces, newest first — a handful, not a gallery
+const DAYS = 30; // draw from the past month
+const MAX = 5; // a handful of faces at a time, not a gallery
 const INTERVAL = 6500; // gentle, dignified cadence
 const REDUCED = "(prefers-reduced-motion: reduce)";
 
@@ -30,18 +30,27 @@ function withinDays(sourceDate, days) {
   return when >= cutoff;
 }
 
-// `obituaries` arrives newest death first (App sorts once), so the pool reads
-// as "this week" and a returning visitor sees the same set — not a shuffle.
-// On a quiet stretch (nothing photographed in the window) it falls back to the
-// most recent portraits so the strip never vanishes. It sits at the top of the
-// default view, under the search, and stands down the moment the reader
-// searches or browses: then the list itself is the answer.
+// Five faces drawn at random from the past month's notices (about 130 of them),
+// so a different handful gets its moment on each visit instead of the same five
+// every time. The draw happens once per mount, never per render, so the strip
+// stays put while the reader is on the page. It sits at the top of the default
+// view, under the search, and stands down the moment the reader searches or
+// browses: then the list itself is the answer.
 export default function FeaturedCarousel({ obituaries }) {
   const reduced = useMediaQuery(REDUCED);
   const featured = useMemo(() => {
+    // filter() and slice() return fresh arrays, so shuffling in place is safe.
     const photographed = obituaries.filter((o) => o.photoUrl);
     const recent = photographed.filter((o) => withinDays(o.sourceDate, DAYS));
-    return (recent.length ? recent : photographed).slice(0, MAX);
+    // Prefer the past month; on a quiet stretch fall back to the most recent
+    // portraits (the list arrives newest first) so the strip never vanishes.
+    const pool = recent.length ? recent : photographed.slice(0, MAX * 2);
+    // Fisher–Yates, then take MAX.
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool.slice(0, MAX);
   }, [obituaries]);
 
   const [index, setIndex] = useState(0);

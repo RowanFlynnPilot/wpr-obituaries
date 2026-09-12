@@ -86,9 +86,9 @@ Source of truth → static output → embedded widget:
    the iframe on load. The sponsor logos ride in the masthead as a
    "presented by" line above the ink rule (the footer card is the full-size
    placement), so nothing sits between the search and its results. The
-   "Recently Remembered" strip (`FeaturedCarousel`, five of the week's
-   portraits newest first) opens the default view under the search and stands
-   down as soon as the reader searches or browses. Register rows carry no
+   "Recently Remembered" strip (`FeaturedCarousel`, five portraits drawn at
+   random from the past 30 days, redrawn once per visit) opens the default view
+   under the search and stands down as soon as the reader searches or browses. Register rows carry no
    summary line: the extractor's one sentence restates the name, age and town
    the row already shows. Vite
    builds **two embeds** from this one app: `index.html` (the full register,
