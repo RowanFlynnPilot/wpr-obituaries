@@ -20,13 +20,25 @@ export function lifespan(ob) {
   return death || "";
 }
 
-export function publishedOn(ob) {
-  // ob.sourceDate is an ISO date like "2026-06-19".
-  return dateLabel(ob.sourceDate);
+// The date the register is organised by: the date of death when it is known
+// (98% of records), else the date the notice was published. sourceDate alone
+// mixes the two — it is the publication date for WPR batch records and the
+// death date for scraped ones — so a heading built from it could never be
+// labelled honestly.
+const FULL_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+// A death date counts only when it is a full calendar date — a bare year
+// ("2026") can't head a day group or key a month chip.
+export function hasDeathDate(ob) {
+  return FULL_DATE.test(ob.deathDate || "");
 }
 
-export function dateLabel(sourceDate) {
-  const [y, m, d] = sourceDate.split("-").map(Number);
+export function eventDate(ob) {
+  return hasDeathDate(ob) ? ob.deathDate : ob.sourceDate;
+}
+
+export function dateLabel(isoDate) {
+  const [y, m, d] = isoDate.split("-").map(Number);
   return new Date(y, m - 1, d).toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
@@ -34,8 +46,8 @@ export function dateLabel(sourceDate) {
   });
 }
 
-export function monthKey(sourceDate) {
-  return sourceDate.slice(0, 7); // "2026-06"
+export function monthKey(isoDate) {
+  return isoDate.slice(0, 7); // "2026-06"
 }
 
 export function monthLabel(monthKey) {

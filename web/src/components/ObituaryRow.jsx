@@ -3,6 +3,9 @@ import { initials, lifespan, photoSrc } from "../lib/format.js";
 export default function ObituaryRow({ ob }) {
   const span = lifespan(ob);
   const href = `${import.meta.env.BASE_URL}o/${ob.slug}.html`;
+  // The scannable facts — lifespan and town — sit outside the sentence, on
+  // the typewriter line, so "is this my Frank?" is answered without reading.
+  const facts = [span, ob.town].filter(Boolean).join(" · ");
 
   return (
     <li className="entry">
@@ -23,7 +26,7 @@ export default function ObituaryRow({ ob }) {
         )}
         <span className="entry__text">
           <span className="entry__name">{ob.name}</span>
-          {span && <span className="entry__span">{span}</span>}
+          {facts && <span className="entry__span">{facts}</span>}
           {ob.summary && <span className="entry__summary">{ob.summary}</span>}
           {(ob.homeName || ob.funeralHome) && (
             <span className="entry__home">{ob.homeName || ob.funeralHome}</span>

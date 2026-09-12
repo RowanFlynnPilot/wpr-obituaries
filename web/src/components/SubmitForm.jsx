@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import config from "../config.js";
 
 const { identity } = config;
@@ -6,20 +6,20 @@ const { identity } = config;
 // The lightweight, no-infrastructure submit path: collect structured fields and
 // hand the family a prefilled email to the newsroom (matching the existing
 // "email obituaries to…" workflow). An editor turns the email into an approved
-// data/intake/<id>.json. Step 5 swaps this for a Supabase POST — same form.
+// data/intake/<id>.json. A hosted intake backend was shelved; this is the path.
 const FIELDS = [
   { name: "name", label: "Full name", required: true },
-  // Publication date is a newsroom concept a family can't know — the editor
-  // sets it during intake review, so it's optional here.
-  { name: "source_date", label: "Date of publication (if known)", type: "date" },
   { name: "birth_date", label: "Date of birth", type: "date" },
   { name: "death_date", label: "Date of death", type: "date" },
   { name: "age", label: "Age", type: "number" },
   { name: "funeral_home", label: "Funeral home" },
+  // Publication date is a newsroom concept a family can't know — the editor
+  // sets it during intake review, so it's optional and last.
+  { name: "source_date", label: "Date of publication (if known)", type: "date" },
 ];
 
-export default function SubmitForm() {
-  const [open, setOpen] = useState(false);
+// `open` is owned by App so the register's empty state can open the form too.
+const SubmitForm = forwardRef(function SubmitForm({ open, onOpenChange }, ref) {
   const [form, setForm] = useState({});
   const [body, setBody] = useState("");
   const formRef = useRef(null);
@@ -59,15 +59,19 @@ export default function SubmitForm() {
 
   if (!open) {
     return (
-      <div className="submit">
+      <div className="submit" ref={ref}>
         <button
           className="submit__open"
           type="button"
           ref={openBtnRef}
-          onClick={() => setOpen(true)}
+          onClick={() => onOpenChange(true)}
         >
           Submit an obituary
         </button>
+        <p className="submit__note">
+          Free of charge. Notices are reviewed and published Monday, Wednesday and
+          Friday — or ask your funeral director to send it for you.
+        </p>
       </div>
     );
   }
@@ -75,15 +79,21 @@ export default function SubmitForm() {
   return (
     <form
       className="submit submit--open"
-      ref={formRef}
+      ref={(el) => {
+        formRef.current = el;
+        if (typeof ref === "function") ref(el);
+        else if (ref) ref.current = el;
+      }}
       onSubmit={submit}
       onKeyDown={(e) => {
-        if (e.key === "Escape") setOpen(false);
+        if (e.key === "Escape") onOpenChange(false);
       }}
     >
+      <h2 className="submit__title">Submit an obituary</h2>
       <p className="submit__intro">
-        Fill in what you can. Your email program opens with a message ready to
-        send to our newsroom — attach a photo there if you have one.
+        Fill in what you can. Your email program will open with a message ready to
+        send to our newsroom — attach a photo there if you have one. We review every
+        notice and publish free of charge on Monday, Wednesday and Friday.
       </p>
       <div className="submit__grid">
         {FIELDS.map((f) => (
@@ -124,11 +134,13 @@ export default function SubmitForm() {
         <button
           className="submit__cancel"
           type="button"
-          onClick={() => setOpen(false)}
+          onClick={() => onOpenChange(false)}
         >
           Cancel
         </button>
       </div>
     </form>
   );
-}
+});
+
+export default SubmitForm;

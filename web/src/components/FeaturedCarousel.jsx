@@ -32,24 +32,27 @@ export default function FeaturedCarousel({ obituaries }) {
   }, [obituaries]);
 
   const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
-  // A manual choice (arrow/dot) stops the auto-advance for good — hover/focus
-  // pause never fires on touch, so tapping is the only pause a phone has, and
-  // nobody who picked a card wants it swapped out from under them seconds later.
-  const [interacted, setInteracted] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  // Auto-advance stops for good after any manual choice (arrow, dot, or the
+  // Pause control) — hover/focus pause never fires on touch, so an explicit,
+  // visible control is the pause a phone reader has (WCAG 2.2.2).
+  const [stopped, setStopped] = useState(false);
+  const reduced =
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // Reset if the underlying set changes (e.g. fresh data load).
   useEffect(() => setIndex(0), [featured.length]);
 
+  const playing = featured.length > 1 && !hovered && !stopped && !reduced;
   useEffect(() => {
-    if (featured.length <= 1 || paused || interacted) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!playing) return;
     const t = setInterval(
       () => setIndex((i) => (i + 1) % featured.length),
       INTERVAL
     );
     return () => clearInterval(t);
-  }, [featured.length, paused, interacted]);
+  }, [playing, featured.length]);
 
   if (featured.length === 0) return null;
 
@@ -58,7 +61,7 @@ export default function FeaturedCarousel({ obituaries }) {
   const span = lifespan(ob);
   const href = `${BASE}o/${ob.slug}.html`;
   const go = (n) => {
-    setInteracted(true);
+    setStopped(true);
     setIndex((n + featured.length) % featured.length);
   };
 
@@ -66,10 +69,10 @@ export default function FeaturedCarousel({ obituaries }) {
     <section
       className="featured"
       aria-label="Recently remembered"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)}
-      onBlurCapture={() => setPaused(false)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocusCapture={() => setHovered(true)}
+      onBlurCapture={() => setHovered(false)}
     >
       <p className="featured__kicker">Recently Remembered</p>
 
@@ -116,18 +119,35 @@ export default function FeaturedCarousel({ obituaries }) {
         )}
       </div>
 
+      {/* Screen readers hear the change without the card itself being live. */}
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        Now showing {ob.name}, {i + 1} of {featured.length}
+      </p>
+
       {featured.length > 1 && (
-        <div className="featured__dots" role="group" aria-label="Choose a featured obituary">
-          {featured.map((f, n) => (
+        <div className="featured__nav">
+          <div className="featured__dots" role="group" aria-label="Choose a featured obituary">
+            {featured.map((f, n) => (
+              <button
+                key={f.slug}
+                type="button"
+                className={`featured__dot${n === i ? " is-active" : ""}`}
+                aria-label={`Show ${f.name}`}
+                aria-current={n === i}
+                onClick={() => go(n)}
+              />
+            ))}
+          </div>
+          {!reduced && (
             <button
-              key={f.slug}
               type="button"
-              className={`featured__dot${n === i ? " is-active" : ""}`}
-              aria-label={`Show ${f.name}`}
-              aria-current={n === i}
-              onClick={() => go(n)}
-            />
-          ))}
+              className="featured__pause"
+              aria-pressed={stopped}
+              onClick={() => setStopped((s) => !s)}
+            >
+              {stopped ? "Play" : "Pause"}
+            </button>
+          )}
         </div>
       )}
     </section>

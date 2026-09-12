@@ -64,7 +64,14 @@ Source of truth → static output → embedded widget:
    committed. `python extract/main.py --render-only` regenerates them locally
    (and reaches every existing page after a template/brand change).
 6. `web/` — React 18 / Vite memorial register. The **browse + search** layer
-   only. It fetches the JSON index and links each card to the static page. Vite
+   only. It fetches the JSON index and links each card to the static page. The
+   name search is the product: it sits directly under the lede, matches by
+   name-token prefix (`lib/search.js` — "Allan Jensen" finds Allan Guy
+   Jensen; diacritics folded; records that only *mention* the query list in a
+   second tier), and the register is grouped by **date of death** (`eventDate`,
+   falling back to the publication date for the 2% without one) with honest
+   "Died …" / "Published …" headings. Browse (month / last name / town / home)
+   is a secondary path behind one disclosure. Vite
    builds **two embeds** from this one app: `index.html` (the full register,
    paginated 60 rows at a time — "Show earlier obituaries" — so the embed's
    height and portrait loads stay bounded as the catalogue grows) and

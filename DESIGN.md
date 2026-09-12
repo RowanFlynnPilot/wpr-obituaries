@@ -105,7 +105,7 @@ components:
     textColor: "{colors.ink}"
     typography: "{typography.body}"
     rounded: "{rounded.control}"
-    padding: "14px 16px"
+    padding: "15px 16px 15px 46px"
   input-field:
     backgroundColor: "{colors.newsprint}"
     textColor: "{colors.ink}"
@@ -350,13 +350,22 @@ oxblood outline (offset 2px) on keyboard focus.
 - **Featured card**: portrait (132×168, ruled frame) beside name / lifespan /
   three-line excerpt / "Read the full obituary →" in oxblood mono; fades in
   over 0.5s when it changes; hover to hover-wash with the name turning oxblood.
+  Beside the dots sits a visible mono **Pause / Play** control (auto-advance
+  also stops for good after any arrow or dot choice), and a screen-reader
+  live region announces each card.
 - **Sponsor card**: centered label ("OBITUARIES MADE POSSIBLE BY", tracked mono
   in muted) over 80px logos on the paper-white sheet.
 
 ### Inputs / Fields
-- **Search** (`{components.input-search}`): the serif at 1rem in a paper-white
-  box with a rule border, 14px 16px padding, italic placeholder in muted; the
-  live count ("287 names") in mono beneath.
+- **Search** (`{components.input-search}`): the product's one primary control,
+  placed directly under the lede — before the sponsors, the carousel, and
+  everything else. A serif label at body size ("Find a name"), a drawn search
+  glyph inside the field, the serif at 1.1rem in a paper-white box with a **2px
+  muted border** (5.3:1 — a boundary a low-vision reader can find on cream;
+  the 1px rule was 1.5:1), italic placeholder; the live count in mono beneath
+  states the scope ("276 names · the last 3 months", or "2 names · 3 more
+  mentions"). Matching is by name token prefix, so "Allan Jensen" finds Allan
+  Guy Jensen; records that only *mention* the query list in a second tier.
 - **Form fields** (`{components.input-field}`): newsprint fill, rule border, 2px
   corners; labels above in mono caps.
 - **Focus**: a 2px oxblood outline offset 2px (inputs also switch the border to
@@ -368,15 +377,31 @@ The masthead *is* the navigation: the flag (seal 52px beside the 34px
 wordmark, one link home) over the tagline and the thick-over-thin ink rule,
 then the surface's kicker and title. Static pages add a small mono "← All
 obituaries" box top-left and a mono footer row ("← All obituaries · Browse the
-full index →"), then the colophon. Browse controls on the register are the
-chip rows (Month, A–Z) and two selects (Town, Funeral home) with mono labels.
+full index →"), then the colophon. Browse on the register is a secondary path
+and lives behind **one disclosure** ("Browse by month, last name, town or
+funeral home" — an oxblood mono link with a small ruled +/– mark), closed
+unless a filter is active; inside, the chip rows (Month, Last name) and two
+selects (Town, Funeral home) with 11px mono labels, no box around them. A
+letter browse lists surnames alphabetically under one heading. On phones the
+selects go full-width with their labels stacked above.
 
 ### Register row (signature)
 A 66px square portrait in a ruled frame (or a monogram tile: serif 700 initials
 in oxblood on paper white with an inset hairline), beside the name in title
-weight, the lifespan in mono, a one-line summary in body weight, and the
+weight, a mono **fact line** (lifespan · town — the confirming facts outside
+the sentence), a one-line summary at weight 400 capped at 65ch, and the
 funeral home as a tracked mono caption. Rows divide with hairlines; the whole
-row is one link that washes on hover and turns the name oxblood.
+row is one link that washes on hover and turns the name oxblood. Groups are
+headed by the **date of death** in oxblood mono ("Died September 2, 2026"; the
+few records without one say "Published …") — the register is a calendar of
+deaths, not of editions.
+
+### Empty state
+A dead end on a memorial page must offer a way forward and never end on the
+sponsor card: "No one named “…” is listed yet." in ink, then a row of
+secondary-style actions (Clear the search · Browse by last name · Not listed?
+Submit an obituary), then a muted italic hint about spellings and notices
+that haven't arrived yet.
 
 ### Share buttons
 A row on every person page — "SHARE" as a tracked mono label, then Facebook /
