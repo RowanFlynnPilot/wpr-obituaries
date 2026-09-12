@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Masthead from "./components/Masthead.jsx";
 import SubmitForm from "./components/SubmitForm.jsx";
+import FeaturedCarousel from "./components/FeaturedCarousel.jsx";
 import SearchBar from "./components/SearchBar.jsx";
 import BrowseBar from "./components/BrowseBar.jsx";
 import Register from "./components/Register.jsx";
@@ -184,6 +185,10 @@ export default function App() {
     );
   }
 
+  // The strip is the default view's own content: it stands down the moment the
+  // reader searches or browses, when the list itself is the answer.
+  const isDefault = !query && filter.kind === "recent";
+
   return (
     <main className="page">
       <Masthead
@@ -202,6 +207,7 @@ export default function App() {
       />
       {data ? (
         <>
+          {isDefault && <FeaturedCarousel obituaries={data.obituaries} />}
           {!query && (
             <BrowseBar
               ref={browseRef}

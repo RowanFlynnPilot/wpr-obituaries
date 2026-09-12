@@ -86,7 +86,7 @@ the WPR instance is the reference deployment for that story.
   `Obituary` data, canonical, OG/Twitter tags, a branded 1200×630 share card,
   a vendored portrait, share/print controls, related links, and a colophon.
 - Register: search (name, town, funeral home), browse by month / letter /
-  town / home, paginated rows, submit-an-obituary form.
+  town / home, featured carousel, paginated rows, submit-an-obituary form.
 - Slugs are persisted: a correction can never move a published URL.
 - Suppression by slug on family request; the record stays in the master.
 - Content is third-party text (extracted, scraped, submitted) — always
