@@ -122,6 +122,21 @@ components:
     textColor: "{colors.ink}"
     rounded: "{rounded.none}"
     padding: "30px 28px 32px"
+  mini-card:
+    backgroundColor: "{colors.newsprint}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.none}"
+    padding: "16px 16px 14px"
+    width: "380px"
+  share-button:
+    backgroundColor: "{colors.paper-white}"
+    textColor: "{colors.oxblood}"
+    typography: "{typography.label}"
+    rounded: "{rounded.control}"
+    padding: "6px 12px"
+  share-button-hover:
+    backgroundColor: "{colors.hover-wash}"
+    textColor: "{colors.oxblood}"
 ---
 
 # Design System: WPR Obituaries
@@ -362,6 +377,28 @@ in oxblood on paper white with an inset hairline), beside the name in title
 weight, the lifespan in mono, a one-line summary in body weight, and the
 funeral home as a tracked mono caption. Rows divide with hairlines; the whole
 row is one link that washes on hover and turns the name oxblood.
+
+### Share buttons
+A row on every person page — "SHARE" as a tracked mono label, then Facebook /
+Copy link / Email / Save as PDF as four secondary-style boxes
+(`{components.share-button}`): Courier Prime 12px in oxblood on paper white,
+1px rule border, 2px corners, 6px 12px padding; hover to hover-wash. "Copy
+link" confirms inline by swapping its own label to "Link copied" for 1.5s —
+no toast, no icon. The row is hidden in print.
+
+### Mini widget card (signature)
+The compact article/sidebar embed (`{components.mini-card}`): a 380px-wide
+newsprint sheet with a 1px rule border and the 3px oxblood top edge, 16px
+padding. Inside, top to bottom: the "In Memoriam · WPR" kicker (10.5px mono,
+tracked 0.22em, oxblood, centered); one card — a 72×90 ruled portrait (or a
+monogram tile) beside the name (serif 700, 1.08rem), the lifespan in 11.5px
+mono, and a two-line clamped summary in body weight; a centered nav row of
+30px round paper-white arrows around 6px dots (faint, oxblood when active, in
+22px hit areas); "View all obituaries →" in oxblood mono; and a hairline-topped
+sponsor strip with a 9.5px tracked label over 26px logos. The card fades in
+over 0.45s on change and auto-advances every 6s until hovered, focused, or
+touched. Everything is scoped under `.mini` so it can never bleed into a host
+page.
 
 ### Colophon (signature)
 The 44px seal beside two mono lines in muted: the provenance sentence, then
