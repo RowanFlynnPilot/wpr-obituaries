@@ -7,13 +7,16 @@ body {
   background: transparent;
 }
 
+::selection {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
 .mini {
   max-width: 380px;
   margin: 0 auto;
   background: var(--paper);
   border: 1px solid var(--rule);
   border-top: 3px solid var(--accent);
-  border-radius: 2px;
   padding: 16px 16px 14px;
   font-family: var(--serif);
   color: var(--ink);

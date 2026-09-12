@@ -16,11 +16,67 @@ import html
 import json
 from datetime import datetime, timezone
 from itertools import groupby
-from urllib.parse import quote
+from urllib.parse import parse_qsl, quote, urlencode, urlsplit, urlunsplit
 
 from analytics import event_script, head_snippet, sponsor_track_attrs
 from config import Newsroom
 from models import Obituary
+
+
+def _utm_source(newsroom: Newsroom) -> str:
+    """'https://www.wausaupilotandreview.com' -> 'wausaupilotandreview'."""
+    host = (urlsplit(newsroom.url).hostname or "").removeprefix("www.")
+    return host.rsplit(".", 1)[0] if "." in host else host
+
+
+def sponsor_href(url: str, newsroom: Newsroom) -> str:
+    """UTM-tag a paid link so click-through reports per placement (the fleet's
+    sponsorship convention). Fails loudly on a malformed sponsor URL."""
+    parts = urlsplit(url)
+    if not parts.scheme or not parts.netloc:
+        raise ValueError(f"sponsor url is not an absolute URL: {url!r}")
+    query = dict(parse_qsl(parts.query))
+    query.update(utm_source=_utm_source(newsroom), utm_medium="page", utm_campaign="obituaries")
+    return urlunsplit(parts._replace(query=urlencode(query)))
+
+
+def _masthead(base_url: str, newsroom: Newsroom, kicker: str) -> str:
+    """WPR's flag: press seal beside the wordmark (one link home), the tagline,
+    then the newspaper thick-over-thin rule. The page's own title always sits
+    below the rule — the masthead is the newsroom's, the title is the tool's."""
+    tagline = (
+        f'\n      <p class="masthead__tagline">{html.escape(newsroom.tagline)}</p>'
+        if newsroom.tagline else ""
+    )
+    return f"""<header class="masthead">
+      <a class="masthead__flag" href="{newsroom.url}" target="_blank" rel="noopener"
+         aria-label="{html.escape(newsroom.name)}">
+        <img class="masthead__seal" src="{base_url}/{newsroom.seal_path}" alt="" width="52" height="52" />
+        <img class="masthead__wordmark" src="{_logo_src(base_url, newsroom)}" alt="{html.escape(newsroom.name)}" />
+      </a>{tagline}
+      <div class="masthead__flag-rule" aria-hidden="true"></div>
+      <p class="kicker">{kicker}</p>
+    </header>"""
+
+
+def _colophon(base_url: str, newsroom: Newsroom) -> str:
+    """Seal + provenance + contact: where a reader checks whether to trust the page."""
+    lines = []
+    if newsroom.provenance:
+        lines.append(f"<p>{html.escape(newsroom.provenance)}</p>")
+    contact = html.escape(newsroom.name)
+    if newsroom.phone:
+        contact += f" &middot; {html.escape(newsroom.phone)}"
+    if newsroom.footer_tagline:
+        contact += f" &mdash; {html.escape(newsroom.footer_tagline)}"
+    lines.append(f"<p>{contact}</p>")
+    body = "\n        ".join(lines)
+    return f"""<footer class="colophon">
+      <img class="colophon__seal" src="{base_url}/{newsroom.seal_path}" alt="" width="44" height="44" loading="lazy" />
+      <div class="colophon__lines">
+        {body}
+      </div>
+    </footer>"""
 
 
 def _rfc822(date_str: str) -> str:
@@ -143,11 +199,18 @@ _SECONDARY_CSS = """
       text-decoration: none; margin-bottom: 24px; }
     .topnav:hover { background: var(--hover); }
     .masthead { text-align: center; margin-bottom: 30px; }
-    .masthead__logo img { height: 34px; mix-blend-mode: multiply; }
-    .masthead__seal { display: block; width: 58px; height: 58px; border-radius: 50%; margin: 12px auto 0; }
-    .kicker { margin: 16px 0 0; font-family: var(--mono); font-size: 11.5px;
+    .masthead__flag { display: inline-flex; align-items: center; gap: 14px; max-width: 100%; text-decoration: none; }
+    .masthead__seal { width: 52px; height: 52px; border-radius: 50%; flex: none; }
+    .masthead__wordmark { height: 34px; width: auto; min-width: 0; max-width: 100%; object-fit: contain; display: block; mix-blend-mode: multiply; }
+    @media (max-width: 480px) { .masthead__flag { gap: 10px; } .masthead__seal { width: 44px; height: 44px; }
+      .masthead__wordmark { height: 27px; } .masthead__tagline { letter-spacing: 0.2em; } }
+    .masthead__tagline { margin: 10px 0 0; font-family: var(--mono); font-size: 10.5px;
+      letter-spacing: 0.28em; text-transform: uppercase; color: var(--muted); }
+    /* The newspaper flag rule: thick over thin, in ink. */
+    .masthead__flag-rule { height: 2px; border-top: 3px solid var(--ink); border-bottom: 1px solid var(--ink);
+      margin: 16px 0 18px; }
+    .kicker { margin: 0; font-family: var(--mono); font-size: 11.5px;
       letter-spacing: 0.26em; text-transform: uppercase; color: var(--accent); }
-    .masthead__rule { height: 0; border: 0; border-top: 3px double var(--rule); margin: 22px auto 0; }
     h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(1.9rem, 5vw, 2.6rem);
       line-height: 1.1; margin: 0; }
     .count { font-family: var(--mono); font-size: 13px; color: var(--muted); margin: 10px 0 0; }
@@ -183,6 +246,14 @@ _SECONDARY_CSS = """
     .foot-nav a { color: var(--accent); text-decoration: none; }
     .foot-nav a:hover { text-decoration: underline; }
     .foot-nav__dot { color: var(--rule); }
+    .colophon { display: flex; align-items: flex-start; gap: 14px; margin-top: 40px;
+      padding-top: 18px; border-top: 1px solid var(--rule); }
+    .colophon__seal { flex: none; width: 44px; height: 44px; border-radius: 50%; }
+    .colophon__lines p { margin: 0; font-family: var(--mono); font-size: 11px; line-height: 1.6;
+      letter-spacing: 0.03em; color: var(--muted); }
+    /* Browser surfaces carry the palette too: selection, caret, native controls. */
+    ::selection { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+    :root { caret-color: var(--accent); accent-color: var(--accent); }
     a:focus-visible, button:focus-visible, [role="button"]:focus-visible {
       outline: 2px solid var(--accent); outline-offset: 2px; }
     @media print {
@@ -241,16 +312,7 @@ def render_home_page(
 <body>
   <main class="wrap">
     <a class="topnav" href="{base_url}/">&larr; All obituaries</a>
-    <header class="masthead">
-      <a class="masthead__logo" href="{newsroom.url}"
-         target="_blank" rel="noopener">
-        <img src="{_logo_src(base_url, newsroom)}" alt="{html.escape(newsroom.name)}" />
-      </a>
-      <img class="masthead__seal" src="{base_url}/{newsroom.seal_path}" alt=""
-           width="46" height="46" />
-      <p class="kicker">Funeral Home</p>
-      <hr class="masthead__rule" />
-    </header>
+    {_masthead(base_url, newsroom, 'Funeral Home')}
     <h1>{name}</h1>
     <p class="count">{len(records)} obituaries on {html.escape(newsroom.name)}</p>
     {website}
@@ -258,12 +320,13 @@ def render_home_page(
     <ul class="list">
       {links}
     </ul>
-    {_sponsor_section(sponsor, base_url, newsroom.analytics)}
+    {_sponsor_section(sponsor, base_url, newsroom)}
     <nav class="foot-nav" aria-label="More obituaries">
       <a href="{base_url}/">&larr; All obituaries</a>
       <span class="foot-nav__dot" aria-hidden="true">&middot;</span>
       <a href="{base_url}/archive.html">Browse the full index &rarr;</a>
     </nav>
+    {_colophon(base_url, newsroom)}
   </main>
   {event_script(newsroom.analytics)}
 </body>
@@ -365,22 +428,14 @@ def render_archive(
 <body>
   <main class="wrap">
     <a class="topnav" href="{base_url}/">&larr; Search obituaries</a>
-    <header class="masthead">
-      <a class="masthead__logo" href="{newsroom.url}"
-         target="_blank" rel="noopener">
-        <img src="{_logo_src(base_url, newsroom)}" alt="{html.escape(newsroom.name)}" />
-      </a>
-      <img class="masthead__seal" src="{base_url}/{newsroom.seal_path}" alt=""
-           width="46" height="46" />
-      <p class="kicker">Obituary Index</p>
-      <hr class="masthead__rule" />
-    </header>
+    {_masthead(base_url, newsroom, 'Obituary Index')}
     <h1>All Obituaries</h1>
     <p class="count">{len(obituaries)} obituaries published for {html.escape(newsroom.coverage_area)}</p>
     <div class="rule"></div>
     {body}
-    {_sponsor_section(sponsor, base_url, newsroom.analytics)}
+    {_sponsor_section(sponsor, base_url, newsroom)}
     <a class="back" href="{base_url}/">&larr; Search obituaries</a>
+    {_colophon(base_url, newsroom)}
   </main>
   {event_script(newsroom.analytics)}
 </body>
@@ -440,8 +495,9 @@ def _structured_data(
     return _json_ld(data)
 
 
-def _sponsor_lockup(s: dict, base_url: str, analytics: dict) -> str:
+def _sponsor_lockup(s: dict, base_url: str, newsroom: Newsroom) -> str:
     """A single sponsor's logo (or name), linked to its site when present."""
+    analytics = newsroom.analytics
     name = html.escape(s["name"])
     if s.get("logo"):
         inner = f'<img src="{base_url}/{html.escape(s["logo"])}" alt="{name}" />'
@@ -449,16 +505,16 @@ def _sponsor_lockup(s: dict, base_url: str, analytics: dict) -> str:
         inner = f'<span class="sponsor-card__name">{name}</span>'
     if s.get("url"):
         return (
-            f'<a class="sponsor-card__logo" href="{html.escape(s["url"])}" '
-            f'target="_blank" rel="noopener"{sponsor_track_attrs(analytics, s["name"])}>{inner}</a>'
+            f'<a class="sponsor-card__logo" href="{html.escape(sponsor_href(s["url"], newsroom))}" '
+            f'target="_blank" rel="noopener sponsored"{sponsor_track_attrs(analytics, s["name"])}>{inner}</a>'
         )
     return f'<span class="sponsor-card__logo">{inner}</span>'
 
 
-def _sponsor_section(sponsor: dict, base_url: str, analytics: dict) -> str:
+def _sponsor_section(sponsor: dict, base_url: str, newsroom: Newsroom) -> str:
     """Showcase the anchor sponsors: one logo lockup per sponsor."""
     lockups = [
-        _sponsor_lockup(s, base_url, analytics)
+        _sponsor_lockup(s, base_url, newsroom)
         for s in (sponsor.get("sponsors") or [])
         if s.get("name")
     ]
@@ -575,7 +631,7 @@ def render_person_page(
         funeral_line = f'<p class="arrangements">Arrangements by {home}.</p>'
     else:
         funeral_line = ""
-    sponsor_section = _sponsor_section(sponsor, base_url, newsroom.analytics)
+    sponsor_section = _sponsor_section(sponsor, base_url, newsroom)
     share_section = _share_section(ob.name, page_url, newsroom.name)
     related_section = _related_section(related or [], base_url)
     # A bare "Name." summary (a hand-entered obit with no summary) makes a thin
@@ -639,15 +695,19 @@ def render_person_page(
     }}
     .topnav:hover {{ background: var(--hover); }}
     .masthead {{ text-align: center; margin-bottom: 30px; }}
-    .masthead__logo img {{ height: 34px; width: auto; mix-blend-mode: multiply; }}
-    .masthead__seal {{ display: block; width: 58px; height: 58px; border-radius: 50%; margin: 12px auto 0; }}
+    .masthead__flag {{ display: inline-flex; align-items: center; gap: 14px; max-width: 100%; text-decoration: none; }}
+    .masthead__seal {{ width: 52px; height: 52px; border-radius: 50%; flex: none; }}
+    .masthead__wordmark {{ height: 34px; width: auto; min-width: 0; max-width: 100%; object-fit: contain; display: block; mix-blend-mode: multiply; }}
+    @media (max-width: 480px) {{ .masthead__flag {{ gap: 10px; }} .masthead__seal {{ width: 44px; height: 44px; }}
+      .masthead__wordmark {{ height: 27px; }} .masthead__tagline {{ letter-spacing: 0.2em; }} }}
+    .masthead__tagline {{ margin: 10px 0 0; font-family: var(--mono); font-size: 10.5px;
+      letter-spacing: 0.28em; text-transform: uppercase; color: var(--muted); }}
+    /* The newspaper flag rule: thick over thin, in ink. */
+    .masthead__flag-rule {{ height: 2px; border-top: 3px solid var(--ink); border-bottom: 1px solid var(--ink);
+      margin: 16px 0 18px; }}
     .kicker {{
-      margin: 16px 0 0; font-family: var(--mono); font-size: 11.5px;
+      margin: 0; font-family: var(--mono); font-size: 11.5px;
       letter-spacing: 0.26em; text-transform: uppercase; color: var(--accent);
-    }}
-    .masthead__rule {{
-      height: 0; border: 0; border-top: 3px double var(--rule);
-      margin: 22px auto 0;
     }}
     h1 {{
       font-family: var(--serif); font-weight: 700;
@@ -670,8 +730,7 @@ def render_person_page(
     }}
     .sponsor-card {{
       clear: both; text-align: center; background: var(--paper-2);
-      border: 1px solid var(--rule); border-top: 3px solid var(--accent);
-      border-radius: 2px; padding: 30px 28px 32px; margin: 44px 0 0;
+      border: 1px solid var(--rule); border-top: 3px solid var(--accent); padding: 30px 28px 32px; margin: 44px 0 0;
     }}
     .sponsor-card__label {{
       margin: 0 0 18px; font-family: var(--mono); font-size: 11px;
@@ -736,6 +795,14 @@ def render_person_page(
     .foot-nav a {{ color: var(--accent); text-decoration: none; }}
     .foot-nav a:hover {{ text-decoration: underline; }}
     .foot-nav__dot {{ color: var(--rule); }}
+    .colophon {{ display: flex; align-items: flex-start; gap: 14px; margin-top: 40px;
+      padding-top: 18px; border-top: 1px solid var(--rule); }}
+    .colophon__seal {{ flex: none; width: 44px; height: 44px; border-radius: 50%; }}
+    .colophon__lines p {{ margin: 0; font-family: var(--mono); font-size: 11px; line-height: 1.6;
+      letter-spacing: 0.03em; color: var(--muted); }}
+    /* Browser surfaces carry the palette too: selection, caret, native controls. */
+    ::selection {{ background: color-mix(in srgb, var(--accent) 18%, transparent); }}
+    :root {{ caret-color: var(--accent); accent-color: var(--accent); }}
     a:focus-visible, button:focus-visible, [role="button"]:focus-visible {{
       outline: 2px solid var(--accent); outline-offset: 2px; }}
     @media (max-width: 480px) {{
@@ -750,7 +817,7 @@ def render_person_page(
       body {{ background: #fff; color: #000; font-size: 11.5pt; }}
       .wrap {{ max-width: 100%; padding: 0; }}
       .masthead {{ margin-bottom: 22px; }}
-      .masthead__rule {{ border-top-color: #999; }}
+      .masthead__flag-rule {{ border-color: #999; }}
       .kicker {{ color: #333; }}
       h1 {{ text-align: center; font-size: 26pt; }}
       .lifespan {{ text-align: center; color: #333; }}
@@ -770,16 +837,7 @@ def render_person_page(
 <body>
   <main class="wrap">
     <a class="topnav" href="{base_url}/">&larr; All obituaries</a>
-    <header class="masthead">
-      <a class="masthead__logo" href="{newsroom.url}"
-         target="_blank" rel="noopener">
-        <img src="{_logo_src(base_url, newsroom)}" alt="{html.escape(newsroom.name)}" />
-      </a>
-      <img class="masthead__seal" src="{base_url}/{newsroom.seal_path}" alt=""
-           width="46" height="46" />
-      <p class="kicker">In Memoriam</p>
-      <hr class="masthead__rule" />
-    </header>
+    {_masthead(base_url, newsroom, 'In Memoriam')}
     <h1>{html.escape(ob.name)}</h1>
     {f'<p class="lifespan">{lifespan}</p>' if lifespan else ''}
     <div class="rule"></div>
@@ -796,6 +854,7 @@ def render_person_page(
       <span class="foot-nav__dot" aria-hidden="true">&middot;</span>
       <a href="{base_url}/archive.html">Browse the full index &rarr;</a>
     </nav>
+    {_colophon(base_url, newsroom)}
   </main>
   <div class="lightbox" id="lightbox" hidden tabindex="-1" role="dialog" aria-modal="true" aria-label="Portrait, enlarged. Press Escape to close."><img class="lightbox__img" alt="" /></div>
   <script>

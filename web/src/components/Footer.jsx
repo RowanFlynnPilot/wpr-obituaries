@@ -1,8 +1,9 @@
 import config from "../config.js";
 import { trackEvent } from "../lib/analytics.js";
+import { sponsorHref } from "../lib/sponsor.js";
 
 const BASE = import.meta.env.BASE_URL;
-const { identity, copy } = config;
+const { identity, branding, copy } = config;
 
 export default function Footer({ sponsor }) {
   const sponsors = sponsor?.sponsors || [];
@@ -20,9 +21,9 @@ export default function Footer({ sponsor }) {
                 <a
                   key={s.name}
                   className="sponsor-card__logo"
-                  href={s.url}
+                  href={sponsorHref(s.url)}
                   target="_blank"
-                  rel="noopener"
+                  rel="noopener sponsored"
                   onClick={() => trackEvent("Sponsor click", { label: s.name })}
                 >
                   {img}
@@ -43,9 +44,25 @@ export default function Footer({ sponsor }) {
           Browse the full obituary index →
         </a>
       </p>
-      <p className="footer__fineprint">
-        {identity.name} — {copy.footerTagline}
-      </p>
+      {/* Colophon: where a reader checks whether to trust the page — provenance,
+          then the newsroom's name and phone. */}
+      <div className="footer__colophon">
+        <img
+          className="footer__seal"
+          src={`${BASE}${branding.sealPath}`}
+          alt=""
+          width="44"
+          height="44"
+          loading="lazy"
+        />
+        <div className="footer__lines">
+          {copy.provenance && <p>{copy.provenance}</p>}
+          <p>
+            {identity.name}
+            {identity.phone ? ` · ${identity.phone}` : ""} — {copy.footerTagline}
+          </p>
+        </div>
+      </div>
     </footer>
   );
 }

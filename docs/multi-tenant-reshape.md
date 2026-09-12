@@ -22,9 +22,9 @@ at build time). Secrets never live here (API keys, proxy URL stay in env;
 the real serving location). A missing required key raises immediately.
 
 ```
-identity   { name, shortName, url, coverageArea, submissionsEmail }
+identity   { name, shortName, url, tagline?, phone?, coverageArea, submissionsEmail }
 branding   { logoUrl, logoPath?, sealPath, accent, paper, fontsUrl, serif, nameplate, mono }
-copy       { lede, footerTagline }          # widget editorial copy
+copy       { lede, footerTagline, provenance? }   # editorial copy (widget + static pages)
 analytics  { provider, domain, site, headHtml }   # cookieless; empty provider = off
 adapters   { wordpress_scrape{enabled,apiBase,categorySlug,windowDays},
              funeral_home_scrape{enabled,windowDays},

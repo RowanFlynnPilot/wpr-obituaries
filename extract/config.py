@@ -34,6 +34,10 @@ class Newsroom:
     url: str
     coverage_area: str
     submissions_email: str
+    tagline: str  # optional — WPR's is "Where Locals Look First For News"; "" hides it
+    phone: str  # optional newsroom phone for the colophon; "" hides it
+    provenance: str  # optional one-line "where these obituaries come from" for the colophon
+    footer_tagline: str  # optional; "" hides it
     logo_url: str
     logo_path: str  # optional vendored logo (repo-relative); falls back to logo_url
     seal_path: str
@@ -74,12 +78,17 @@ def load_newsroom(path: Path = CONFIG_FILE) -> Newsroom:
     data = json.loads(path.read_text(encoding="utf-8"))
     identity = data.get("identity") or {}
     branding = data.get("branding") or {}
+    copy = data.get("copy") or {}
     return Newsroom(
         name=_require(identity, "name", "identity"),
         short_name=_require(identity, "shortName", "identity"),
         url=_require(identity, "url", "identity"),
         coverage_area=_require(identity, "coverageArea", "identity"),
         submissions_email=_require(identity, "submissionsEmail", "identity"),
+        tagline=(identity.get("tagline") or "").strip(),
+        phone=(identity.get("phone") or "").strip(),
+        provenance=(copy.get("provenance") or "").strip(),
+        footer_tagline=(copy.get("footerTagline") or "").strip(),
         logo_url=_require(branding, "logoUrl", "branding"),
         logo_path=(branding.get("logoPath") or "").strip(),
         seal_path=_require(branding, "sealPath", "branding"),

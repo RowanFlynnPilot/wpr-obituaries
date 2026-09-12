@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import config from "../config.js";
 import { trackEvent } from "../lib/analytics.js";
 import { initials, lifespan, photoSrc } from "../lib/format.js";
+import { sponsorHref } from "../lib/sponsor.js";
 
 const BASE = import.meta.env.BASE_URL;
 const { identity } = config;
@@ -195,9 +196,9 @@ function SponsorLogo({ s }) {
   const img = <img src={`${BASE}${s.logo}`} alt={s.name} loading="lazy" />;
   return s.url ? (
     <a
-      href={s.url}
+      href={sponsorHref(s.url)}
       target="_blank"
-      rel="noopener"
+      rel="noopener sponsored"
       onClick={() => trackEvent("Sponsor click", { label: s.name })}
     >
       {img}

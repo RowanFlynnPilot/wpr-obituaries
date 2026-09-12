@@ -1,5 +1,6 @@
 import config from "../config.js";
 import { trackEvent } from "../lib/analytics.js";
+import { sponsorHref } from "../lib/sponsor.js";
 
 const BASE = import.meta.env.BASE_URL;
 const { identity, branding, copy } = config;
@@ -8,25 +9,31 @@ export default function Masthead({ sponsor }) {
   const sponsors = sponsor?.sponsors || [];
   return (
     <header className="masthead">
+      {/* WPR's flag: press seal beside the wordmark, one link home, the tagline,
+          then the newspaper thick-over-thin rule. The register's own title sits
+          below the rule — the masthead is the newsroom's, the title is the tool's. */}
       <a
-        className="masthead__logo"
+        className="masthead__flag"
         href={identity.url}
         target="_blank"
         rel="noopener"
+        aria-label={identity.name}
       >
         <img
+          className="masthead__seal"
+          src={`${BASE}${branding.sealPath}`}
+          alt=""
+          width="52"
+          height="52"
+        />
+        <img
+          className="masthead__wordmark"
           src={branding.logoPath ? `${BASE}${branding.logoPath}` : branding.logoUrl}
           alt={identity.name}
         />
       </a>
-      <img
-        className="masthead__seal"
-        src={`${BASE}${branding.sealPath}`}
-        alt=""
-        width="58"
-        height="58"
-        loading="lazy"
-      />
+      {identity.tagline && <p className="masthead__tagline">{identity.tagline}</p>}
+      <div className="masthead__flag-rule" aria-hidden="true" />
       <p className="masthead__eyebrow">In Memoriam</p>
       <h1 className="masthead__title">Obituaries</h1>
       <p className="masthead__lede">{copy.lede}</p>
@@ -61,9 +68,9 @@ function SponsorLogo({ s }) {
   return s.url ? (
     <a
       className="masthead__sponsor-logo"
-      href={s.url}
+      href={sponsorHref(s.url)}
       target="_blank"
-      rel="noopener"
+      rel="noopener sponsored"
       onClick={() => trackEvent("Sponsor click", { label: s.name })}
     >
       {img}

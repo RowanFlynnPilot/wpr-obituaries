@@ -68,6 +68,8 @@ def make_config(a: dict) -> dict:
         "copy": {
             "lede": a.get("lede") or f"Remembering the lives of {coverage}.",
             "footerTagline": a.get("footerTagline") or "local journalism.",
+            "provenance": a.get("provenance")
+            or f"Compiled from obituaries published by {a['name']} and shared by the funeral homes named with each notice.",
         },
         "analytics": {
             "provider": a.get("analytics_provider", ""),

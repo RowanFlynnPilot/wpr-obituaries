@@ -26,6 +26,16 @@
   box-sizing: border-box;
 }
 
+/* Browser surfaces carry the palette too: selection, caret, native controls. */
+::selection {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+:root {
+  caret-color: var(--accent);
+  accent-color: var(--accent);
+}
+
 /* Screen-reader-only text (the loading announcement — the skeleton is aria-hidden). */
 .sr-only {
   position: absolute;
@@ -74,25 +84,49 @@ body {
   text-align: center;
 }
 
-.masthead__logo {
-  display: inline-block;
+/* The flag: seal beside the wordmark, one link home. */
+.masthead__flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 100%;
+  text-decoration: none;
 }
 
-.masthead__logo img {
+.masthead__seal {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+}
+
+.masthead__wordmark {
+  display: block;
   height: 34px;
   width: auto;
-  margin-bottom: 14px;
+  min-width: 0;
+  max-width: 100%;
+  object-fit: contain;
   /* The WPR wordmark ships on a white plate; multiply drops it onto the
      newsprint paper so the box disappears and the black mark stays black. */
   mix-blend-mode: multiply;
 }
 
-.masthead__seal {
-  display: block;
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  margin: 0 auto 18px;
+.masthead__tagline {
+  margin: 10px 0 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* The newspaper flag rule: thick over thin, in ink. */
+.masthead__flag-rule {
+  height: 2px;
+  border-top: 3px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  margin: 16px 0 22px;
 }
 
 .masthead__eyebrow {
@@ -143,11 +177,11 @@ body {
   text-decoration-color: var(--accent);
 }
 
-/* Double newspaper rule under the masthead */
+/* Hairline closing the masthead block; the flag rule above carries the weight. */
 .masthead__rule {
   height: 0;
   border: 0;
-  border-top: 3px double var(--rule);
+  border-top: 1px solid var(--rule);
   margin: 26px auto 0;
   max-width: 100%;
 }
@@ -188,6 +222,13 @@ body {
   opacity: 0.78;
 }
 
+@media (max-width: 480px) {
+  .masthead__flag { gap: 10px; }
+  .masthead__seal { width: 44px; height: 44px; }
+  .masthead__wordmark { height: 27px; }
+  .masthead__tagline { letter-spacing: 0.2em; }
+}
+
 /* ---------- Featured carousel ---------- */
 .featured {
   margin: 34px 0 8px;
@@ -216,7 +257,6 @@ body {
   background: var(--paper-2);
   border: 1px solid var(--rule);
   border-top: 3px solid var(--accent);
-  border-radius: 2px;
   padding: 22px 24px;
   animation: featured-fade 0.5s ease;
   transition: background-color 0.15s ease;
@@ -770,7 +810,6 @@ body {
   background: var(--paper-2);
   border: 1px solid var(--rule);
   border-top: 3px solid var(--accent);
-  border-radius: 2px;
   padding: 30px 28px 32px;
   margin-bottom: 40px;
 }
@@ -827,12 +866,27 @@ body {
   text-decoration: underline;
 }
 
-.footer__fineprint {
-  margin: 10px 0 0;
+.footer__colophon {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.footer__seal {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+
+.footer__lines p {
+  margin: 0;
   font-family: var(--mono);
   font-size: 11px;
-  letter-spacing: 0.04em;
-  color: var(--faint);
+  line-height: 1.6;
+  letter-spacing: 0.03em;
+  color: var(--muted);
 }
 
 /* ---------- Loading skeleton ---------- */
@@ -992,7 +1046,6 @@ body {
   background: var(--paper-2);
   border: 1px solid var(--rule);
   border-top: 3px solid var(--accent);
-  border-radius: 2px;
   padding: 24px 22px 26px;
 }
 .submit__intro {

@@ -248,6 +248,16 @@ platforms' mechanics, and the cross-source dedupe/overlap note are in
   datelines and metadata — on a warm newsprint palette with an oxblood accent
   (`#7c2e36`). Keep the two surfaces visually in sync. `--render-only` reaches
   every existing page after a brand/template change (no API needed).
+  The WPR fleet's brand invariants (see the `wpr-brand` skill) are applied on
+  every surface: the **flag** (press seal beside the wordmark, one link home,
+  the tagline beneath) closed by a **thick-over-thin rule in ink** with the
+  tool's own title always *below* it; a **colophon** (seal + provenance line +
+  `name · phone — tagline`) at the foot of the widget and every static page;
+  and paid sponsor links carrying `rel="noopener sponsored"` plus UTM tags
+  (`sponsor_href` in Python, `lib/sponsor.js` in the widget, same params).
+  Accent-topped cards are square-cornered (the house convention marks cards on
+  the top edge only). The tagline, phone, and provenance are optional config
+  keys (`identity.tagline`, `identity.phone`, `copy.provenance`); absent = hidden.
 
 ## v2 (deferred, by decision)
 

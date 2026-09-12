@@ -3,6 +3,8 @@
     "name": "Wausau Pilot & Review",
     "shortName": "WPR",
     "url": "https://wausaupilotandreview.com",
+    "tagline": "Where Locals Look First For News",
+    "phone": "715-301-5539",
     "coverageArea": "Wausau and Marathon County",
     "submissionsEmail": "darren@wausaupilotandreview.com"
   },
@@ -19,7 +21,8 @@
   },
   "copy": {
     "lede": "Remembering the lives of Wausau and Marathon County residents, published free of charge each Monday, Wednesday and Friday.",
-    "footerTagline": "nonprofit local journalism for north central Wisconsin."
+    "footerTagline": "nonprofit local journalism for north central Wisconsin.",
+    "provenance": "Compiled from obituaries published by Wausau Pilot & Review and shared by the area funeral homes named with each notice."
   },
   "analytics": {
     "provider": "",
