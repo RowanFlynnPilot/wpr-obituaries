@@ -32,7 +32,7 @@ export default function SearchBar({ value, onChange, count, mentions = 0, scope 
           id="obit-search"
           className="search__input"
           type="search"
-          placeholder="First and last name, a town, or a funeral home"
+          placeholder="Name, town or funeral home"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={onKeyDown}
@@ -41,7 +41,8 @@ export default function SearchBar({ value, onChange, count, mentions = 0, scope 
           enterKeyHint="search"
         />
       </div>
-      <p className="search__count" role="status" aria-live="polite" aria-atomic="true">
+      {/* role="status" already implies a polite, atomic live region. */}
+      <p className="search__count" role="status">
         {names}
         {extra}
         {scoped}

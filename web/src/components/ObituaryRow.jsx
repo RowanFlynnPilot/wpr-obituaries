@@ -1,6 +1,6 @@
 import { initials, lifespan, photoSrc } from "../lib/format.js";
 
-export default function ObituaryRow({ ob }) {
+export default function ObituaryRow({ ob, match = null }) {
   const span = lifespan(ob);
   const href = `${import.meta.env.BASE_URL}o/${ob.slug}.html`;
   // The scannable facts — lifespan and town — sit outside the sentence, on
@@ -27,7 +27,18 @@ export default function ObituaryRow({ ob }) {
         <span className="entry__text">
           <span className="entry__name">{ob.name}</span>
           {facts && <span className="entry__span">{facts}</span>}
-          {ob.summary && <span className="entry__summary">{ob.summary}</span>}
+          {/* A row in the mentions tier shows the phrase that matched instead
+              of its own summary — a row with no visible reason reads as a
+              wrong answer on a memorial page. */}
+          {match ? (
+            <span className="entry__match">
+              {match.before}
+              <mark className="entry__mark">{match.hit}</mark>
+              {match.after}
+            </span>
+          ) : (
+            ob.summary && <span className="entry__summary">{ob.summary}</span>
+          )}
           {(ob.homeName || ob.funeralHome) && (
             <span className="entry__home">{ob.homeName || ob.funeralHome}</span>
           )}

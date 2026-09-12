@@ -6,22 +6,29 @@ import { dateLabel, eventDate, hasDeathDate } from "../lib/format.js";
 // height and how many portraits load at once (inside the auto-height iframe
 // every mounted row counts as "in viewport", so lazy loading can't help).
 const PAGE_SIZE = 60;
+// The second tier is evidence, not a result set: a handful, then the rest on
+// request.
+const MENTION_PAGE = 10;
 
 export default function Register({
   obituaries,
   mentions = [],
+  homes = [],
   query,
   letter = null,
+  featured = null,
   onClear,
   onBrowseLetters,
   onSubmit,
+  onHome,
 }) {
   // App keys this component on the search/filter identity, so a new result set
   // mounts fresh at the first page — no frame of the old page size, no stale
   // height posted to the embedding page.
   const [limit, setLimit] = useState(PAGE_SIZE);
+  const [allMentions, setAllMentions] = useState(false);
 
-  if (obituaries.length === 0 && mentions.length === 0) {
+  if (obituaries.length === 0 && mentions.length === 0 && homes.length === 0) {
     return (
       <div className="register__empty">
         <p className="register__empty-text">
@@ -77,17 +84,25 @@ export default function Register({
     }
   }
 
+  const shownMentions = allMentions ? mentions : mentions.slice(0, MENTION_PAGE);
+  const restMentions = mentions.length - shownMentions.length;
+
   return (
     <div className="register">
-      {groups.map((g) => (
-        <section className="register__group" key={g.key}>
-          <h2 className="register__date">{g.label}</h2>
-          <ol className="register__list">
-            {g.items.map((ob) => (
-              <ObituaryRow key={ob.slug} ob={ob} />
-            ))}
-          </ol>
-        </section>
+      {groups.map((g, n) => (
+        <div key={g.key}>
+          <section className="register__group">
+            <h2 className="register__date">{g.label}</h2>
+            <ol className="register__list">
+              {g.items.map((ob) => (
+                <ObituaryRow key={ob.slug} ob={ob} />
+              ))}
+            </ol>
+          </section>
+          {/* The featured strip follows the newest day's names rather than
+              standing between the search and its results. */}
+          {n === 0 && featured}
+        </div>
       ))}
       {/* No live region here: the search bar's count line is the one announcer
           for a new result set, so a keystroke never triggers two readouts. */}
@@ -101,16 +116,44 @@ export default function Register({
           <span className="register__more-count">{remaining} more</span>
         </button>
       )}
+      {remaining === 0 && homes.length > 0 && (
+        <div className="register__elsewhere">
+          {homes.map((h) => (
+            <button
+              key={h.name}
+              type="button"
+              className="register__elsewhere-link"
+              onClick={() => onHome(h.name)}
+            >
+              {h.count} {h.count === 1 ? "notice" : "notices"} arranged by {h.name} →
+            </button>
+          ))}
+        </div>
+      )}
       {remaining === 0 && mentions.length > 0 && (
         <section className="register__group register__group--mentions">
           <h2 className="register__date">
-            Mentioned in {mentions.length === 1 ? "another notice" : `${mentions.length} other notices`}
+            {/* "Also" only when there were names to be also to. */}
+            {obituaries.length > 0 ? "Also named in " : "Named in "}
+            {mentions.length === 1
+              ? `one ${obituaries.length > 0 ? "other " : ""}notice`
+              : `${mentions.length} ${obituaries.length > 0 ? "other " : ""}notices`}
           </h2>
           <ol className="register__list">
-            {mentions.slice(0, PAGE_SIZE).map((ob) => (
-              <ObituaryRow key={ob.slug} ob={ob} />
+            {shownMentions.map((m) => (
+              <ObituaryRow key={m.ob.slug} ob={m.ob} match={m.match} />
             ))}
           </ol>
+          {restMentions > 0 && (
+            <button
+              type="button"
+              className="register__more"
+              onClick={() => setAllMentions(true)}
+            >
+              Show the rest
+              <span className="register__more-count">{restMentions} more</span>
+            </button>
+          )}
         </section>
       )}
     </div>

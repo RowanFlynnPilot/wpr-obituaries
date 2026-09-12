@@ -213,9 +213,6 @@ body {
   .masthead__wordmark { height: 27px; }
   .masthead__tagline { letter-spacing: 0.2em; }
   .masthead__sponsor-logo img { height: 24px; }
-  /* The strip's job on a phone — a face within reach — is done by the mini
-     widget in the article; here it only pushed the first name off the screen. */
-  .featured { display: none; }
 }
 
 /* ---------- Featured carousel ---------- */
@@ -505,7 +502,6 @@ body {
   align-items: flex-start;
   gap: 10px;
   text-align: left;
-  text-align: left;
   font-family: var(--mono);
   font-size: 12.5px;
   letter-spacing: 0.04em;
@@ -788,6 +784,7 @@ body {
 .browse__letter:focus-visible,
 .register__more:focus-visible,
 .register__action:focus-visible,
+.register__elsewhere-link:focus-visible,
 .browse__toggle:focus-visible,
 .browse__more:focus-visible,
 .featured__pause:focus-visible,
@@ -866,6 +863,24 @@ body {
   color: var(--ink);
 }
 
+/* Why this row is in the second tier: the phrase around the hit, in the
+   typewriter voice the register uses for facts, with the matched word washed
+   rather than highlighted — a memorial page does not need a marker pen. */
+.entry__match {
+  margin-top: 3px;
+  max-width: 65ch;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.entry__mark {
+  background: var(--hover);
+  color: var(--ink);
+  padding: 1px 2px;
+}
+
 .entry__home {
   margin-top: 5px;
   font-family: var(--mono);
@@ -916,6 +931,37 @@ body {
 .register__action:hover {
   background: var(--hover);
   border-color: var(--muted);
+}
+
+/* A funeral home's own name is not a person. One line into that home's
+   notices, set apart from the register by a rule. */
+.register__elsewhere {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 30px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+}
+
+.register__elsewhere-link {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  padding: 6px 0;
+  min-height: 24px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.register__elsewhere-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .register__group--mentions {
@@ -1118,10 +1164,18 @@ body {
 
 /* ---------- States ---------- */
 .page__error {
-  margin: 48px 0;
-  font-family: var(--mono);
-  font-size: 13px;
-  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 48px 0 56px;
+}
+
+.page__error-text {
+  margin: 0;
+  max-width: 50ch;
+  font-size: 1.05rem;
+  color: var(--ink);
 }
 
 @media (max-width: 480px) {
@@ -1298,5 +1352,18 @@ body {
   .search__input {
     font-size: 1.05rem;
     padding: 14px 14px 14px 44px;
+  }
+  /* Thumb targets: the letters and chips are the densest controls on the
+     surface, and a phone is where they are tapped. */
+  .browse__letter {
+    width: 32px;
+    height: 32px;
+  }
+  .browse__chip {
+    min-height: 36px;
+    padding: 8px 11px;
+  }
+  .browse__select select {
+    min-height: 36px;
   }
 }

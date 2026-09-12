@@ -5,6 +5,22 @@ const BASE = import.meta.env.BASE_URL;
 const DAYS = 7; // draw from the past week
 const MAX = 5; // this week's faces, newest first — a handful, not a gallery
 const INTERVAL = 6500; // gentle, dignified cadence
+const PHONE = "(max-width: 480px)";
+const REDUCED = "(prefers-reduced-motion: reduce)";
+
+function useMediaQuery(query) {
+  const [matches, setMatches] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(query).matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const onChange = (e) => setMatches(e.matches);
+    setMatches(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, [query]);
+  return matches;
+}
 
 function withinDays(sourceDate, days) {
   const [y, m, d] = sourceDate.split("-").map(Number);
@@ -18,9 +34,12 @@ function withinDays(sourceDate, days) {
 // `obituaries` arrives newest death first (App sorts once), so the pool reads
 // as "this week" and a returning visitor sees the same set — not a shuffle.
 // On a quiet stretch (nothing photographed in the window) it falls back to the
-// most recent portraits so the strip never vanishes. Hidden on phones (CSS):
-// there the first name has to land within a screen of the search.
+// most recent portraits so the strip never vanishes. The register places it
+// after the newest day's names; on phones it does not render at all, so
+// nothing auto-advances or announces behind a hidden section.
 export default function FeaturedCarousel({ obituaries }) {
+  const phone = useMediaQuery(PHONE);
+  const reduced = useMediaQuery(REDUCED);
   const featured = useMemo(() => {
     const photographed = obituaries.filter((o) => o.photoUrl);
     const recent = photographed.filter((o) => withinDays(o.sourceDate, DAYS));
@@ -34,14 +53,11 @@ export default function FeaturedCarousel({ obituaries }) {
   // visible control is the pause a phone reader has (WCAG 2.2.2).
   const [stopped, setStopped] = useState(false);
   const dotsRef = useRef(null);
-  const reduced =
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // Reset if the underlying set changes (e.g. fresh data load).
   useEffect(() => setIndex(0), [featured.length]);
 
-  const playing = featured.length > 1 && !hovered && !stopped && !reduced;
+  const playing = featured.length > 1 && !hovered && !stopped && !reduced && !phone;
   useEffect(() => {
     if (!playing) return;
     const t = setInterval(
@@ -51,7 +67,7 @@ export default function FeaturedCarousel({ obituaries }) {
     return () => clearInterval(t);
   }, [playing, featured.length]);
 
-  if (featured.length === 0) return null;
+  if (phone || featured.length === 0) return null;
 
   const i = index % featured.length;
   const ob = featured[i];
@@ -89,7 +105,7 @@ export default function FeaturedCarousel({ obituaries }) {
       onFocusCapture={() => setHovered(true)}
       onBlurCapture={() => setHovered(false)}
     >
-      <p className="featured__kicker">Recently Remembered</p>
+      <h2 className="featured__kicker">Recently Remembered</h2>
 
       <div className="featured__stage">
         {featured.length > 1 && (
@@ -134,9 +150,11 @@ export default function FeaturedCarousel({ obituaries }) {
         )}
       </div>
 
-      {/* Screen readers hear the change without the card itself being live. */}
+      {/* Screen readers hear a change the reader asked for. While the strip is
+          advancing on its own the region stays empty: someone reading the
+          register must not be interrupted by a new name every 6.5 seconds. */}
       <p className="sr-only" aria-live="polite" aria-atomic="true">
-        Now showing {ob.name}, {i + 1} of {featured.length}
+        {playing ? "" : `Now showing ${ob.name}, ${i + 1} of ${featured.length}`}
       </p>
 
       {featured.length > 1 && (
@@ -164,7 +182,7 @@ export default function FeaturedCarousel({ obituaries }) {
             <button
               type="button"
               className="featured__pause"
-              aria-pressed={stopped}
+              aria-label={stopped ? "Resume auto-advance" : "Pause auto-advance"}
               onClick={() => setStopped((s) => !s)}
             >
               {stopped ? "Play" : "Pause"}

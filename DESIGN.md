@@ -353,13 +353,18 @@ oxblood outline (offset 2px) on keyboard focus.
   three-line excerpt / "Read the full obituary →" in oxblood mono; fades in
   over 0.5s when it changes; hover to hover-wash with the name turning oxblood.
   The strip holds **five** of this week's portraits, newest death first (the
-  same set on every visit — not a shuffle). The dots are one keyboard stop
-  with a roving tabindex (arrow keys move between them), so the strip costs a
-  keyboard reader five stops, not fourteen. Beside the dots sits a visible
-  mono **Pause / Play** control (28px tall; auto-advance also stops for good
-  after any arrow or dot choice), and a screen-reader live region announces
-  each card. **Hidden on phones**: there the first name must land within a
-  screen of the search, and the mini widget already puts a face in the article.
+  same set on every visit — not a shuffle), and it follows the newest day's
+  names rather than standing between the search and its results. The dots are
+  one keyboard stop with a roving tabindex (arrow keys move between them), so
+  the strip costs a keyboard reader five stops, not fourteen. Beside the dots
+  sits a visible mono **Pause / Play** control (28px tall, labelled "Pause
+  auto-advance" / "Resume auto-advance"; auto-advance also stops for good
+  after any arrow or dot choice). The live region carries a name only after a
+  change the reader asked for — someone reading the register is never
+  interrupted every 6.5 seconds. **Not rendered on phones at all** (the
+  component unmounts, so nothing advances or announces behind a hidden
+  section): there the first name must land within a screen of the search, and
+  the mini widget already puts a face in the article.
 - **Sponsor card**: centered label ("OBITUARIES MADE POSSIBLE BY", tracked mono
   in muted) over 80px logos on the paper-white sheet — the sponsors' full-size
   placement, in the footer.
@@ -380,7 +385,9 @@ oxblood outline (offset 2px) on keyboard focus.
   the last 3 months", "36 names · last names beginning with J", "2 names · 3
   more mentions"). Matching is by name token prefix, so "Allan Jensen" finds
   Allan Guy Jensen; records that only *mention* the query list in a second
-  tier. Enter dismisses the phone keyboard (results are already live). The
+  tier; a hyphenated surname is two names to the searcher, so "Tugnoli"
+  reaches "Latzig-Tugnoli". Enter dismisses the phone keyboard (results are
+  already live). The
   search and any browse filter mirror into the URL (`?q=`, `?month=`,
   `?letter=`, `?town=`, `?home=`) so Back and a shared link reopen the list.
 - **Form fields** (`{components.input-field}`): newsprint fill, rule border, 2px
@@ -395,8 +402,9 @@ wordmark, one link home) over the tagline, the sponsors' presented-by line,
 and the thick-over-thin ink rule, then the surface's kicker and title. Static pages add a small mono "← All
 obituaries" box top-left and a mono footer row ("← All obituaries · Browse the
 full index →"), then the colophon. Browse on the register is a secondary path
-and lives behind **one disclosure** ("Browse by month, last name, town or
-funeral home" — an oxblood mono link with a small ruled +/– mark), closed
+and lives behind **one disclosure** ("Browse by month or last name" — an
+oxblood mono link with a small ruled +/– mark, naming what is immediately
+inside rather than everything nested under it), closed
 unless a filter is active; inside, two rows — Month (Last 3 months · All · up
 to six month chips with three or more names, the rest in an "Earlier…"
 select) and Last name — with 11px mono labels and no box around them, then a
@@ -416,12 +424,34 @@ headed by the **date of death** in oxblood mono ("Died September 2, 2026"; the
 few records without one say "Published …") — the register is a calendar of
 deaths, not of editions.
 
+### Second tier (mentions and arrangements)
+A row is a promise that this person is who you searched for, so anything that
+is not a person of that name says what it is instead:
+- **A funeral home's own name** ("Schmidt" is also Schmidt & Schulta) never
+  becomes rows. One oxblood mono line above a rule — "68 notices arranged by
+  Schmidt & Schulta Funeral Home →" — filters to that home.
+- **A mention** (a maiden name, a surviving relative, a hall named for a
+  family) keeps its row but replaces its summary with the **evidence line**:
+  the phrase around the hit in 12px Courier muted, the matched word washed in
+  hover-wash rather than highlighted, six words either side, ellipses outside.
+  Ten at a time under "Also named in N other notices" (just "Named in N
+  notices" when no name matched), then "Show the rest".
+
 ### Empty state
 A dead end on a memorial page must offer a way forward and never end on the
 sponsor card: "No one named “…” is listed yet." in ink, then a row of
 secondary-style actions (Clear the search · Browse by last name · Not listed?
 Submit an obituary), then a muted italic hint about spellings and notices
-that haven't arrived yet.
+that haven't arrived yet. Each action hands focus to what it opened: the
+search field after Clear, the first letter after Browse, the first field
+after Submit — never to nothing.
+
+### Failure state
+The one state the reader cannot fix by typing differently, so it says so and
+offers a way on: "Obituaries are unavailable right now. This is usually
+temporary." in ink, a secondary **Try again** that refetches in place, and the
+footer beneath it — the index link and the colophon, which is where the
+newsroom's phone number is. Never a raw status code.
 
 ### Share buttons
 A row on every person page — "SHARE" as a tracked mono label, then Facebook /

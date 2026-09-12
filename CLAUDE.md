@@ -68,9 +68,13 @@ Source of truth → static output → embedded widget:
 6. `web/` — React 18 / Vite memorial register. The **browse + search** layer
    only. It fetches the JSON index and links each card to the static page. The
    name search is the product: it sits directly under the lede, matches by
-   name-token prefix (`lib/search.js` — "Allan Jensen" finds Allan Guy
-   Jensen; diacritics folded; records that only *mention* the query list in a
-   second tier), and the register is grouped by **date of death** (`eventDate`,
+   name-token prefix (`lib/search.js` — "Allan Jensen" finds Allan Guy Jensen,
+   "Tugnoli" finds Latzig-Tugnoli; diacritics folded). What is *not* a person
+   of that name never becomes a look-alike row: a funeral home whose own name
+   matches ("Schmidt" is also Schmidt & Schulta) collapses to one line into
+   that home's notices, and a text mention keeps its row but shows the phrase
+   that matched (`matchSnippet`) in place of its summary. The register is
+   grouped by **date of death** (`eventDate`,
    falling back to the publication date for the 2% without one) with honest
    "Died …" / "Published …" headings. Browse (month / last name, with town /
    home behind a second-tier line) is a secondary path behind one disclosure.
@@ -82,8 +86,8 @@ Source of truth → static output → embedded widget:
    the iframe on load. The sponsor logos ride in the masthead as a
    "presented by" line above the ink rule (the footer card is the full-size
    placement), so nothing sits between the search and its results; the
-   featured strip (five of the week's portraits, newest first) is hidden on
-   phones. Vite
+   featured strip (five of the week's portraits, newest first) follows the
+   newest day's names and does not render at all on phones. Vite
    builds **two embeds** from this one app: `index.html` (the full register,
    paginated 60 rows at a time — "Show earlier obituaries" — so the embed's
    height and portrait loads stay bounded as the catalogue grows) and

@@ -84,7 +84,7 @@ const BrowseBar = forwardRef(function BrowseBar(
         <span className="browse__toggle-mark" aria-hidden="true">
           {open ? "–" : "+"}
         </span>
-        Browse by month, last name, town or funeral home
+        Browse by month or last name
       </button>
 
       {open && (
