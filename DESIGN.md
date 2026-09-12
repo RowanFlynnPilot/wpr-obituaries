@@ -170,7 +170,7 @@ candles, stock florals, or upsell chrome around a notice.
 - Structure from hairlines and rules, never from shadows or boxes
 - Square-cornered cards marked on the top edge; near-square (2px) controls
 - Portraits in ink-ruled frames, lightly desaturated (`grayscale(0.15)`)
-- One authored motion moment per surface (a 0.5s fade on the featured card); everything else is a 120–150ms state change
+- At most one authored motion moment per surface (the mini widget's card fade); the register has none, and everything else is a 120–150ms state change
 - Reads as WPR: flag, thick-over-thin rule, tagline, colophon with provenance and phone
 
 ## Colors
@@ -195,13 +195,14 @@ surface in place of the site's teal.
 - **Newsprint** (`{colors.newsprint}`): the page ground and the register's own
   surface (chips, the "show earlier" control, form fields).
 - **Paper white** (`{colors.paper-white}`): the lighter sheet for things that sit
-  *on* the page — the featured card, sponsor card, search input, secondary
-  buttons, portrait placeholders.
+  *on* the page — the sponsor card, search input, secondary buttons, portrait
+  placeholders, the mini widget's card.
 - **Muted** (`{colors.muted}`): secondary text — lifespans, ledes, arrangements
   lines, the colophon, inactive letters. 4.8:1 on newsprint.
-- **Faint** (`{colors.faint}`): the smallest labels (sponsor eyebrows, fineprint)
-  and inactive carousel dots. Deliberately as dark as "faint" gets: those uses
-  are tiny text that needs the full 4.5:1, not the 3:1 large-text floor.
+- **Faint** (`{colors.faint}`): the search placeholder, the smallest labels
+  (sponsor eyebrows, fineprint), and the mini widget's inactive dots.
+  Deliberately as dark as "faint" gets: those uses are tiny text that needs the
+  full 4.5:1, not the 3:1 large-text floor.
 - **Rule** (`{colors.rule}`): borders on cards, controls, portrait frames, the
   hairline that closes the masthead, the archive's first-row rule.
 - **Hairline** (`{colors.hairline}`): the lightest divider — between register
@@ -239,8 +240,7 @@ body) rather than size-contrasted.
 - **Headline** (`{typography.headline}`): a person's name atop their page —
   Merriweather 700 at `clamp(2.1rem, 6vw, 3rem)`, tracked in slightly. Also the
   funeral-home and archive page titles.
-- **Title** (`{typography.title}`): names in the register (1.32rem) and on the
-  featured card (1.5rem); Merriweather 700, line-height 1.15–1.2,
+- **Title** (`{typography.title}`): names in the register (1.32rem); Merriweather 700, line-height 1.15–1.2,
   `overflow-wrap: anywhere` so a long surname can never overflow a row.
 - **Body** (`{typography.body}`): summaries and obituary text — Merriweather 300,
   1rem in the register, 1.06rem on a person page, leading 1.55–1.7. Reading
@@ -279,8 +279,9 @@ Spacing follows a loose 4px rhythm with the observed steps 8 / 14 / 18 / 22 /
 internal padding; controls 6–14px.
 
 Responsive behavior at one breakpoint, 480px: the flag scales down (seal 44px,
-wordmark 27px, tagline tracking 0.2em), the featured card stacks portrait over
-text, the portrait on a person page becomes full-width above the text, sponsor
+wordmark 27px, tagline tracking 0.2em), the browse selects go full-width with
+their labels stacked, the portrait on a person page becomes full-width above
+the text, sponsor
 logos shrink (72px), and control padding tightens. Both embeds post their own
 height to the WordPress parent so the iframe never scrolls; the register is
 paginated 60 rows at a time to keep that height bounded.
@@ -295,9 +296,9 @@ Flat. There are no drop shadows anywhere in the system; depth is conveyed by
 tone (paper white sitting on newsprint), by hairlines and rules, and by the
 3px oxblood edge that marks a card as a thing placed on the page. The one
 `box-shadow` in use is an inset 1px hairline ring on monogram tiles (portrait
-placeholders), which is a border, not elevation. The featured card and the
-mini widget are the "raised" objects and they achieve it entirely with the
-lighter sheet plus a 1px rule border.
+placeholders), which is a border, not elevation. The sponsor card and the mini
+widget are the "raised" objects and they achieve it entirely with the lighter
+sheet plus a 1px rule border.
 
 ### Named Rules
 **The No-Shadow Rule.** Nothing floats. If an element needs to read as on top
@@ -312,7 +313,7 @@ oxblood outlines.
 Print geometry. Cards and sheets are square-cornered (0). Controls — chips,
 buttons, inputs — carry a near-square 2px radius that reads as a printed box
 rather than a pill. The only true rounds are the press seal, portrait
-placeholders' monogram tiles, carousel dots, and the prev/next arrows (50%).
+placeholders' monogram tiles, and the mini widget's dots and arrows (50%).
 Portraits are rectangles in a 1px `rule` frame with a light `grayscale(0.15)`,
 never circles. Rules are horizontal and thin (1px hairline, 1px rule) except
 two deliberate heavy strokes: the 3px-over-1px ink flag rule under the
@@ -330,8 +331,8 @@ oxblood outline (offset 2px) on keyboard focus.
   label ("Submit an obituary", share buttons on a page); hover to hover-wash.
 - **Show earlier** (`{components.button-more}`): full-width, newsprint fill, ink
   label with a hairline-divided count ("227 more").
-- **Arrows**: 34px round paper-white buttons with a rule border for the
-  carousel, 85% opacity at rest.
+- **Arrows**: 34px round paper-white buttons with a rule border in the mini
+  widget, 85% opacity at rest.
 
 ### Chips
 - **Style** (`{components.chip}`): mono 12px label, newsprint fill, 1px rule
@@ -496,7 +497,7 @@ SemiBold over the sponsor line at the foot.
 - **Do** set every control in Courier Prime caps inside a 1px rule box with 2px corners; primary actions get the single oxblood fill.
 - **Do** keep portraits rectangular in a ruled frame with the light desaturation, and never crop them to circles.
 - **Do** keep the flag intact on every surface: seal beside wordmark linking home, tagline, thick-over-thin ink rule, the surface's own title below it.
-- **Do** honor reduced motion (the featured and mini fades are the only authored motion; the loading skeleton is a still hairline block, not a shimmer; all other transitions are 120–150ms and disable under `prefers-reduced-motion`).
+- **Do** honor reduced motion (the mini widget's card fade is the only authored motion left; the loading skeleton is a still hairline block, not a shimmer; all other transitions are 120–150ms and disable under `prefers-reduced-motion`).
 - **Do** keep the smallest type on the register and the pages at 11px (the tagline, sponsor labels, funeral-home captions, the colophon — only the mini widget, at card scale, runs smaller) and every control at a 24px minimum target, even when its visible mark is smaller.
 - **Do** design the print state of a person page as a keepsake.
 

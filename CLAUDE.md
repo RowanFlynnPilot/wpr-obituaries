@@ -85,9 +85,10 @@ Source of truth → static output → embedded widget:
    embed snippet mirrors it onto the WordPress URL and forwards it back into
    the iframe on load. The sponsor logos ride in the masthead as a
    "presented by" line above the ink rule (the footer card is the full-size
-   placement), so nothing sits between the search and its results; the
-   featured strip (five of the week's portraits, newest first) follows the
-   newest day's names and does not render at all on phones. Vite
+   placement), so nothing sits between the search and its results. The register
+   carries no carousel of its own: the strip that used to sit among the rows
+   showed the same five people the rows already showed, and the mini widget is
+   where a face belongs in an article. Vite
    builds **two embeds** from this one app: `index.html` (the full register,
    paginated 60 rows at a time — "Show earlier obituaries" — so the embed's
    height and portrait loads stay bounded as the catalogue grows) and

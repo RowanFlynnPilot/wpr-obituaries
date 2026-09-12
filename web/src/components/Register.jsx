@@ -16,7 +16,6 @@ export default function Register({
   homes = [],
   query,
   letter = null,
-  featured = null,
   onClear,
   onBrowseLetters,
   onSubmit,
@@ -89,20 +88,15 @@ export default function Register({
 
   return (
     <div className="register">
-      {groups.map((g, n) => (
-        <div key={g.key}>
-          <section className="register__group">
-            <h2 className="register__date">{g.label}</h2>
-            <ol className="register__list">
-              {g.items.map((ob) => (
-                <ObituaryRow key={ob.slug} ob={ob} />
-              ))}
-            </ol>
-          </section>
-          {/* The featured strip follows the newest day's names rather than
-              standing between the search and its results. */}
-          {n === 0 && featured}
-        </div>
+      {groups.map((g) => (
+        <section className="register__group" key={g.key}>
+          <h2 className="register__date">{g.label}</h2>
+          <ol className="register__list">
+            {g.items.map((ob) => (
+              <ObituaryRow key={ob.slug} ob={ob} />
+            ))}
+          </ol>
+        </section>
       ))}
       {/* No live region here: the search bar's count line is the one announcer
           for a new result set, so a keystroke never triggers two readouts. */}
