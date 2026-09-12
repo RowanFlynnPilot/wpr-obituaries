@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-11T00:00:00Z",
+  "title": "Design System: WPR Obituaries",
+  "extensions": {
+    "colorMeta": {
+      "oxblood": { "role": "primary", "displayName": "Oxblood", "canonical": "#7c2e36",
+        "tonalRamp": ["#2a0f12", "#3f171b", "#5a2128", "#7c2e36", "#9a3a43", "#b8666d", "#d6a3a7", "#f0e2e0"] },
+      "oxblood-bright": { "role": "primary", "displayName": "Oxblood, bright", "canonical": "#9a3a43",
+        "tonalRamp": ["#2a0f12", "#3f171b", "#5a2128", "#7c2e36", "#9a3a43", "#b8666d", "#d6a3a7", "#f0e2e0"] },
+      "on-oxblood": { "role": "primary", "displayName": "On oxblood", "canonical": "#ffffff",
+        "tonalRamp": ["#1b1a18", "#3a3835", "#5a5752", "#7a766f", "#9c978e", "#c0bbb1", "#e0dbd0", "#ffffff"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#1b1a18",
+        "tonalRamp": ["#1b1a18", "#2e2c29", "#45423d", "#5d5952", "#777268", "#948f84", "#b5b0a5", "#d9d3c6"] },
+      "newsprint": { "role": "neutral", "displayName": "Newsprint", "canonical": "#f6f2ea",
+        "tonalRamp": ["#3a352c", "#5a5346", "#7a7262", "#9a9180", "#b9b0a0", "#d6cdbf", "#e9e3d8", "#f6f2ea"] },
+      "paper-white": { "role": "neutral", "displayName": "Paper white", "canonical": "#fffdf7",
+        "tonalRamp": ["#3d3a30", "#5e5a4c", "#7f7a69", "#a09a88", "#c1bba9", "#ded9c9", "#f1ede2", "#fffdf7"] },
+      "muted": { "role": "neutral", "displayName": "Muted", "canonical": "#6f6a61",
+        "tonalRamp": ["#221f1b", "#37332d", "#4d4840", "#6f6a61", "#8c877c", "#aaa599", "#c9c4b8", "#e7e1d5"] },
+      "faint": { "role": "neutral", "displayName": "Faint", "canonical": "#6d675f",
+        "tonalRamp": ["#211e1a", "#36322c", "#4c473f", "#6d675f", "#8a847a", "#a8a297", "#c7c2b6", "#e6e0d4"] },
+      "rule": { "role": "neutral", "displayName": "Rule", "canonical": "#d9d3c6",
+        "tonalRamp": ["#3e3a31", "#5f594d", "#807969", "#a19a87", "#c0b8a5", "#d9d3c6", "#e7e1d5", "#f6f2ea"] },
+      "hairline": { "role": "neutral", "displayName": "Hairline", "canonical": "#e7e1d5",
+        "tonalRamp": ["#3e3a31", "#5f594d", "#807969", "#a19a87", "#c0b8a5", "#d9d3c6", "#e7e1d5", "#f6f2ea"] },
+      "hover-wash": { "role": "neutral", "displayName": "Hover wash", "canonical": "#efe9dd",
+        "tonalRamp": ["#3e3a31", "#5f594d", "#807969", "#a19a87", "#c0b8a5", "#d9d3c6", "#efe9dd", "#f6f2ea"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The OBITUARIES nameplate only; uppercase Oswald." },
+      "headline": { "displayName": "Headline", "purpose": "A person's name atop their page; funeral-home and archive titles." },
+      "title": { "displayName": "Title", "purpose": "Names in the register (1.32rem) and on the featured card (1.5rem)." },
+      "body": { "displayName": "Body", "purpose": "Summaries and obituary text; 1.06rem on a person page." },
+      "lede": { "displayName": "Lede", "purpose": "Italic muted line under the nameplate; arrangements line." },
+      "label": { "displayName": "Label", "purpose": "Kickers, section labels, chips, buttons, date headings; uppercase, tracked 0.2–0.32em." },
+      "meta": { "displayName": "Meta", "purpose": "Lifespans, counts, the colophon." }
+    },
+    "shadows": [
+      { "name": "monogram-ring", "value": "inset 0 0 0 1px #e7e1d5", "purpose": "Inset hairline ring on portrait-placeholder monogram tiles. The only box-shadow in the system; it is a border, not elevation." }
+    ],
+    "motion": [
+      { "name": "state-quick", "value": "120ms ease", "purpose": "Chip, letter, and select state changes (background, border, color)." },
+      { "name": "state", "value": "150ms ease", "purpose": "Row, card, button, and input hover/focus changes; sponsor logo opacity." },
+      { "name": "featured-fade", "value": "opacity 0 → 1, 500ms ease", "purpose": "The one authored moment on the register: the featured card fading in when it changes. Disabled under prefers-reduced-motion." },
+      { "name": "mini-fade", "value": "opacity 0 → 1, 450ms ease", "purpose": "The mini widget's card change. Disabled under prefers-reduced-motion." },
+      { "name": "carousel-advance", "value": "6000ms (register 6500ms) interval", "purpose": "Auto-advance cadence; paused on hover/focus and stopped for good after any manual choice." }
+    ],
+    "breakpoints": [
+      { "name": "phone", "value": "480px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "A month/filter chip: mono label in a hairline box; a count after an inner divider.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\">June 2026 <span class=\"ds-chip__count\">148</span></button><button class=\"ds-chip is-active\">Recent</button></div>",
+      "css": ".ds-chips { display: flex; gap: 8px; } .ds-chip { display: inline-flex; align-items: center; font-family: 'Courier Prime', 'Courier New', monospace; font-size: 12px; line-height: 1; color: #1b1a18; background: #f6f2ea; border: 1px solid #d9d3c6; border-radius: 2px; padding: 6px 9px; cursor: pointer; transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease; } .ds-chip:hover { background: #efe9dd; border-color: #6f6a61; } .ds-chip:focus-visible { outline: 2px solid #7c2e36; outline-offset: 2px; } .ds-chip.is-active { background: #7c2e36; border-color: #7c2e36; color: #fff; } .ds-chip__count { margin-left: 6px; padding-left: 6px; border-left: 1px solid #d9d3c6; opacity: 0.7; font-size: 11px; } .ds-chip.is-active .ds-chip__count { border-left-color: rgba(255,255,255,0.4); opacity: 0.85; }"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single oxblood-filled action in a flow (\"Open email to send\").",
+      "html": "<button class=\"ds-btn-primary\">Open email to send</button>",
+      "css": ".ds-btn-primary { font-family: 'Courier Prime', 'Courier New', monospace; font-size: 13px; letter-spacing: 0.04em; color: #fffdf7; background: #7c2e36; border: 1px solid #7c2e36; border-radius: 2px; padding: 10px 20px; cursor: pointer; transition: background-color 0.15s ease; } .ds-btn-primary:hover { background: #9a3a43; border-color: #9a3a43; } .ds-btn-primary:focus-visible { outline: 2px solid #7c2e36; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Paper-white box with an oxblood mono label (\"Submit an obituary\", share buttons).",
+      "html": "<button class=\"ds-btn-secondary\">Submit an obituary</button>",
+      "css": ".ds-btn-secondary { font-family: 'Courier Prime', 'Courier New', monospace; font-size: 13px; letter-spacing: 0.04em; color: #7c2e36; background: #fffdf7; border: 1px solid #d9d3c6; border-radius: 2px; padding: 9px 18px; cursor: pointer; transition: background-color 0.12s ease, border-color 0.12s ease; } .ds-btn-secondary:hover { background: #efe9dd; border-color: #6f6a61; } .ds-btn-secondary:focus-visible { outline: 2px solid #7c2e36; outline-offset: 2px; }"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "The register's search field: serif text in a paper-white ruled box, mono count beneath.",
+      "html": "<div class=\"ds-search\"><input class=\"ds-search__input\" type=\"search\" placeholder=\"Search by name, town, or funeral home\" /><p class=\"ds-search__count\">287 names</p></div>",
+      "css": ".ds-search { max-width: 520px; } .ds-search__input { width: 100%; padding: 14px 16px; font-family: Merriweather, Georgia, serif; font-size: 1rem; color: #1b1a18; background: #fffdf7; border: 1px solid #d9d3c6; border-radius: 2px; caret-color: #7c2e36; transition: border-color 0.15s ease; } .ds-search__input::placeholder { color: #6f6a61; font-style: italic; } .ds-search__input:focus-visible { outline: 2px solid #7c2e36; outline-offset: 2px; border-color: #7c2e36; } .ds-search__count { margin: 8px 0 0; font-family: 'Courier Prime', 'Courier New', monospace; font-size: 12px; letter-spacing: 0.04em; color: #6f6a61; }"
+    },
+    {
+      "name": "Register Row",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "One person in the register: ruled portrait (or monogram tile), title-weight name, mono lifespan, one-line summary, mono funeral-home caption; the whole row is a link.",
+      "html": "<ol class=\"ds-register\"><li class=\"ds-entry\"><a class=\"ds-entry__link\" href=\"#\"><span class=\"ds-entry__photo ds-entry__photo--blank\" aria-hidden=\"true\">AJ</span><span class=\"ds-entry__text\"><span class=\"ds-entry__name\">Allan Guy Jensen</span><span class=\"ds-entry__span\">1944 – 2026</span><span class=\"ds-entry__summary\">Allan Guy Jensen, age 81, of Birnamwood, passed away on September 2, 2026.</span><span class=\"ds-entry__home\">Schmidt &amp; Schulta Funeral Home</span></span></a></li></ol>",
+      "css": ".ds-register { list-style: none; margin: 0; padding: 0; max-width: 680px; } .ds-entry { border-top: 1px solid #e7e1d5; border-bottom: 1px solid #e7e1d5; } .ds-entry__link { display: flex; gap: 20px; padding: 18px 8px; text-decoration: none; color: inherit; transition: background-color 0.15s ease; } .ds-entry__link:hover { background: #efe9dd; } .ds-entry__link:focus-visible { outline: 2px solid #7c2e36; outline-offset: -2px; } .ds-entry__photo { flex: 0 0 66px; width: 66px; height: 66px; object-fit: cover; border: 1px solid #d9d3c6; background: #fffdf7; filter: grayscale(0.15); } .ds-entry__photo--blank { display: inline-flex; align-items: center; justify-content: center; font-family: Merriweather, Georgia, serif; font-weight: 700; font-size: 1.4rem; color: #7c2e36; letter-spacing: 0.01em; box-shadow: inset 0 0 0 1px #e7e1d5; } .ds-entry__text { display: flex; flex-direction: column; min-width: 0; } .ds-entry__name { font-family: Merriweather, Georgia, serif; font-weight: 700; font-size: 1.32rem; line-height: 1.2; color: #1b1a18; overflow-wrap: anywhere; } .ds-entry__link:hover .ds-entry__name { color: #7c2e36; } .ds-entry__span { font-family: 'Courier Prime', 'Courier New', monospace; font-size: 12.5px; letter-spacing: 0.02em; color: #6f6a61; margin-top: 3px; } .ds-entry__summary { margin-top: 3px; font-family: Merriweather, Georgia, serif; font-size: 1rem; font-weight: 300; line-height: 1.55; color: #1b1a18; } .ds-entry__home { margin-top: 6px; font-family: 'Courier Prime', 'Courier New', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #6f6a61; }"
+    },
+    {
+      "name": "Featured Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "The \"Recently Remembered\" card: paper-white sheet with a 3px oxblood top edge, portrait beside name / lifespan / excerpt.",
+      "html": "<a class=\"ds-featured\" href=\"#\"><span class=\"ds-featured__photo\" aria-hidden=\"true\">JT</span><span class=\"ds-featured__text\"><span class=\"ds-featured__name\">John M. Trempe</span><span class=\"ds-featured__span\">1957 – 2026</span><span class=\"ds-featured__excerpt\">John M. Trempe, 68, of Wausau, passed away on Monday, August 31, 2026. He was born on October 3, 1957, to the late Charles and Marguerite Trempe.</span><span class=\"ds-featured__more\">Read the full obituary →</span></span></a>",
+      "css": ".ds-featured { display: flex; gap: 22px; align-items: stretch; max-width: 640px; text-decoration: none; color: inherit; background: #fffdf7; border: 1px solid #d9d3c6; border-top: 3px solid #7c2e36; padding: 22px 24px; transition: background-color 0.15s ease; } .ds-featured:hover { background: #efe9dd; } .ds-featured:focus-visible { outline: 2px solid #7c2e36; outline-offset: -2px; } .ds-featured__photo { flex: 0 0 132px; width: 132px; height: 168px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #d9d3c6; background: #f6f2ea; font-family: Merriweather, Georgia, serif; font-weight: 700; font-size: 2rem; color: #7c2e36; } .ds-featured__text { display: flex; flex-direction: column; min-width: 0; } .ds-featured__name { font-family: Merriweather, Georgia, serif; font-weight: 700; font-size: 1.5rem; line-height: 1.15; color: #1b1a18; } .ds-featured:hover .ds-featured__name { color: #7c2e36; } .ds-featured__span { font-family: 'Courier Prime', 'Courier New', monospace; font-size: 12.5px; letter-spacing: 0.02em; color: #6f6a61; margin-top: 3px; } .ds-featured__excerpt { margin-top: 10px; font-family: Merriweather, Georgia, serif; font-weight: 300; font-size: 1rem; line-height: 1.55; color: #1b1a18; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; } .ds-featured__more { margin-top: auto; padding-top: 12px; font-family: 'Courier Prime', 'Courier New', monospace; font-size: 11.5px; letter-spacing: 0.04em; color: #7c2e36; }"
+    },
+    {
+      "name": "Masthead Flag",
+      "kind": "nav",
+      "refersTo": "card",
+      "description": "WPR's flag: seal beside wordmark (one link home), the tagline, the thick-over-thin ink rule, then the surface's kicker and title beneath it.",
+      "html": "<header class=\"ds-masthead\"><a class=\"ds-masthead__flag\" href=\"#\" aria-label=\"Wausau Pilot &amp; Review\"><span class=\"ds-masthead__seal\" aria-hidden=\"true\"></span><span class=\"ds-masthead__wordmark\">Wausau Pilot &amp; Review</span></a><p class=\"ds-masthead__tagline\">Where Locals Look First For News</p><div class=\"ds-masthead__flag-rule\" aria-hidden=\"true\"></div><p class=\"ds-masthead__eyebrow\">In Memoriam</p><h1 class=\"ds-masthead__title\">Obituaries</h1></header>",
+      "css": ".ds-masthead { text-align: center; max-width: 640px; } .ds-masthead__flag { display: inline-flex; align-items: center; gap: 14px; text-decoration: none; color: #1b1a18; } .ds-masthead__seal { flex: none; width: 52px; height: 52px; border-radius: 50%; border: 2px solid #1b1a18; background: #fffdf7; } .ds-masthead__wordmark { font-family: Oswald, 'Arial Narrow', sans-serif; font-weight: 600; font-size: 28px; letter-spacing: 0.01em; } .ds-masthead__tagline { margin: 10px 0 0; font-family: 'Courier Prime', 'Courier New', monospace; font-size: 10.5px; letter-spacing: 0.28em; text-transform: uppercase; color: #6f6a61; } .ds-masthead__flag-rule { height: 2px; border-top: 3px solid #1b1a18; border-bottom: 1px solid #1b1a18; margin: 16px 0 22px; } .ds-masthead__eyebrow { margin: 0; font-family: 'Courier Prime', 'Courier New', monospace; font-size: 12px; letter-spacing: 0.32em; text-transform: uppercase; color: #7c2e36; } .ds-masthead__title { font-family: Oswald, 'Arial Narrow', sans-serif; font-weight: 600; font-size: clamp(2.7rem, 9vw, 4rem); line-height: 0.98; letter-spacing: 0.02em; text-transform: uppercase; margin: 8px 0 0; color: #1b1a18; }"
+    },
+    {
+      "name": "Colophon",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "Seal beside provenance and contact lines in muted mono; the foot of every surface.",
+      "html": "<footer class=\"ds-colophon\"><span class=\"ds-colophon__seal\" aria-hidden=\"true\"></span><div class=\"ds-colophon__lines\"><p>Compiled from obituaries published by Wausau Pilot &amp; Review and shared by the area funeral homes named with each notice.</p><p>Wausau Pilot &amp; Review · 715-301-5539 — nonprofit local journalism for north central Wisconsin.</p></div></footer>",
+      "css": ".ds-colophon { display: flex; align-items: flex-start; gap: 14px; max-width: 640px; padding-top: 18px; border-top: 1px solid #d9d3c6; } .ds-colophon__seal { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 2px solid #1b1a18; background: #fffdf7; } .ds-colophon__lines p { margin: 0; font-family: 'Courier Prime', 'Courier New', monospace; font-size: 11px; line-height: 1.6; letter-spacing: 0.03em; color: #6f6a61; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Memorial Page",
+    "overview": "This is a newspaper's obituary page done with care — Wausau Pilot & Review's own page, not a memorial-products brand's. Everything sits on warm newsprint under the paper's flag: the press seal beside the wordmark, the tagline, and a thick-over-thin rule in ink. Names are set in the paper's reading serif; datelines, labels, and lifespans in a typewriter face that echoes the typewriter on WPR's badge; the nameplate in the condensed sans the site uses for headings. One color speaks — oxblood — and it speaks rarely: the kicker, the date headings, the active chip, the short rule beneath a name, the three-pixel edge on a card. Portraits sit in hairline-ruled frames, very slightly desaturated, like a photograph printed on paper.\n\nThe mood is newsprint-honest and permanent: the pages read as the paper itself (rules, datelines, a flag, a colophon), and every page looks like it will still be there in twenty years. Density is editorial rather than app-like — generous leading, a single reading column, groups separated by hairlines rather than boxes. The confirmed anti-reference is the funeral-products web (Legacy.com and its kin): no pastel gradients, doves, candles, stock florals, or upsell chrome around a notice.",
+    "keyCharacteristics": [
+      "Warm newsprint ground, near-black ink, one oxblood accent used sparingly",
+      "Three faces with fixed jobs: Oswald nameplate, Merriweather reading serif, Courier Prime typewriter labels",
+      "Structure from hairlines and rules, never from shadows or boxes",
+      "Square-cornered cards marked on the top edge; near-square (2px) controls",
+      "Portraits in ink-ruled frames, lightly desaturated (grayscale(0.15))",
+      "One authored motion moment per surface (a 0.5s fade on the featured card); everything else is a 120–150ms state change",
+      "Reads as WPR: flag, thick-over-thin rule, tagline, colophon with provenance and phone"
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "Oxblood is the only chromatic color on any surface and appears on well under a tenth of it. Its rarity is what makes a kicker or a date heading read as the paper's voice. A second accent is a redesign, not a tweak.", "section": "colors" },
+      { "name": "The Contrast-Is-Measured Rule", "body": "Every text color is checked against the surface it actually sits on (newsprint or paper white), never against white by habit. faint exists because \"lighter grey for small text\" fails AA on cream.", "section": "colors" },
+      { "name": "The Weight-Not-Size Rule", "body": "In the register a name and its summary sit two weights apart (700 / 300) at nearly the same size; hierarchy comes from weight and the mono/serif contrast, not from a big type step.", "section": "typography" },
+      { "name": "The Typewriter-Means-Data Rule", "body": "Courier Prime is for things that would be typed on a form: dates, labels, counts, lifespans, the tagline. It is never a \"technical\" costume for body copy.", "section": "typography" },
+      { "name": "The No-Shadow Rule", "body": "Nothing floats. If an element needs to read as on top of the page, give it the paper-white sheet and a rule; never a shadow.", "section": "elevation" },
+      { "name": "The Edge-On-Top Rule", "body": "Cards mark themselves with a 3px oxblood border on the top edge only — the WPR house convention. No side accents, no full oxblood outlines.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep oxblood to labels, edges, rules, and one active state per row of controls; the page should read as ink on newsprint with one color speaking.",
+      "Do separate groups with hairlines and whitespace; put the 3px oxblood edge on a card's top only.",
+      "Do measure every text color against the surface it sits on (newsprint 4.5:1 for small text; muted and faint already pass, rule and hairline never do).",
+      "Do set every control in Courier Prime caps inside a 1px rule box with 2px corners; primary actions get the single oxblood fill.",
+      "Do keep portraits rectangular in a ruled frame with the light desaturation, and never crop them to circles.",
+      "Do keep the flag intact on every surface: seal beside wordmark linking home, tagline, thick-over-thin ink rule, the surface's own title below it.",
+      "Do honor reduced motion (the featured and mini fades are the only authored motion; all other transitions are 120–150ms and disable under prefers-reduced-motion).",
+      "Do design the print state of a person page as a keepsake."
+    ],
+    "donts": [
+      "Don't add a second accent, a gradient, a glow, or any drop shadow.",
+      "Don't round a card; don't round a control past 2px; don't put an accent on a card's left or right edge.",
+      "Don't use imagery from the funeral-products web — doves, candles, florals, soft-focus skies — or any decorative illustration around a notice.",
+      "Don't set body copy or names in Oswald or Courier Prime; Oswald is the nameplate, Courier is for data.",
+      "Don't put the tool's title above the newsroom's flag, and don't drop the colophon.",
+      "Don't use pure black or pure white as text or ground; ink and newsprint are the poles.",
+      "Don't let auto-advancing content run without a reachable pause; touch users get it by interacting."
+    ]
+  }
+}
