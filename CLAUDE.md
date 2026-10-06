@@ -193,7 +193,7 @@ platforms' mechanics, and the cross-source dedupe/overlap note are in
   `docs/seo-batch-posts.md`.
 - **SEO domain (done)**: the site serves from `obituaries.wausaupilotandreview.com`
   (Cloudflare `CNAME obituaries → rowanflynnpilot.github.io`, **proxied** —
-  orange-cloud, not DNS-only; Pages custom domain + enforced HTTPS; `base: "/"`;
+  orange-cloud, not DNS-only; Pages custom domain; `base: "/"`;
   `PUBLIC_BASE_URL` variable set to the subdomain). Ranking equity now accrues
   to the brand domain and the old `github.io/wpr-obituaries` URLs 301-redirect
   here. Because the subdomain is proxied, Cloudflare's zone settings apply:
@@ -203,6 +203,25 @@ platforms' mechanics, and the cross-source dedupe/overlap note are in
   Follow-ups: re-submit the sitemap in Search Console under the new domain, and
   confirm Googlebot crawl health there (Cloudflare bot rules over Pages is
   where over-blocking would silently cost rankings).
+- **Edge TLS — do not set this hostname back to Full (strict)**: a Cloudflare
+  page rule, `obituaries.wausaupilotandreview.com/*` → **SSL: Full**, is the
+  permanent configuration, not a workaround. GitHub Pages gets its origin
+  certificate from Let's Encrypt, and GitHub will only issue or renew one when
+  its DNS check sees the record pointing at `rowanflynnpilot.github.io`. The
+  record is **proxied**, so public DNS returns Cloudflare's addresses instead
+  and the check can never pass. The certificate issued once (3 Jul 2026, while
+  the record was presumably DNS-only), never renewed, and expired 1 Oct 2026 —
+  at which point the zone's Full (strict) setting made Cloudflare refuse the
+  origin and the whole site returned **526 for five days** (1–6 Oct). Pages
+  still reports `https_certificate.state = bad_authz` and cannot leave it;
+  `https_enforced` is consequently `false` and GitHub refuses to re-enable it
+  without a valid certificate. None of that matters while the page rule stands:
+  readers get Cloudflare's own valid certificate, and the Cloudflare → GitHub
+  hop stays encrypted, just unvalidated — the usual trade for GitHub Pages
+  behind a proxied record, and acceptable for a public static site. The only
+  way back to strict is a maintenance window (grey-cloud the record, remove and
+  re-add the custom domain, wait for issuance while readers see certificate
+  warnings, re-proxy) and it would lapse again 90 days later. Don't.
 - **Seeding the master**: the chosen migration is a one-time **6-month seed**,
   `python extract/main.py --days 180` (or workflow dispatch with `seed_days=180`)
   — ~73 posts, ~15-20 min, a few dollars. The full `--backfill` (every post since
