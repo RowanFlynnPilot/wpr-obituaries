@@ -161,6 +161,28 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
 
+  # A successful deploy says nothing about whether a reader can reach the result.
+  # In October 2026 the edge returned 526 for five days — the origin certificate
+  # had expired and Cloudflare was set to validate it — while every scheduled run
+  # reported success, because nothing ever asked the public URL. This does, so an
+  # outage that the build cannot see goes red on the next run instead of waiting
+  # for someone to notice.
+  verify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify the published site serves readers
+        env:
+          PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL }}
+        run: python scripts/verify_live.py
+
   # Quarantined units make this job — and so the workflow — red, while the deploy
   # above still ships everything that did extract. Persistent failures therefore
   # stay visible run after run without ever holding the catalogue hostage.

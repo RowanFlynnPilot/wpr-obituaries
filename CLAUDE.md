@@ -105,7 +105,11 @@ Source of truth → static output → embedded widget:
    render, commits the updated master back (`contents: write`), then builds the
    widget and deploys to Pages. Quarantined units (exit 2) still deploy the rest
    and go red in a separate `report` job; a crashed extract (exit 1) skips the
-   deploy (the last good deploy stays live) but still persists the master.
+   deploy (the last good deploy stays live) but still persists the master. A
+   `verify` job then asks the **public URL** whether a reader can actually load
+   the register, the widget's index and a person's page (`scripts/verify_live.py`),
+   because a green deploy proves nothing about the edge: in Oct 2026 the site
+   returned 526 for five days while every run reported success.
 
 The React widget is the iframe embed on WordPress. The static `o/*.html` pages
 are what actually get crawled and ranked. Do not collapse these two layers —
