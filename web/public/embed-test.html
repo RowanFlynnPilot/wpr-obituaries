@@ -60,19 +60,21 @@
     <aside>
       <h1>Sidebar — mini widget</h1>
       <!-- ===== MINI WIDGET EMBED (same snippet as docs/embedding.md) ===== -->
-      <iframe id="wpr-obits-mini" title="Recent obituaries"
+      <iframe class="wpr-obits-mini" title="Recent obituaries"
               src="./mini.html?link=https%3A%2F%2Fwausaupilotandreview.com%2Fobituaries%2F"
               style="min-height:340px" loading="lazy"></iframe>
       <script>
         (function () {
-          var frame = document.getElementById("wpr-obits-mini");
+          // Sizes whichever mini widget sent the message, so this snippet can be
+          // pasted more than once on a page (in an article and in the sidebar).
           window.addEventListener("message", function (e) {
-            if (
-              frame && e.source === frame.contentWindow &&
-              e.data && e.data.type === "wpr-obituaries:height"
-            ) {
-              frame.style.height = e.data.height + "px";
-              frame.style.minHeight = "0";
+            if (!e.data || e.data.type !== "wpr-obituaries:height") return;
+            var frames = document.querySelectorAll("iframe.wpr-obits-mini");
+            for (var i = 0; i < frames.length; i++) {
+              if (frames[i].contentWindow === e.source) {
+                frames[i].style.height = e.data.height + "px";
+                frames[i].style.minHeight = "0";
+              }
             }
           });
         })();

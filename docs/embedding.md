@@ -72,21 +72,23 @@ any origin, so the snippet works unchanged wherever the tool is served from.
 
 ```html
 <!-- Wausau Pilot & Review — Recent obituaries (mini) -->
-<iframe id="wpr-obits-mini"
+<iframe class="wpr-obits-mini"
         src="https://obituaries.wausaupilotandreview.com/mini.html?link=https%3A%2F%2Fwausaupilotandreview.com%2Fobituaries%2F"
         title="Recent obituaries"
         style="display:block;width:100%;max-width:380px;margin:0 auto;border:0;min-height:340px"
         loading="lazy"></iframe>
 <script>
   (function () {
-    var frame = document.getElementById("wpr-obits-mini");
+    // Sizes whichever mini widget sent the message, so this snippet can be
+    // pasted more than once on a page (in an article and in the sidebar).
     window.addEventListener("message", function (e) {
-      if (
-        frame && e.source === frame.contentWindow &&
-        e.data && e.data.type === "wpr-obituaries:height"
-      ) {
-        frame.style.height = e.data.height + "px";
-        frame.style.minHeight = "0";
+      if (!e.data || e.data.type !== "wpr-obituaries:height") return;
+      var frames = document.querySelectorAll("iframe.wpr-obits-mini");
+      for (var i = 0; i < frames.length; i++) {
+        if (frames[i].contentWindow === e.source) {
+          frames[i].style.height = e.data.height + "px";
+          frames[i].style.minHeight = "0";
+        }
       }
     });
   })();
@@ -108,9 +110,13 @@ the frame); sponsor logos and click tracking match the main tool.
 
 ## Notes
 
-- Both snippets are per-iframe (the listener is bound to its own frame by id +
-  `e.source`), so the mini widget can appear on many pages, and both embeds can
-  even share one page.
+- Each snippet sizes only its own frames (matched by `e.source`), so both embeds
+  can share one page. The full tool's snippet finds its iframe by id, so it
+  belongs once per page. The mini's snippet finds its iframes by class and
+  sizes whichever one sent the message, so it can appear any number of times on
+  a page, such as in an article and again in a site-wide sidebar. (An id-based
+  mini snippet pasted twice binds both listeners to the first iframe, and the
+  second copy never gets its height.)
 - If a page's CSP or a security plugin strips scripts, the iframes still render
   at their `min-height` fallback — functional, just not perfectly sized.
 - The mini widget's `max-width: 380px` matches its internal card width; drop the
