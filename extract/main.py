@@ -28,6 +28,7 @@ import json
 import os
 import re
 import sys
+from datetime import date
 from pathlib import Path
 
 from adapters import enabled_sources
@@ -74,6 +75,11 @@ FAILURES_FILE = ROOT / "data" / "failures.json"
 DEFAULT_WINDOW_DAYS = 14  # fallback if the wordpress_scrape adapter omits
 #                           windowDays; a safety buffer (covers missed crons),
 #                           not a retention limit — the master keeps every page.
+# Dedupe: one funeral home handling a same-named person this close together is
+# one person even when the dates can't say so. A batch post runs a median 4 days
+# after the home's date of death, 30 at the 99th percentile (383 pairs, Oct 2026).
+SAME_HOME_DAYS = 30
+_FULL_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 
 def _load_sponsor() -> dict:
@@ -199,46 +205,136 @@ def _sponsor_line(sponsor: dict) -> str:
     return "Obituaries  ·  " + " + ".join(names) if names else "Obituaries"
 
 
-def _reconcile_year_only(groups: dict[tuple, list[Obituary]]) -> None:
-    """Fold a year-only group into the same person's full-date group, in place.
+def _exact(value: str | None) -> str | None:
+    """A full YYYY-MM-DD date, or None: a partial one ("1947") identifies no one."""
+    return value if value and _FULL_DATE.fullmatch(value) else None
 
-    WPR sometimes yields only a death *year* while the funeral-home scrape has
-    the full date, so the same person lands in two groups — ("jane doe", "2026")
-    and ("jane doe", "2026-05-27") — and shows up twice. When a bare-year group
-    has exactly one dated group sharing its name and year, merge them. The
-    exactly-one guard keeps two same-named people who died the same year apart.
+
+def _identity_keys(r: Obituary) -> list[tuple]:
+    """Keys that identify a person outright: records sharing any one are joined.
+
+    Under one first + last name (`name_key`): a shared exact birth date, or a
+    shared exact death date — or, for a record without one, the same death year
+    or (undated) the same publication date. The kinds never cross: an undated
+    batch post's publication date is not a death date, so it cannot collide with
+    someone who died that day.
+
+    Across first names, the surname with both exact dates: the sources disagree
+    on the first name ("Sandi"/"Sandra", "Mike"/"Michael", "Bob"/"Robert"), and
+    a shared surname, birth date and death date is one person. (Twins who died
+    on the same day would be merged; that is rare enough to accept.)
     """
-    dated: dict[tuple, list[tuple]] = {}
-    for (name_key, stamp) in groups:
-        if len(stamp) == 10:  # YYYY-MM-DD
-            dated.setdefault((name_key, stamp[:4]), []).append((name_key, stamp))
-    for (name_key, stamp) in list(groups):
-        if len(stamp) == 4 and stamp.isdigit():  # bare year
-            targets = dated.get((name_key, stamp), [])
-            if len(targets) == 1:
-                groups[targets[0]].extend(groups.pop((name_key, stamp)))
+    name = name_key(r.name)
+    born, died = _exact(r.birth_date), _exact(r.death_date)
+    keys = [(name, "born", born)] if born else []
+    if died:
+        keys.append((name, "died", died))
+    elif r.death_year:
+        keys.append((name, "year", r.death_year))
+    else:
+        keys.append((name, "published", r.source_date))
+    if born and died:
+        keys.append((name.split()[-1], "born+died", born, died))
+    return keys
+
+
+def _person_groups(records: list[Obituary], homes: list[dict]) -> list[list[Obituary]]:
+    """Partition records into people.
+
+    Identity keys (above) join records outright. The birth date is what catches
+    a death date that disagrees between two copies of one obituary: a funeral
+    home re-listing a notice under a placeholder date, or a batch post whose
+    extracted date differs from the home's.
+
+    Weak evidence then folds what is left, one first + last name at a time:
+      - the same canonical funeral home within SAME_HOME_DAYS, comparing death
+        dates, or the publication date for a batch post that omits it (nearest
+        pairs first);
+      - a bare death year into the one dated person who died that year; when
+        two did, it joins neither, since keeping people apart beats guessing.
+    A weak fold never joins two people who each carry an exact birth date: a
+    shared one would already have joined them, so theirs differ.
+    """
+    parent = list(range(len(records)))
+    born = [bool(_exact(r.birth_date)) for r in records]  # per root: holds a birth date
+
+    def find(i: int) -> int:
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    def join(i: int, j: int, *, weak: bool = False) -> None:
+        a, b = find(i), find(j)
+        if a == b or (weak and born[a] and born[b]):
+            return
+        parent[a] = b
+        born[b] = born[a] or born[b]
+
+    first: dict[tuple, int] = {}
+    for i, r in enumerate(records):
+        for key in _identity_keys(r):
+            join(i, first.setdefault(key, i))
+
+    home = [(resolve_home(r.funeral_home, homes) or {}).get("slug") for r in records]
+    when = [date.fromisoformat(_exact(r.death_date) or r.source_date) for r in records]
+    by_name: dict[str, list[int]] = {}
+    for i, r in enumerate(records):
+        by_name.setdefault(name_key(r.name), []).append(i)
+
+    for idxs in by_name.values():
+        near = sorted(
+            (abs((when[i] - when[j]).days), i, j)
+            for n, i in enumerate(idxs)
+            for j in idxs[n + 1:]
+            if home[i] and home[i] == home[j]
+        )
+        for gap, i, j in near:
+            if gap <= SAME_HOME_DAYS:
+                join(i, j, weak=True)
+        dated = [j for j in idxs if _exact(records[j].death_date)]
+        for i in idxs:
+            year = records[i].death_year
+            if not year or find(i) in {find(j) for j in dated}:
+                continue  # undated, or already joined to a dated record
+            died_then = {find(j) for j in dated if records[j].death_date[:4] == str(year)}
+            if len(died_then) == 1:
+                join(i, died_then.pop(), weak=True)
+
+    groups: dict[int, list[Obituary]] = {}
+    for i, r in enumerate(records):
+        groups.setdefault(find(i), []).append(r)
+    return list(groups.values())
+
+
+def _primary_rank(r: Obituary) -> tuple:
+    """Rank one person's records; the highest is the primary.
+
+    The fullest record wins (longest body). Two copies of one obituary can tie
+    on it yet disagree on the date of death, and what lands in that field by
+    mistake is the date of something later (a funeral home re-listing the notice,
+    a publication date), so among equals a dated record beats an undated one and
+    the earlier date wins. Then the later post.
+    """
+    died = _exact(r.death_date)
+    earliest = -date.fromisoformat(died).toordinal() if died else 0
+    return (len(r.body or ""), died is not None, earliest, r.source_date, r.slug)
 
 
 def _dedupe_people(
-    records: list[Obituary],
+    records: list[Obituary], homes: list[dict]
 ) -> tuple[list[Obituary], dict[str, Obituary]]:
-    """Collapse one person (name + death date) appearing in more than one source.
+    """Collapse one person appearing more than once (`_person_groups`).
 
     Returns (canonical, primary_by_slug): `canonical` has one record per person
     for the index/feed/home pages; `primary_by_slug` maps every record's slug to
     its chosen primary, so a duplicate page can rel=canonical at the primary
     instead of competing with it (and without 404ing the duplicate URL).
     """
-    groups: dict[tuple, list[Obituary]] = {}
-    for r in records:
-        stamp = r.death_date or (str(r.death_year) if r.death_year else r.source_date)
-        groups.setdefault((name_key(r.name), stamp), []).append(r)
-    _reconcile_year_only(groups)
     canonical: list[Obituary] = []
     primary_by_slug: dict[str, Obituary] = {}
-    for group in groups.values():
-        # the fullest record wins (longest body), then the later post
-        primary = max(group, key=lambda r: (len(r.body or ""), r.source_date, r.slug))
+    for group in _person_groups(records, homes):
+        primary = max(group, key=_primary_rank)
         canonical.append(primary)
         for r in group:
             primary_by_slug[r.slug] = primary
@@ -378,11 +474,11 @@ def render(master: Master, sponsor: dict, base_url: str, newsroom, allow_empty: 
             "Refusing to render an empty site (0 records after manual/suppression). "
             "Seed the master with `--backfill`, or pass --allow-empty if intended."
         )
+    homes = load_homes(HOMES_FILE)
     # One canonical record per person for the visible surfaces; every record
     # still gets a page (duplicates rel=canonical at their primary).
-    canonical, primary_by_slug = _dedupe_people(records)
+    canonical, primary_by_slug = _dedupe_people(records, homes)
     vendored = vendored_slugs(PHOTOS_DIR)
-    homes = load_homes(HOMES_FILE)
     _write_index(canonical, vendored, homes)
     _write_pages(records, canonical, sponsor, base_url, vendored, homes, primary_by_slug, newsroom)
     home_slugs = _write_home_pages(canonical, sponsor, base_url, homes, newsroom)
