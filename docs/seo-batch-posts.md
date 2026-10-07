@@ -9,7 +9,7 @@ of what we want.
 
 The per-person pages already send strong "I'm the canonical for this person"
 signals: the name in the `<title>`, `<h1>`, and URL; a self-referencing
-`rel=canonical`; `schema.org/Obituary` structured data; and now a sitemap and
+`rel=canonical`; schema.org `NewsArticle` structured data about the `Person`; and now a sitemap and
 social cards. So in most cases they should win on specificity. The steps below
 lock that in.
 

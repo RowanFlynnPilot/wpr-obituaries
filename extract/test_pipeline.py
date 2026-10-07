@@ -665,6 +665,31 @@ def test_wp_fetch_retries_cloudflare_block():
     print("ok: wp fetch retries a Cloudflare 403, passes 400 through, surfaces a real block")
 
 
+def test_person_structured_data():
+    # The person pages are the SEO layer. Their JSON-LD must use a type schema.org
+    # actually defines (it declared a nonexistent "Obituary" until Oct 2026), be
+    # about the Person, and carry the author and dates Google recommends.
+    import re
+
+    ob = mk("Jane Q. Doe", 1, "2026-06-10", birth_date="1940-01-02", death_date="2026-06-08")
+    page = templates.render_person_page(
+        ob, {"sponsors": []}, "http://b", NEWSROOM, [], None,
+        "http://b/og.png", None, f"http://b/o/{ob.slug}.html",
+    )
+    blocks = [
+        json.loads(b)
+        for b in re.findall(r'<script type="application/ld\+json">(.*?)</script>', page, re.S)
+    ]
+    assert not any(b.get("@type") == "Obituary" for b in blocks)
+    article = next(b for b in blocks if b.get("@type") == "NewsArticle")
+    assert article["about"]["@type"] == "Person"
+    assert article["about"]["name"] == "Jane Q. Doe"
+    assert article["about"]["deathDate"] == "2026-06-08"
+    assert article["author"]["name"] == NEWSROOM.name
+    assert article["datePublished"] == article["dateModified"] == "2026-06-10"
+    print("ok: person structured data (NewsArticle about a Person, author, dates)")
+
+
 def test_json_ld_escaping():
     # Third-party text must not be able to close the ld+json <script> block:
     # the HTML parser ends a script element at the first "</" it sees.

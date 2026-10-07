@@ -38,7 +38,8 @@ Source of truth → static output → embedded widget:
    `extract/adapters/intake.py` folds in reviewed manual submissions.
 3. `extract/templates.py` — renders one crawlable HTML page per person plus a
    `sitemap.xml`. **This is the SEO layer.** Each page has the name in the title
-   and H1, schema.org `Obituary` structured data, canonical, and OG tags.
+   and H1, schema.org `NewsArticle` structured data about the `Person` (schema.org
+   has no Obituary type), canonical, and OG tags.
 4. `extract/store.py` — the **persistent master** (`data/obituaries_master.json`,
    `{posts, records}`). This is the source of truth that lets pages outlive the
    fetch window. It is committed to the repo and grows over time. Each record

@@ -1,8 +1,8 @@
 """Render a single crawlable, rankable obituary page per person.
 
 This is the SEO layer. Each page is a real URL Google can index, with a
-person's name in the title and H1, schema.org Obituary structured data, and
-the full text. The React widget is only the browse surface; these pages are
+person's name in the title and H1, schema.org NewsArticle structured data
+about the Person, and the full text. The React widget is only the browse surface; these pages are
 what win the "<name> obituary Wausau" searches.
 
 Visual system mirrors the WPR newsroom: Oswald (the condensed nameplate face),
@@ -461,16 +461,27 @@ def _structured_data(
         publisher["logo"] = {"@type": "ImageObject", "url": _logo_src(base_url, newsroom)}
     data = {
         "@context": "https://schema.org",
-        "@type": "Obituary",
+        # A notice the newsroom publishes about one person, so a NewsArticle whose
+        # subject is the Person. schema.org has no Obituary type: these pages
+        # declared one until Oct 2026, and Google cannot use a type it does not
+        # know, so the markup they were built around went unread.
+        "@type": "NewsArticle",
         "headline": f"{ob.name} obituary",
         "url": page_url,
         "mainEntityOfPage": page_url,
         "datePublished": ob.source_date,
+        # Obituaries are rarely revised once published, and a WordPress batch
+        # revises as a unit — a correction to one person would move every
+        # neighbour's date — so the honest modified date is the published one.
+        "dateModified": ob.source_date,
         "inLanguage": "en-US",
         # The coverage area, not a claimed residence — reinforces the local
         # "<name> obituary <area>" query intent without inventing a place.
         "contentLocation": {"@type": "Place", "name": newsroom.coverage_area},
         "publisher": publisher,
+        # Obituaries are unsigned, so the newsroom that publishes the notice is
+        # credited, as with any unsigned news content.
+        "author": publisher,
         **({"image": images} if images else {}),
         "about": {
             "@type": "Person",
