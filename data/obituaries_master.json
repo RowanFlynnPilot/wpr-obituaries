@@ -397,6 +397,7 @@
     "funeral_home_scrape:132962700384176": "c8d1bbfa1665",
     "funeral_home_scrape:134046731153593": "4464df846186",
     "funeral_home_scrape:134124144109828": "929549361793",
+    "funeral_home_scrape:134472583805355": "9cd0fa5fea5c",
     "funeral_home_scrape:134541211092356": "4059e547f2a5",
     "funeral_home_scrape:134692131446208": "c90b1d3591df",
     "funeral_home_scrape:135560291434838": "a7e0977edf14",
@@ -25533,6 +25534,22 @@
       "body": "Corrine Sue Petri, 55, Edgar, passed away peacefully on Thursday, September 24, 2026 at Mayo Clinic Health Systems in Eau Claire, WI.\n\nShe was born July 2, 1971 in Medford, daughter of Gene and Martha (Ortman) Rodman. On June 17, 1995, she married Joe Petri at St. John Lutheran Church-High Steeple, Edgar. He survives.\n\nCorrine loved to help people whenever she could and loved all animals, especially her cats and dogs. Her favorite times were spent with her family and being a loving aunt to her nephew, Cody.\n\nSurvivors include her husband, Joe; her mother, Martha Rodman; her brother, Wade (Raegene) Rodman; her nephew, Cody Rodman; and many aunts, uncles, cousins and friends.\n\nShe was preceded in death by her father, Gene Rodman; and her sister, Gail Rodman.\n\nPrivate services were held.",
       "source": "wordpress_scrape",
       "slug": "corrine-s-petri-2026-82a432"
+    },
+    {
+      "name": "Diana Marie Raboin",
+      "source_id": 134472583805355,
+      "source_url": "https://www.helke.com/obituaries/diana-raboin",
+      "source_date": "2026-10-05",
+      "death_year": 2026,
+      "birth_date": "1946-08-15",
+      "death_date": "2026-10-05",
+      "age": 80,
+      "funeral_home": "Helke Funeral Home & Cremation Service",
+      "photo_url": "https://cdn.tukioswebsites.com/2f3fa4ae-4644-4f42-8fc4-61e6a821569e/lg",
+      "summary": "Diana Marie Raboin, age 80, passed away on October 5, 2026.",
+      "body": "Diana \"Diane\" Marie Raboin, age 80, of Wausau, passed away on October 5, 2026.\n\nDiane was born on August 15, 1942, in Iron Mountain, Michigan, to Clarence and Myrtle Johnson. She was born and raised in Iron Mountain before making her way to Wisconsin. Diane married Leslie Raboin on October 10, 1964. Together, they first lived in Appleton before making their home in Wausau and raising their family.\n\nDiane enjoyed a successful career in automobile sales at Bob Johnson's, at a time when the industry was largely dominated by men. She earned the respect of those around her through her hard work, knowledge, and natural ability to work with people. Her talent was recognized when she competed in a sales competition and placed second. Diane proved herself in an industry where she stood out, earning the respect of her coworkers and customers alike.\n\nLater in life, Diane continued her caring work as a CNA at Aspirus, where her compassion for others also led her to volunteer with the Aspirus Hospice Unit.\n\nAfter retirement, Diane enjoyed spending time at her and Leslie's camper in Goodman, Wisconsin, where some of her favorite memories were made surrounded by family and friends. She especially enjoyed camping and making memories with friends, both old and new. Diane and Leslie also looked forward to spending their winters in Gulf Shores, Alabama, enjoying the warmer weather and time together. She enjoyed flower arranging, golfing, camping, and snowmobiling in the Northwoods. She was also a devoted Green Bay Packers fan and enjoyed spending time at the casino playing slot machines.\n\nDiane's greatest joy was her family. She treasured her children and grandchildren and held a particularly special place in her heart for her four grandchildren and her twin great-granddaughters.\n\nDiane is survived by her children, Jeff Raboin; Chris Raboin and his wife, Gina; and Renae Laffin and her husband, Lester; grandchildren, Erica Laffin, Brendan Raboin, Evan Raboin, and Zackary Raboin; great-grandchildren Ashynd Laffin and Baylyn Laffin; her sister Debra Cheney and her husband, Steve; and her beloved dogs, Duffer and Bailey.\n\nShe was preceded in death by her husband, Leslie Raboin; daughter, Shelly Raboin; brother, Dale Johnson; and parents, Clarence and Myrtle Johnson.\n\nDiane will be remembered as a charming, caring, and determined woman who made an impact on everyone fortunate enough to know her. Her memory will live on through the many lives she touched and, most of all, through the family she loved so dearly.\n\nVisitation will be at 9:30 am - 10:30 am and a memorial mass will follow with Father Sebastian Kolodziejczyk officiating at 10:30 a.m. on Friday, October 9, 2026, at Saint Matthew Catholic Church, 227 S. 28th Ave., Wausau, WI 54401. Family and friends are invited to gather and celebrate Diane's life.",
+      "source": "funeral_home_scrape",
+      "slug": "diana-marie-raboin-2026-7a4d56"
     },
     {
       "name": "George W. Gering",
