@@ -79,7 +79,16 @@ const BrowseBar = forwardRef(function BrowseBar(
         className={`browse__toggle${open ? " is-open" : ""}`}
         aria-expanded={open}
         aria-controls="browse-panel"
-        onClick={() => onOpenChange(!open)}
+        onClick={(e) => {
+          const toggle = e.currentTarget;
+          onOpenChange(!open);
+          // Opening or closing the panel stands the slideshow above it down or
+          // back up, moving this button by the strip's height. A page anchors
+          // its scroll to that on its own, but the WordPress page around the
+          // iframe cannot see inside it, so bring the button back into view if
+          // the move carried it off screen (a no-op when it is still visible).
+          setTimeout(() => toggle.scrollIntoView({ block: "nearest" }), 0);
+        }}
       >
         <span className="browse__toggle-mark" aria-hidden="true">
           {open ? "–" : "+"}

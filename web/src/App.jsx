@@ -108,11 +108,13 @@ export default function App() {
     if (data) reportStateToParent(writeState(query, filter));
   }, [data, query, filter]);
 
-  // Search and browse are independent narrowings; activating one clears the other.
-  // Clearing the search returns to the default view — carousel and all.
+  // Search and browse are independent narrowings; activating one clears the other
+  // (searching also closes the browse panel). Clearing the search returns to the
+  // default view — carousel and all.
   const onSearch = (v) => {
     setQuery(v);
     setFilter(v ? NO_FILTER : RECENT);
+    if (v) setBrowseOpen(false);
   };
   const onFilter = (f) => {
     setFilter(f);
@@ -186,8 +188,10 @@ export default function App() {
   }
 
   // The strip is the default view's own content: it stands down the moment the
-  // reader searches or browses, when the list itself is the answer.
-  const isDefault = !query && filter.kind === "recent";
+  // reader searches or opens browse, when the list itself is the answer. An open
+  // panel counts even before a month or letter is chosen — it shows the same
+  // recent list, but the reader has asked to browse it.
+  const isDefault = !query && filter.kind === "recent" && !browseOpen;
 
   return (
     <main className="page">

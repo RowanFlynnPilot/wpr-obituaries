@@ -432,7 +432,12 @@ unless a filter is active; inside, two rows — Month (Last 3 months · All · u
 to six month chips with three or more names, the rest in an "Earlier…"
 select) and Last name — with 11px mono labels and no box around them, then a
 second-tier line ("More ways to browse: town, funeral home") that reveals the
-two selects, so the open panel is two rows, not a control deck. A letter
+two selects, so the open panel is two rows, not a control deck. Opening the
+panel is browsing, so the Recently Remembered strip stands down even before a
+month or letter is chosen, and the toggle is brought back into view if the
+strip's collapse lifted it off screen (inside the WordPress iframe the host
+page cannot anchor its scroll to it); starting a search closes the panel, so
+clearing the search returns the whole default view. A letter
 browse lists surnames alphabetically under one heading. On phones the selects
 go full-width with their labels stacked above.
 
