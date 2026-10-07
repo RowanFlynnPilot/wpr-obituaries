@@ -350,22 +350,6 @@ oxblood outline (offset 2px) on keyboard focus.
 - **Background:** paper white on the newsprint page.
 - **Shadow Strategy:** none — a 1px rule border plus a 3px oxblood top edge.
 - **Internal Padding:** 22–32px.
-- **Featured card**: portrait (132×168, ruled frame) beside name / lifespan /
-  three-line excerpt / "Read the full obituary →" in oxblood mono; fades in
-  over 0.5s when it changes; hover to hover-wash with the name turning oxblood.
-  The strip holds **five** of this week's portraits, newest death first (the
-  same set on every visit — not a shuffle), and it follows the newest day's
-  names rather than standing between the search and its results. The dots are
-  one keyboard stop with a roving tabindex (arrow keys move between them), so
-  the strip costs a keyboard reader five stops, not fourteen. Beside the dots
-  sits a visible mono **Pause / Play** control (28px tall, labelled "Pause
-  auto-advance" / "Resume auto-advance"; auto-advance also stops for good
-  after any arrow or dot choice). The live region carries a name only after a
-  change the reader asked for — someone reading the register is never
-  interrupted every 6.5 seconds. **Not rendered on phones at all** (the
-  component unmounts, so nothing advances or announces behind a hidden
-  section): there the first name must land within a screen of the search, and
-  the mini widget already puts a face in the article.
 - **Featured card** ("Recently Remembered"): portrait (132×168, ruled frame)
   beside name / lifespan / three-line excerpt / "Read the full obituary →" in
   oxblood mono; fades in over 0.5s when it changes; hover to hover-wash with
@@ -374,9 +358,8 @@ oxblood outline (offset 2px) on keyboard focus.
   **five** faces drawn at random from the past month's notices, so a different
   handful gets its moment on each visit; the draw happens once per visit, so the
   strip stays put while the reader is on the page. The dots are one keyboard
-  stop with a roving tabindex
-  (arrow keys move between them), so the strip costs a keyboard reader five
-  stops, not fourteen. Beside them sits a visible mono **Pause / Resume**
+  stop with a roving tabindex (arrow keys move between them), so the strip
+  costs a keyboard reader five stops, not fourteen. Beside them sits a visible mono **Pause / Resume**
   control (28px tall, its visible word contained in its accessible name;
   auto-advance also stops for good after any arrow or dot choice). The live
   region carries a name only after a change the reader asked for, so someone
