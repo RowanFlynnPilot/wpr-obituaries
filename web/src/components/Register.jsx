@@ -62,8 +62,9 @@ export default function Register({
   const visible = obituaries.slice(0, limit);
   const remaining = obituaries.length - visible.length;
 
-  // Grouped by date of death (98% of records), labelled honestly; the few with
-  // only a publication date say so. A letter browse is one alphabetical index.
+  // Grouped by date of death (98% of records), labelled honestly but gently
+  // ("Passed …", the word a family would use); the few with only a publication
+  // date say so. A letter browse is one alphabetical index.
   let groups;
   if (letter) {
     groups = [{ key: letter, label: `Last names beginning with ${letter}`, items: visible }];
@@ -76,7 +77,7 @@ export default function Register({
       else {
         groups.push({
           key,
-          label: `${hasDeathDate(ob) ? "Died" : "Published"} ${dateLabel(key)}`,
+          label: `${hasDeathDate(ob) ? "Passed" : "Published"} ${dateLabel(key)}`,
           items: [ob],
         });
       }
