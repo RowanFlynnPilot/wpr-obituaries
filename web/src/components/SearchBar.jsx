@@ -1,3 +1,16 @@
+import { useEffect, useState } from "react";
+
+// A value that only changes once it has held still for `ms` — so a reader who
+// types "jensen" hears one count, not six.
+function useSettled(value, ms) {
+  const [settled, setSettled] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setSettled(value), ms);
+    return () => clearTimeout(t);
+  }, [value, ms]);
+  return settled;
+}
+
 // The name search is the product (PRODUCT.md, principle 1): it sits directly
 // under the lede, reads at body size, and has a boundary a low-vision reader
 // can see. Nothing above it but the newsroom's flag and the title; nothing
@@ -6,6 +19,11 @@ export default function SearchBar({ value, onChange, count, mentions = 0, scope 
   const names = `${count} ${count === 1 ? "name" : "names"}`;
   const extra = mentions ? ` · ${mentions} more mention${mentions === 1 ? "" : "s"}` : "";
   const scoped = scope ? ` · ${scope}` : "";
+  const line = `${names}${extra}${scoped}`;
+  // Sighted readers watch the count change as they type. Screen-reader users
+  // get the same text from a stable status region once typing pauses; the
+  // visible line is hidden from them so it is not read twice.
+  const announced = useSettled(line, 700);
   // Results are live as you type, so Enter's one job is to dismiss the phone
   // keyboard and show the list — what enterKeyHint="search" promises.
   const onKeyDown = (e) => {
@@ -41,11 +59,13 @@ export default function SearchBar({ value, onChange, count, mentions = 0, scope 
           enterKeyHint="search"
         />
       </div>
-      {/* role="status" already implies a polite, atomic live region. */}
-      <p className="search__count" role="status">
-        {names}
-        {extra}
-        {scoped}
+      <p className="search__count" aria-hidden="true">
+        {line}
+      </p>
+      {/* role="status" is a polite, atomic live region. It is rendered from the
+          start with the initial count, so only a change is announced. */}
+      <p className="sr-only" role="status">
+        {announced}
       </p>
     </div>
   );

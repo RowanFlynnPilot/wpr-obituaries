@@ -101,7 +101,8 @@ To point it somewhere else, re-encode the new URL and swap it in; drop the
 `?link=…` entirely and the link falls back to the tool's own register.
 
 Details: shows 10 of the 20 most recent obituaries, shuffled per page load;
-auto-advances every 6 s (pauses on hover); each person links to their full
+auto-advances every 6 s (holds while hovered or focused; a visible Pause button
+stops it, and it never advances on its own under reduced motion); each person links to their full
 obituary page (`target="_top"`, so it opens as a normal navigation, not inside
 the frame); sponsor logos and click tracking match the main tool.
 

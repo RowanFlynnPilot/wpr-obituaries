@@ -35,7 +35,7 @@ body {
 .mini__kicker {
   margin: 0 0 12px;
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: 11px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   text-align: center;
@@ -84,11 +84,13 @@ body {
   line-height: 1.2;
 }
 
-.mini__card:hover .mini__name {
-  color: var(--accent);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
+@media (hover: hover) {
+  .mini__card:hover .mini__name {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
 }
 
 .mini__span {
@@ -109,6 +111,7 @@ body {
 
 .mini__nav {
   display: flex;
+  flex-wrap: wrap; /* a narrow sidebar wraps the dots rather than overflowing */
   align-items: center;
   justify-content: center;
   gap: 4px;
@@ -123,7 +126,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--border-control);
   border-radius: 50%;
   background: var(--paper-2);
   color: var(--accent);
@@ -133,9 +136,11 @@ body {
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.mini__arrow:hover {
-  background: var(--hover);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .mini__arrow:hover {
+    background: var(--hover);
+    border-color: var(--accent);
+  }
 }
 
 .mini__arrow:focus-visible {
@@ -147,40 +152,84 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1px;
+  gap: 0;
 }
 
-/* 6px dot inside a 22px transparent hit area so it's tappable. */
+/* A 6px dot inside a 24px hit area, set edge to edge: centres 24px apart are
+   what WCAG 2.5.8 asks of targets this close together (22px with a 1px gap
+   was not). */
 .mini__dot {
   flex: none;
-  width: 22px;
-  height: 22px;
-  padding: 8px;
+  width: 24px;
+  height: 24px;
+  padding: 9px;
   box-sizing: border-box;
   background-clip: content-box;
   border: 0;
   border-radius: 50%;
-  /* --faint, not --rule: an inactive dot must clear the 3:1 non-text minimum. */
-  background-color: var(--faint);
+  /* --muted, not --rule: an inactive dot must clear the 3:1 non-text minimum. */
+  background-color: var(--muted);
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.15s ease;
+  transition: background-color 0.15s ease;
 }
 
+/* The current dot grows inside its own box (less padding), never by scaling
+   the button: a scaled hit area would spill into its neighbours'. */
 .mini__dot.is-active {
   background-color: var(--accent);
-  transform: scale(1.3);
+  padding: 8px;
 }
 
 .mini__dot:focus-visible,
+.mini__pause:focus-visible,
 .mini__all:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
+/* Pause beside "View all", directly under the dots: the visible way to stop a
+   card that moves on its own beside article text. */
+.mini__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 12px;
+  margin-top: 10px;
+}
+
+.mini__foot--pause {
+  justify-content: space-between;
+}
+
+.mini__pause {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--border-control);
+  border-radius: 2px;
+  min-height: 28px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+@media (hover: hover) {
+  .mini__pause:hover {
+    background: var(--hover);
+    color: var(--accent);
+  }
+}
+
 .mini__all {
-  display: block;
-  margin-top: 12px;
-  text-align: center;
+  /* A standalone link, so it gets a full 24px target, not just its text. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 2px 0;
   font-family: var(--mono);
   font-size: 11.5px;
   letter-spacing: 0.04em;
@@ -188,8 +237,10 @@ body {
   text-decoration: none;
 }
 
-.mini__all:hover {
-  text-decoration: underline;
+@media (hover: hover) {
+  .mini__all:hover {
+    text-decoration: underline;
+  }
 }
 
 .mini__sponsors {
@@ -207,7 +258,7 @@ body {
   font-size: 9.5px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--muted);
 }
 
 .mini__sponsor-logos {

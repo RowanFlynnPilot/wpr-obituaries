@@ -8,18 +8,40 @@
   --ink: #1b1a18;
   --paper: #f6f2ea;
   --paper-2: #fffdf7;
-  --muted: #6f6a61;
-  --faint: #6d675f; /* darkest "faint": its uses are tiny text, which needs the
-                       full 4.5:1 AA ratio on --paper, not the 3:1 large-text floor */
+  /* Secondary text. Measured against every surface it sits on — newsprint
+     5.11:1, paper white 5.60:1, and the row hover wash 4.72:1, the worst case
+     (the old #6f6a61 fell to 4.44:1 there, under AA). One token: the old
+     "faint" was a near-duplicate doing the same job. */
+  --muted: #6b665d;
+  /* Decorative only — card edges, portrait frames, dividers. Never a control's
+     boundary: at 1.34:1 a reader cannot find the edge of a box drawn with it. */
   --rule: #d9d3c6;
   --hairline: #e7e1d5;
+  /* A control's boundary (inputs, selects, chips, buttons): 3.25:1 on
+     newsprint and 3.57:1 on paper white, over WCAG 1.4.11's 3:1. */
+  --border-control: #8b867a;
   --accent: #7c2e36;       /* oxblood — dignified, ties to the sponsor crimson */
   --accent-2: #9a3a43;
   --hover: #efe9dd;
+  /* The search-match highlight, a step darker than the hover wash so it does
+     not vanish when its row is hovered. Ink on it measures 12.7:1. */
+  --mark: #e2dcd0;
 
   --serif: "Merriweather", Georgia, "Times New Roman", serif;
   --nameplate: "Oswald", "Arial Narrow", system-ui, sans-serif;
   --mono: "Courier Prime", "Courier New", monospace;
+}
+
+/* Readers who ask their system for more contrast get it: text to 7:1, every
+   edge and boundary a step stronger. Same hues, lightness only. */
+@media (prefers-contrast: more) {
+  :root {
+    --muted: #514c44;
+    --rule: #8b867a;
+    --hairline: #aca69b;
+    --border-control: #6f695e;
+    --mark: #cfcabe;
+  }
 }
 
 * {
@@ -203,8 +225,10 @@ body {
   transition: opacity 0.15s ease;
 }
 
-.masthead__sponsor-logo:hover img {
-  opacity: 0.78;
+@media (hover: hover) {
+  .masthead__sponsor-logo:hover img {
+    opacity: 0.78;
+  }
 }
 
 @media (max-width: 480px) {
@@ -248,9 +272,13 @@ body {
   transition: background-color 0.15s ease;
 }
 
-.featured__card:hover,
 .featured__card:focus-visible {
   background: var(--hover);
+}
+@media (hover: hover) {
+  .featured__card:hover {
+    background: var(--hover);
+  }
 }
 
 .featured__photo {
@@ -277,9 +305,13 @@ body {
   color: var(--ink);
 }
 
-.featured__card:hover .featured__name,
 .featured__card:focus-visible .featured__name {
   color: var(--accent);
+}
+@media (hover: hover) {
+  .featured__card:hover .featured__name {
+    color: var(--accent);
+  }
 }
 
 .featured__span {
@@ -325,16 +357,18 @@ body {
   line-height: 1;
   color: var(--ink);
   background: var(--paper-2);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--border-control);
   border-radius: 50%;
   cursor: pointer;
   opacity: 0.85;
   transition: opacity 0.15s ease, background-color 0.15s ease;
 }
 
-.featured__arrow:hover {
-  opacity: 1;
-  background: var(--paper);
+@media (hover: hover) {
+  .featured__arrow:hover {
+    opacity: 1;
+    background: var(--paper);
+  }
 }
 
 .featured__arrow--prev {
@@ -367,7 +401,7 @@ body {
   text-transform: uppercase;
   color: var(--muted);
   background: none;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--border-control);
   border-radius: 2px;
   min-height: 28px;
   padding: 6px 10px;
@@ -375,9 +409,11 @@ body {
   transition: background-color 0.12s ease, color 0.12s ease;
 }
 
-.featured__pause:hover {
-  background: var(--hover);
-  color: var(--accent);
+@media (hover: hover) {
+  .featured__pause:hover {
+    background: var(--hover);
+    color: var(--accent);
+  }
 }
 
 /* 8px dot painted inside a 24px transparent hit area (WCAG 2.5.8 target size). */
@@ -390,16 +426,18 @@ body {
   background-clip: content-box;
   border: 0;
   border-radius: 50%;
-  /* --faint, not --rule: an inactive dot is a UI affordance and needs the 3:1
+  /* --muted, not --rule: an inactive dot is a UI affordance and needs the 3:1
      non-text minimum against the paper — --rule is a 1.3:1 hairline tone. */
-  background-color: var(--faint);
+  background-color: var(--muted);
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.15s ease;
+  transition: background-color 0.15s ease;
 }
 
+/* The current dot grows inside its own box (less padding), never by scaling
+   the button: a scaled hit area would spill into its neighbours'. */
 .featured__dot.is-active {
   background-color: var(--accent);
-  transform: scale(1.25);
+  padding: 7px;
 }
 
 @keyframes featured-fade {
@@ -468,12 +506,14 @@ body {
   cursor: pointer;
 }
 
-.search__input::-webkit-search-cancel-button:hover {
-  background: var(--accent);
+@media (hover: hover) {
+  .search__input::-webkit-search-cancel-button:hover {
+    background: var(--accent);
+  }
 }
 
 .search__input::placeholder {
-  color: var(--faint);
+  color: var(--muted);
   font-style: italic;
   font-size: 1rem;
 }
@@ -512,9 +552,11 @@ body {
   cursor: pointer;
 }
 
-.browse__toggle:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+@media (hover: hover) {
+  .browse__toggle:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
 }
 
 .browse__toggle-mark {
@@ -523,7 +565,7 @@ body {
   justify-content: center;
   width: 22px;
   height: 22px;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--border-control);
   border-radius: 2px;
   background: var(--paper-2);
   color: var(--accent);
@@ -578,16 +620,18 @@ body {
   line-height: 1;
   color: var(--ink);
   background: var(--paper);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--border-control);
   border-radius: 2px;
   padding: 6px 9px;
   cursor: pointer;
   transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
 }
 
-.browse__chip:hover {
-  background: var(--hover);
-  border-color: var(--muted);
+@media (hover: hover) {
+  .browse__chip:hover {
+    background: var(--hover);
+    border-color: var(--muted);
+  }
 }
 
 .browse__chip.is-active {
@@ -605,8 +649,10 @@ body {
   font-size: 11px;
 }
 
-.browse__chip:hover .browse__count {
-  border-left-color: var(--faint);
+@media (hover: hover) {
+  .browse__chip:hover .browse__count {
+    border-left-color: var(--muted);
+  }
 }
 
 .browse__chip.is-active .browse__count {
@@ -631,9 +677,11 @@ body {
   transition: background-color 0.12s ease, color 0.12s ease;
 }
 
-.browse__letter:hover {
-  background: var(--hover);
-  color: var(--accent);
+@media (hover: hover) {
+  .browse__letter:hover {
+    background: var(--hover);
+    color: var(--accent);
+  }
 }
 
 .browse__letter.is-active {
@@ -663,9 +711,11 @@ body {
   cursor: pointer;
 }
 
-.browse__more:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+@media (hover: hover) {
+  .browse__more:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
 }
 
 .browse__row--more .browse__row--selects {
@@ -686,7 +736,7 @@ body {
   font-size: 12px;
   color: var(--ink);
   background-color: var(--paper);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--border-control);
   border-radius: 2px;
   padding: 6px 26px 6px 10px;
   max-width: 240px;
@@ -700,8 +750,10 @@ body {
   transition: border-color 0.12s ease;
 }
 
-.browse__select select:hover {
-  border-color: var(--muted);
+@media (hover: hover) {
+  .browse__select select:hover {
+    border-color: var(--muted);
+  }
 }
 
 /* A chosen facet reads active, like the month/letter chips. */
@@ -766,9 +818,13 @@ body {
   transition: background-color 0.15s ease;
 }
 
-.entry__link:hover,
 .entry__link:focus-visible {
   background: var(--hover);
+}
+@media (hover: hover) {
+  .entry__link:hover {
+    background: var(--hover);
+  }
 }
 
 /* Visible keyboard focus on every interactive control (was outline:none). Rows
@@ -839,12 +895,19 @@ body {
   color: var(--ink);
 }
 
-.entry__link:hover .entry__name,
 .entry__link:focus-visible .entry__name {
   color: var(--accent);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
+}
+@media (hover: hover) {
+  .entry__link:hover .entry__name {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
 }
 
 .entry__span {
@@ -866,9 +929,12 @@ body {
   color: var(--muted);
 }
 
+/* The matched word: its own fill plus weight, so the cue survives the row's
+   hover wash and does not rest on color alone. */
 .entry__mark {
-  background: var(--hover);
+  background: var(--mark);
   color: var(--ink);
+  font-weight: 700;
   padding: 1px 2px;
 }
 
@@ -912,16 +978,18 @@ body {
   letter-spacing: 0.03em;
   color: var(--accent);
   background: var(--paper-2);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--border-control);
   border-radius: 2px;
   padding: 8px 12px;
   cursor: pointer;
   transition: background-color 0.12s ease, border-color 0.12s ease;
 }
 
-.register__action:hover {
-  background: var(--hover);
-  border-color: var(--muted);
+@media (hover: hover) {
+  .register__action:hover {
+    background: var(--hover);
+    border-color: var(--muted);
+  }
 }
 
 /* A funeral home's own name is not a person. One line into that home's
@@ -950,9 +1018,11 @@ body {
   cursor: pointer;
 }
 
-.register__elsewhere-link:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+@media (hover: hover) {
+  .register__elsewhere-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
 }
 
 .register__group--mentions {
@@ -974,16 +1044,18 @@ body {
   letter-spacing: 0.04em;
   color: var(--ink);
   background: var(--paper);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--border-control);
   border-radius: 2px;
   padding: 11px 12px;
   cursor: pointer;
   transition: background-color 0.12s ease, border-color 0.12s ease;
 }
 
-.register__more:hover {
-  background: var(--hover);
-  border-color: var(--muted);
+@media (hover: hover) {
+  .register__more:hover {
+    background: var(--hover);
+    border-color: var(--muted);
+  }
 }
 
 .register__more-count {
@@ -1036,8 +1108,10 @@ body {
   transition: opacity 0.15s ease;
 }
 
-.sponsor-card__logo:hover img {
-  opacity: 0.82;
+@media (hover: hover) {
+  .sponsor-card__logo:hover img {
+    opacity: 0.82;
+  }
 }
 
 .footer__rule {
@@ -1068,8 +1142,10 @@ body {
   color: var(--accent);
   text-decoration: none;
 }
-.footer__index a:hover {
-  text-decoration: underline;
+@media (hover: hover) {
+  .footer__index a:hover {
+    text-decoration: underline;
+  }
 }
 
 .footer__colophon {
@@ -1252,13 +1328,15 @@ body {
   letter-spacing: 0.04em;
   color: var(--accent);
   background: var(--paper-2);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--border-control);
   border-radius: 2px;
   padding: 9px 18px;
   cursor: pointer;
 }
-.submit__open:hover {
-  background: var(--hover);
+@media (hover: hover) {
+  .submit__open:hover {
+    background: var(--hover);
+  }
 }
 .submit--open {
   flex-basis: 100%;
@@ -1299,7 +1377,7 @@ body {
   font-size: 1rem;
   color: var(--ink);
   background: var(--paper);
-  border: 1px solid var(--rule);
+  border: 1px solid var(--border-control);
   border-radius: 2px;
   padding: 9px 11px;
 }
@@ -1328,22 +1406,26 @@ body {
   padding: 10px 20px;
   cursor: pointer;
 }
-.submit__send:hover {
-  background: var(--accent-2);
-  border-color: var(--accent-2);
+@media (hover: hover) {
+  .submit__send:hover {
+    background: var(--accent-2);
+    border-color: var(--accent-2);
+  }
 }
 .submit__cancel {
   font-family: var(--mono);
   font-size: 13px;
   color: var(--muted);
   background: transparent;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--border-control);
   border-radius: 2px;
   padding: 10px 18px;
   cursor: pointer;
 }
-.submit__cancel:hover {
-  background: var(--hover);
+@media (hover: hover) {
+  .submit__cancel:hover {
+    background: var(--hover);
+  }
 }
 @media (max-width: 480px) {
   .submit__grid {

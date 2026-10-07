@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import config from "../config.js";
 import { trackEvent } from "../lib/analytics.js";
 import { initials, lifespan, photoSrc } from "../lib/format.js";
@@ -29,15 +29,21 @@ function shuffle(list) {
 }
 
 export default function MiniWidget() {
+  const id = useId();
   const [data, setData] = useState(null);
   const [sponsor, setSponsor] = useState(null);
   const [error, setError] = useState(null);
   const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
-  // A manual choice stops the auto-advance for good — hover/focus pause never
-  // fires on touch, so tapping an arrow or dot is the only pause a phone has.
-  const [interacted, setInteracted] = useState(false);
-  const timer = useRef(null);
+  // Hover or focus inside the card holds it still while someone is reading.
+  const [held, setHeld] = useState(false);
+  // Stopped for good by the Pause control or any manual choice. The widget sits
+  // beside article text and moves on its own, so a visible way to stop it is
+  // required (WCAG 2.2.2) — hover never fires on a phone.
+  const [stopped, setStopped] = useState(false);
+  const dotsRef = useRef(null);
+  const reduced =
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   useEffect(() => {
     // recent.json is the small feed of the freshest few records — the mini
@@ -59,16 +65,13 @@ export default function MiniWidget() {
     return shuffle(data.obituaries.slice(0, POOL)).slice(0, SHOW);
   }, [data]);
 
+  // Under reduced motion it never advances on its own (the dots still step).
+  const playing = picks.length > 1 && !held && !stopped && !reduced;
   useEffect(() => {
-    if (paused || interacted || picks.length < 2) return undefined;
-    // Honour reduced-motion: no auto-advance (the dots still let you step through).
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
-    timer.current = setInterval(
-      () => setIndex((i) => (i + 1) % picks.length),
-      ADVANCE_MS
-    );
-    return () => clearInterval(timer.current);
-  }, [paused, interacted, picks.length]);
+    if (!playing) return undefined;
+    const t = setInterval(() => setIndex((i) => (i + 1) % picks.length), ADVANCE_MS);
+    return () => clearInterval(t);
+  }, [playing, picks.length]);
 
   if (error) {
     return (
@@ -99,31 +102,47 @@ export default function MiniWidget() {
   const span = lifespan(ob);
   const sponsors = sponsor?.sponsors || [];
   const allUrl = registerUrl();
-  const go = (delta) => {
-    setInteracted(true);
-    setIndex((i) => (i + delta + picks.length) % picks.length);
+  const go = (n) => {
+    setStopped(true);
+    setIndex((n + picks.length) % picks.length);
   };
-  const pick = (i) => {
-    setInteracted(true);
-    setIndex(i);
+
+  // The dots are one Tab stop with a roving tabindex: arrow keys, Home and End
+  // move between them, so ten people cost a keyboard reader one stop, not ten.
+  const onDotsKey = (e) => {
+    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    let n;
+    if (step) n = index + step;
+    else if (e.key === "Home") n = 0;
+    else if (e.key === "End") n = picks.length - 1;
+    else return;
+    e.preventDefault();
+    n = (n + picks.length) % picks.length;
+    go(n);
+    // Every dot is already rendered; only its tabindex moves, so focus can too.
+    dotsRef.current?.children[n]?.focus();
   };
 
   return (
     <aside
       className="mini"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)}
-      onBlurCapture={() => setPaused(false)}
+      onMouseEnter={() => setHeld(true)}
+      onMouseLeave={() => setHeld(false)}
+      onFocusCapture={() => setHeld(true)}
+      onBlurCapture={() => setHeld(false)}
       aria-label={`Recent obituaries from ${identity.name}`}
     >
       <p className="mini__kicker">In Memoriam · {identity.shortName}</p>
 
+      {/* Named by the person and described by their years; the summary stays
+          out of the link's name. */}
       <a
         className="mini__card"
         href={`${BASE}o/${ob.slug}.html`}
         target="_top"
         key={ob.slug}
+        aria-labelledby={`${id}-name`}
+        aria-describedby={span ? `${id}-span` : undefined}
       >
         {ob.photoUrl ? (
           <img className="mini__photo" src={photoSrc(ob.photoUrl)} alt="" loading="lazy" />
@@ -133,11 +152,24 @@ export default function MiniWidget() {
           </span>
         )}
         <span className="mini__text">
-          <span className="mini__name">{ob.name}</span>
-          {span && <span className="mini__span">{span}</span>}
+          <span className="mini__name" id={`${id}-name`}>
+            {ob.name}
+          </span>
+          {span && (
+            <span className="mini__span" id={`${id}-span`}>
+              {span}
+            </span>
+          )}
           {ob.summary && <span className="mini__summary">{ob.summary}</span>}
         </span>
       </a>
+
+      {/* A stable region that speaks only for a change the reader made: while
+          the card advances on its own it stays empty, so article text is never
+          interrupted every six seconds. */}
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {playing ? "" : `Now showing ${ob.name}, ${index + 1} of ${picks.length}`}
+      </p>
 
       {picks.length > 1 && (
         <div className="mini__nav">
@@ -145,19 +177,26 @@ export default function MiniWidget() {
             className="mini__arrow"
             type="button"
             aria-label="Previous obituary"
-            onClick={() => go(-1)}
+            onClick={() => go(index - 1)}
           >
             ‹
           </button>
-          <div className="mini__dots" role="group" aria-label="More obituaries">
+          <div
+            className="mini__dots"
+            role="group"
+            aria-label="Choose an obituary (arrow keys)"
+            ref={dotsRef}
+            onKeyDown={onDotsKey}
+          >
             {picks.map((p, i) => (
               <button
                 key={p.slug}
                 type="button"
                 className={`mini__dot${i === index ? " is-active" : ""}`}
-                aria-label={p.name}
+                aria-label={`Show ${p.name}`}
                 aria-current={i === index}
-                onClick={() => pick(i)}
+                tabIndex={i === index ? 0 : -1}
+                onClick={() => go(i)}
               />
             ))}
           </div>
@@ -165,16 +204,30 @@ export default function MiniWidget() {
             className="mini__arrow"
             type="button"
             aria-label="Next obituary"
-            onClick={() => go(1)}
+            onClick={() => go(index + 1)}
           >
             ›
           </button>
         </div>
       )}
 
-      <a className="mini__all" href={allUrl} target="_top">
-        View all obituaries →
-      </a>
+      <div className={`mini__foot${picks.length > 1 && !reduced ? " mini__foot--pause" : ""}`}>
+        {picks.length > 1 && !reduced && (
+          <button
+            type="button"
+            className="mini__pause"
+            aria-label={stopped ? "Resume auto-advance" : "Pause auto-advance"}
+            onClick={() => setStopped((s) => !s)}
+          >
+            {/* The visible word sits inside the accessible name, so voice
+                control can press it by what it reads (WCAG 2.5.3). */}
+            {stopped ? "Resume" : "Pause"}
+          </button>
+        )}
+        <a className="mini__all" href={allUrl} target="_top">
+          View all obituaries →
+        </a>
+      </div>
 
       {sponsors.length > 0 && (
         <div className="mini__sponsors">

@@ -132,8 +132,9 @@ def _root_vars_wide(newsroom: Newsroom) -> str:
     """
     return f"""
     :root {{
-      --ink: #1b1a18; --paper: {newsroom.paper}; --paper-2: #fffdf7; --muted: #6f6a61;
-      --faint: #6d675f; --rule: #d9d3c6; --hairline: #e7e1d5; --hover: #efe9dd; --accent: {newsroom.accent};
+      --ink: #1b1a18; --paper: {newsroom.paper}; --paper-2: #fffdf7; --muted: #6b665d;
+      --rule: #d9d3c6; --hairline: #e7e1d5; --border-control: #8b867a; --hover: #efe9dd;
+      --accent: {newsroom.accent};
       --serif: {newsroom.serif};
       --nameplate: {newsroom.nameplate};
       --mono: {newsroom.mono};
@@ -189,22 +190,27 @@ def render_sitemap(
 
 
 _SECONDARY_CSS = """
+    /* Readers who ask their system for more contrast get it: text to 7:1 and
+       every edge a step stronger. Same hues, lightness only. */
+    @media (prefers-contrast: more) {
+      :root { --muted: #514c44; --rule: #8b867a; --hairline: #aca69b; --border-control: #6f695e; }
+    }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--paper); color: var(--ink);
       font-family: var(--serif); line-height: 1.7; -webkit-font-smoothing: antialiased; }
     .wrap { max-width: 680px; margin: 0 auto; padding: 44px 24px 80px; }
     .topnav { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono);
       font-size: 12px; letter-spacing: 0.04em; color: var(--accent); background: var(--paper-2);
-      border: 1px solid var(--rule); border-radius: 2px; padding: 7px 13px;
+      border: 1px solid var(--border-control); border-radius: 2px; padding: 7px 13px;
       text-decoration: none; margin-bottom: 24px; }
-    .topnav:hover { background: var(--hover); }
+    @media (hover: hover) { .topnav:hover { background: var(--hover); } }
     .masthead { text-align: center; margin-bottom: 30px; }
     .masthead__flag { display: inline-flex; align-items: center; gap: 14px; max-width: 100%; text-decoration: none; }
     .masthead__seal { width: 52px; height: 52px; border-radius: 50%; flex: none; }
     .masthead__wordmark { height: 34px; width: auto; min-width: 0; max-width: 100%; object-fit: contain; display: block; mix-blend-mode: multiply; }
     @media (max-width: 480px) { .masthead__flag { gap: 10px; } .masthead__seal { width: 44px; height: 44px; }
       .masthead__wordmark { height: 27px; } .masthead__tagline { letter-spacing: 0.2em; } }
-    .masthead__tagline { margin: 10px 0 0; font-family: var(--mono); font-size: 10.5px;
+    .masthead__tagline { margin: 10px 0 0; font-family: var(--mono); font-size: 11px;
       letter-spacing: 0.28em; text-transform: uppercase; color: var(--muted); }
     /* The newspaper flag rule: thick over thin, in ink. */
     .masthead__flag-rule { height: 2px; border-top: 3px solid var(--ink); border-bottom: 1px solid var(--ink);
@@ -216,21 +222,21 @@ _SECONDARY_CSS = """
     .count { font-family: var(--mono); font-size: 13px; color: var(--muted); margin: 10px 0 0; }
     .site { display: inline-block; margin-top: 8px; font-family: var(--mono); font-size: 13px;
       color: var(--accent); text-decoration: none; }
-    .site:hover { text-decoration: underline; }
+    @media (hover: hover) { .site:hover { text-decoration: underline; } }
     .rule { height: 3px; background: var(--accent); width: 54px; margin: 26px 0; }
     .list { list-style: none; margin: 0; padding: 0; }
     .list li { padding: 12px 2px; border-top: 1px solid var(--hairline); }
     .list li:first-child { border-top: 1px solid var(--rule); }
     .list a { font-family: var(--serif); font-weight: 700; font-size: 1.15rem;
       color: var(--ink); text-decoration: none; }
-    .list a:hover { color: var(--accent); text-decoration: underline; }
+    @media (hover: hover) { .list a:hover { color: var(--accent); text-decoration: underline; } }
     .list .meta { font-family: var(--mono); font-size: 12.5px; color: var(--muted); margin-left: 8px; }
     .archive__group { margin: 0; }
     .archive__month { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em;
       text-transform: uppercase; color: var(--muted); margin: 32px 0 2px; }
     .archive__group:first-of-type .archive__month { margin-top: 4px; }
     .sponsor-card { text-align: center; background: var(--paper-2); border: 1px solid var(--rule);
-      border-top: 3px solid var(--accent); border-radius: 2px; padding: 30px 28px 32px; margin: 44px 0 0; }
+      border-top: 3px solid var(--accent); padding: 30px 28px 32px; margin: 44px 0 0; }
     .sponsor-card__label { margin: 0 0 18px; font-family: var(--mono); font-size: 11px;
       letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); }
     .sponsor-card__logos { display: flex; flex-wrap: wrap; align-items: center;
@@ -240,11 +246,11 @@ _SECONDARY_CSS = """
     .sponsor-card__name a { color: var(--ink); text-decoration: none; }
     .back { display: inline-block; margin-top: 34px; font-family: var(--mono); font-size: 12.5px;
       color: var(--accent); text-decoration: none; }
-    .back:hover { text-decoration: underline; }
+    @media (hover: hover) { .back:hover { text-decoration: underline; } }
     .foot-nav { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px;
       margin: 34px 0 0; font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.04em; }
     .foot-nav a { color: var(--accent); text-decoration: none; }
-    .foot-nav a:hover { text-decoration: underline; }
+    @media (hover: hover) { .foot-nav a:hover { text-decoration: underline; } }
     .foot-nav__dot { color: var(--rule); }
     .colophon { display: flex; align-items: flex-start; gap: 14px; margin-top: 40px;
       padding-top: 18px; border-top: 1px solid var(--rule); }
@@ -254,7 +260,7 @@ _SECONDARY_CSS = """
     /* Browser surfaces carry the palette too: selection, caret, native controls. */
     ::selection { background: color-mix(in srgb, var(--accent) 18%, transparent); }
     :root { caret-color: var(--accent); accent-color: var(--accent); }
-    a:focus-visible, button:focus-visible, [role="button"]:focus-visible {
+    a:focus-visible, button:focus-visible {
       outline: 2px solid var(--accent); outline-offset: 2px; }
     @media print {
       body { background: #fff; color: #000; }
@@ -546,17 +552,13 @@ def _share_section(name: str, page_url: str, newsroom_name: str) -> str:
     fb = f"https://www.facebook.com/sharer/sharer.php?u={quote(page_url, safe='')}"
     subject = quote(f"{name} Obituary")
     body = quote(f"{name} — obituary on {newsroom_name}:\n{page_url}")
-    copy_onclick = (
-        "var b=this;navigator.clipboard&&navigator.clipboard.writeText(b.dataset.url)"
-        ".then(function(){b.textContent='Link copied';"
-        "setTimeout(function(){b.textContent='Copy link'},1500)});return false;"
-    )
     return f"""<div class="share">
       <span class="share__label">Share</span>
       <a class="share__btn" href="{fb}" target="_blank" rel="noopener">Facebook</a>
-      <button class="share__btn" type="button" data-url="{html.escape(page_url)}" onclick="{copy_onclick}">Copy link</button>
+      <button class="share__btn" type="button" data-copy="{html.escape(page_url)}">Copy link</button>
       <a class="share__btn" href="mailto:?subject={subject}&amp;body={body}">Email</a>
       <button class="share__btn" type="button" onclick="window.print();return false;">Save as PDF</button>
+      <span class="sr-only" role="status" id="share-status"></span>
     </div>"""
 
 
@@ -627,14 +629,21 @@ def render_person_page(
         f"      <p>{html.escape(p)}</p>" for p in ob.body.split("\n\n") if p.strip()
     )
     lifespan = ob.lifespan()
-    # Tap the portrait to enlarge (the markup is inert without the small script below).
-    photo = (
-        f'<img class="portrait" src="{html.escape(pic)}" '
-        f'alt="{html.escape(ob.name)}" decoding="async" '
-        f'tabindex="0" role="button" aria-label="Enlarge portrait" />'
-        if pic
-        else ""
-    )
+    # A real button that opens the enlarged portrait (the script below wires
+    # it). The image keeps the person's name as its alt — Google Images reads
+    # it for name searches — and the button names the action.
+    photo = lightbox = ""
+    if pic:
+        img = f'src="{html.escape(pic)}" alt="{html.escape(ob.name)}" decoding="async"'
+        photo = (
+            f'<button type="button" class="portrait" aria-haspopup="dialog" '
+            f'aria-label="Enlarge portrait of {html.escape(ob.name)}"><img {img} /></button>'
+        )
+        # The enlarged copy is the same file, already cached by the time it opens.
+        lightbox = f"""<dialog class="lightbox" id="lightbox" aria-label="Enlarged portrait">
+    <img class="lightbox__img" {img} />
+    <button type="button" class="lightbox__close">Close</button>
+  </dialog>"""
     if ob.funeral_home:
         home = html.escape(ob.funeral_home)
         if funeral_home_url:  # internal link to the funeral-home landing page
@@ -685,13 +694,23 @@ def render_person_page(
   <style>
     :root {{
       --ink: #1b1a18; --paper: {newsroom.paper}; --paper-2: #fffdf7;
-      --muted: #6f6a61; --faint: #6d675f; --rule: #d9d3c6;
+      --muted: #6b665d; --rule: #d9d3c6; --border-control: #8b867a;
       --hairline: #e7e1d5; --hover: #efe9dd; --accent: {newsroom.accent};
       --serif: {newsroom.serif};
       --nameplate: {newsroom.nameplate};
       --mono: {newsroom.mono};
     }}
+    /* Readers who ask their system for more contrast get it: text to 7:1 and
+       every edge a step stronger. Same hues, lightness only. */
+    @media (prefers-contrast: more) {{
+      :root {{ --muted: #514c44; --rule: #8b867a; --hairline: #aca69b; --border-control: #6f695e; }}
+    }}
     * {{ box-sizing: border-box; }}
+    /* Text for screen readers only: the copy-link confirmation. */
+    .sr-only {{
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+    }}
     body {{
       margin: 0; background: var(--paper); color: var(--ink);
       font-family: var(--serif); font-weight: 400; line-height: 1.75;
@@ -701,17 +720,17 @@ def render_person_page(
     .topnav {{
       display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono);
       font-size: 12px; letter-spacing: 0.04em; color: var(--accent);
-      background: var(--paper-2); border: 1px solid var(--rule); border-radius: 2px;
+      background: var(--paper-2); border: 1px solid var(--border-control); border-radius: 2px;
       padding: 7px 13px; text-decoration: none; margin-bottom: 24px;
     }}
-    .topnav:hover {{ background: var(--hover); }}
+    @media (hover: hover) {{ .topnav:hover {{ background: var(--hover); }} }}
     .masthead {{ text-align: center; margin-bottom: 30px; }}
     .masthead__flag {{ display: inline-flex; align-items: center; gap: 14px; max-width: 100%; text-decoration: none; }}
     .masthead__seal {{ width: 52px; height: 52px; border-radius: 50%; flex: none; }}
     .masthead__wordmark {{ height: 34px; width: auto; min-width: 0; max-width: 100%; object-fit: contain; display: block; mix-blend-mode: multiply; }}
     @media (max-width: 480px) {{ .masthead__flag {{ gap: 10px; }} .masthead__seal {{ width: 44px; height: 44px; }}
       .masthead__wordmark {{ height: 27px; }} .masthead__tagline {{ letter-spacing: 0.2em; }} }}
-    .masthead__tagline {{ margin: 10px 0 0; font-family: var(--mono); font-size: 10.5px;
+    .masthead__tagline {{ margin: 10px 0 0; font-family: var(--mono); font-size: 11px;
       letter-spacing: 0.28em; text-transform: uppercase; color: var(--muted); }}
     /* The newspaper flag rule: thick over thin, in ink. */
     .masthead__flag-rule {{ height: 2px; border-top: 3px solid var(--ink); border-bottom: 1px solid var(--ink);
@@ -731,9 +750,11 @@ def render_person_page(
     }}
     .rule {{ height: 3px; background: var(--accent); width: 54px; margin: 26px 0; }}
     .portrait {{
-      float: right; width: 184px; max-width: 42%; margin: 4px 0 18px 26px;
-      border: 1px solid var(--rule); filter: grayscale(0.15);
+      float: right; display: block; width: 184px; max-width: 42%; margin: 4px 0 18px 26px;
+      padding: 0; background: none; border: 1px solid var(--rule); filter: grayscale(0.15);
+      cursor: zoom-in;
     }}
+    .portrait img {{ display: block; width: 100%; height: auto; }}
     .body {{ font-weight: 300; font-size: 1.06rem; }}
     .body p {{ margin: 0 0 1.2em; }}
     .arrangements {{
@@ -766,11 +787,11 @@ def render_person_page(
       text-transform: uppercase; color: var(--muted);
     }}
     .share__btn {{
-      font-family: var(--mono); font-size: 12px; letter-spacing: 0.03em;
-      color: var(--accent); background: var(--paper-2); border: 1px solid var(--rule);
+      font-family: var(--mono); font-size: 12px; line-height: 1.5; letter-spacing: 0.03em;
+      color: var(--accent); background: var(--paper-2); border: 1px solid var(--border-control);
       border-radius: 2px; padding: 6px 12px; text-decoration: none; cursor: pointer;
     }}
-    .share__btn:hover {{ background: var(--hover); }}
+    @media (hover: hover) {{ .share__btn:hover {{ background: var(--hover); }} }}
     .more {{ margin: 40px 0 0; padding-top: 22px; border-top: 1px solid var(--rule); }}
     .more__label {{
       margin: 0 0 12px; font-family: var(--mono); font-size: 11px;
@@ -782,29 +803,37 @@ def render_person_page(
       font-family: var(--serif); font-weight: 700; color: var(--ink);
       text-decoration: none;
     }}
-    .more__list a:hover {{ color: var(--accent); text-decoration: underline; }}
+    @media (hover: hover) {{ .more__list a:hover {{ color: var(--accent); text-decoration: underline; }} }}
     .more__span {{
       font-family: var(--mono); font-size: 12px; color: var(--muted); margin-left: 6px;
     }}
-    .portrait {{ cursor: zoom-in; }}
+    /* The enlarged portrait is a native modal <dialog>: the page behind is inert,
+       focus stays inside, Escape closes it. */
     .lightbox {{
-      position: fixed; inset: 0; background: rgba(20, 18, 16, 0.9);
-      display: flex; align-items: center; justify-content: center; padding: 24px;
-      cursor: zoom-out; z-index: 50;
+      padding: 0; border: 0; background: transparent; max-width: 96vw; max-height: 96vh;
+      overscroll-behavior: contain; cursor: zoom-out; text-align: center;
     }}
-    .lightbox[hidden] {{ display: none; }}
-    .lightbox:focus {{ outline: none; }}
-    .lightbox__img {{ max-width: 92vw; max-height: 92vh; border: 4px solid var(--paper); }}
+    .lightbox::backdrop {{ background: rgba(20, 18, 16, 0.9); }}
+    .lightbox__img {{ display: block; max-width: 92vw; max-height: calc(96vh - 64px); border: 4px solid var(--paper); }}
+    /* On the dark backdrop the oxblood focus ring measures 1.3:1, so the close
+       control carries a light ring of its own. */
+    .lightbox__close {{
+      margin-top: 12px; min-height: 32px; padding: 6px 16px; font-family: var(--mono);
+      font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--paper-2); background: transparent; border: 1px solid var(--paper-2);
+      border-radius: 2px; cursor: pointer;
+    }}
+    .lightbox__close:focus-visible {{ outline: 2px solid var(--paper-2); outline-offset: 3px; }}
     .back {{
       display: inline-block; margin-top: 36px; font-family: var(--mono);
       font-size: 12.5px; letter-spacing: 0.04em; color: var(--accent);
       text-decoration: none;
     }}
-    .back:hover {{ text-decoration: underline; }}
+    @media (hover: hover) {{ .back:hover {{ text-decoration: underline; }} }}
     .foot-nav {{ display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px;
       margin: 34px 0 0; font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.04em; }}
     .foot-nav a {{ color: var(--accent); text-decoration: none; }}
-    .foot-nav a:hover {{ text-decoration: underline; }}
+    @media (hover: hover) {{ .foot-nav a:hover {{ text-decoration: underline; }} }}
     .foot-nav__dot {{ color: var(--rule); }}
     .colophon {{ display: flex; align-items: flex-start; gap: 14px; margin-top: 40px;
       padding-top: 18px; border-top: 1px solid var(--rule); }}
@@ -814,7 +843,7 @@ def render_person_page(
     /* Browser surfaces carry the palette too: selection, caret, native controls. */
     ::selection {{ background: color-mix(in srgb, var(--accent) 18%, transparent); }}
     :root {{ caret-color: var(--accent); accent-color: var(--accent); }}
-    a:focus-visible, button:focus-visible, [role="button"]:focus-visible {{
+    a:focus-visible, button:focus-visible {{
       outline: 2px solid var(--accent); outline-offset: 2px; }}
     @media (max-width: 480px) {{
       .wrap {{ padding: 32px 18px 64px; }}
@@ -867,20 +896,38 @@ def render_person_page(
     </nav>
     {_colophon(base_url, newsroom)}
   </main>
-  <div class="lightbox" id="lightbox" hidden tabindex="-1" role="dialog" aria-modal="true" aria-label="Portrait, enlarged. Press Escape to close."><img class="lightbox__img" alt="" /></div>
+  {lightbox}
   <script>
     (function () {{
-      var p = document.querySelector('.portrait'), lb = document.getElementById('lightbox');
-      if (!p || !lb) return;
-      var img = lb.querySelector('img');
-      function open() {{ img.src = p.src; img.alt = p.alt; lb.hidden = false; lb.focus(); }}
-      function close() {{ if (lb.hidden) return; lb.hidden = true; img.src = ''; p.focus(); }}
-      p.addEventListener('click', open);
-      p.addEventListener('keydown', function (e) {{
-        if (e.key === 'Enter' || e.key === ' ') {{ e.preventDefault(); open(); }}
+      // Enlarged portrait: a native modal dialog, so the page behind is inert and
+      // focus stays inside it; Escape, the Close button or any click dismisses
+      // it, and focus returns to the portrait that opened it.
+      var trigger = document.querySelector('.portrait'), lb = document.getElementById('lightbox');
+      if (trigger && lb && lb.showModal) {{
+        trigger.addEventListener('click', function () {{ lb.showModal(); }});
+        lb.addEventListener('click', function () {{ lb.close(); }});
+        lb.addEventListener('close', function () {{ trigger.focus(); }});
+      }}
+      // Copy link: confirmed on the button and in a status region, so a screen
+      // reader hears it too — and said plainly when the browser refuses.
+      var status = document.getElementById('share-status');
+      Array.prototype.forEach.call(document.querySelectorAll('[data-copy]'), function (b) {{
+        b.addEventListener('click', function () {{
+          function say(message, label) {{
+            b.textContent = label;
+            if (status) status.textContent = message;
+            setTimeout(function () {{
+              b.textContent = 'Copy link';
+              if (status) status.textContent = '';
+            }}, 2000);
+          }}
+          if (!navigator.clipboard) {{ say('Copying is not available in this browser.', 'Copy failed'); return; }}
+          navigator.clipboard.writeText(b.dataset.copy).then(
+            function () {{ say('Link copied', 'Link copied'); }},
+            function () {{ say('The link could not be copied.', 'Copy failed'); }}
+          );
+        }});
       }});
-      lb.addEventListener('click', close);
-      document.addEventListener('keydown', function (e) {{ if (e.key === 'Escape') close(); }});
     }})();
   </script>
   {event_script(newsroom.analytics)}

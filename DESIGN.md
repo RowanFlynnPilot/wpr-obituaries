@@ -5,11 +5,12 @@ colors:
   ink: "#1b1a18"
   newsprint: "#f6f2ea"
   paper-white: "#fffdf7"
-  muted: "#6f6a61"
-  faint: "#6d675f"
+  muted: "#6b665d"
   rule: "#d9d3c6"
+  border-control: "#8b867a"
   hairline: "#e7e1d5"
   hover-wash: "#efe9dd"
+  mark: "#e2dcd0"
   oxblood: "#7c2e36"
   oxblood-bright: "#9a3a43"
   on-oxblood: "#ffffff"
@@ -197,17 +198,30 @@ surface in place of the site's teal.
 - **Paper white** (`{colors.paper-white}`): the lighter sheet for things that sit
   *on* the page — the featured card, sponsor card, search input, secondary
   buttons, portrait placeholders.
-- **Muted** (`{colors.muted}`): secondary text — lifespans, ledes, arrangements
-  lines, the colophon, inactive letters. 4.8:1 on newsprint.
-- **Faint** (`{colors.faint}`): the search placeholder, the smallest labels
-  (sponsor eyebrows, fineprint), and inactive carousel dots. Deliberately as dark as "faint" gets: those uses are tiny text that needs the
-  full 4.5:1, not the 3:1 large-text floor.
-- **Rule** (`{colors.rule}`): borders on cards, controls, portrait frames, the
-  hairline that closes the masthead, the archive's first-row rule.
+- **Muted** (`{colors.muted}`): every piece of secondary text — lifespans, ledes,
+  arrangements lines, the colophon, inactive letters, the search placeholder,
+  the smallest labels — and inactive carousel dots. 5.1:1 on newsprint and
+  still 4.7:1 on the hover wash, so a hovered row never drops its facts below
+  AA.
+- **Rule** (`{colors.rule}`): decorative structure only — borders on cards,
+  portrait frames, the hairline that closes the masthead, the archive's
+  first-row rule. At 1.3:1 it is never the edge a reader has to find.
+- **Border, control** (`{colors.border-control}`): the 1px edge of every control
+  — chips, secondary and share buttons, selects, fields, carousel arrows, the
+  Pause control, the static pages' "← All obituaries" box. 3.25:1 on newsprint
+  (WCAG 1.4.11); the next step down the muted ramp.
 - **Hairline** (`{colors.hairline}`): the lightest divider — between register
   rows, under the mini widget's sponsor line, the inset ring on monogram tiles.
 - **Hover wash** (`{colors.hover-wash}`): background on hover for rows, chips,
-  cards, and secondary buttons.
+  cards, and secondary buttons — applied only where the device can hover
+  (`@media (hover: hover)`), so a tap never leaves a row washed.
+- **Mark** (`{colors.mark}`): behind the matched word in a mention's evidence
+  line, which is also set bold in ink (12.7:1). A tone of its own, a step below
+  the hover wash, so the highlight survives a hovered row.
+
+Readers who ask their system for more contrast (`prefers-contrast: more`) get
+the same hues a step darker on every surface: muted 7.6:1, control borders
+4.9:1, rules 3.25:1, so dividers become visible boundaries too.
 
 ### Named Rules
 **The One Voice Rule.** Oxblood is the only chromatic color on any surface and
@@ -217,8 +231,9 @@ tweak.
 
 **The Contrast-Is-Measured Rule.** Every text color is checked against the
 surface it actually sits on (newsprint or paper white), never against white
-by habit. `faint` exists because "lighter grey for small text" fails AA on
-cream.
+by habit — and against the hover wash where a row washes under it. That is why
+`muted` sits at 5.1:1 rather than scraping 4.5:1, and why a control's edge is
+`border-control` rather than the rule hairline.
 
 ## Typography
 
@@ -322,21 +337,22 @@ masthead, and the 3px oxblood card edge / 54px name rule.
 ## Components
 
 ### Buttons
-Set in type, not drawn: a Courier Prime label inside a 1px `rule` box, 2px
-corners, no shadow, a 120–150ms background/border change on hover, a 2px
-oxblood outline (offset 2px) on keyboard focus.
+Set in type, not drawn: a Courier Prime label inside a 1px `border-control`
+box, 2px corners, no shadow, a 120–150ms background/border change on hover
+(where the device can hover), a 2px oxblood outline (offset 2px) on keyboard
+focus.
 - **Primary** (`{components.button-primary}`): oxblood fill, paper-white label,
   used once per flow ("Open email to send").
 - **Secondary** (`{components.button-secondary}`): paper-white fill, oxblood
   label ("Submit an obituary", share buttons on a page); hover to hover-wash.
 - **Show earlier** (`{components.button-more}`): full-width, newsprint fill, ink
   label with a hairline-divided count ("227 more").
-- **Arrows**: 34px round paper-white buttons with a rule border for the
-  carousel, 85% opacity at rest.
+- **Arrows**: 34px round paper-white buttons with a `border-control` edge for
+  the carousel, 85% opacity at rest.
 
 ### Chips
-- **Style** (`{components.chip}`): mono 12px label, newsprint fill, 1px rule
-  border, 2px corners, 6px 9px padding. A count sits after a hairline divider
+- **Style** (`{components.chip}`): mono 12px label, newsprint fill, 1px
+  `border-control` edge, 2px corners, 6px 9px padding. A count sits after a hairline divider
   inside the chip ("June 2026 | 148").
 - **State**: hover → hover-wash with a muted border; active
   (`{components.chip-active}`) → oxblood fill, paper-white label (every chip
@@ -359,7 +375,11 @@ oxblood outline (offset 2px) on keyboard focus.
   handful gets its moment on each visit; the draw happens once per visit, so the
   strip stays put while the reader is on the page. The dots are one keyboard
   stop with a roving tabindex (arrow keys move between them), so the strip
-  costs a keyboard reader five stops, not fourteen. Beside them sits a visible mono **Pause / Resume**
+  costs a keyboard reader five stops, not fourteen. Each dot is a 24px target;
+  the current one grows inside its own box (less padding, never a scaled
+  button, whose hit area would spill into its neighbours'). The card's link
+  is named by the person and described by their years — the excerpt and
+  "Read the full obituary" stay out of its name. Beside them sits a visible mono **Pause / Resume**
   control (28px tall, its visible word contained in its accessible name;
   auto-advance also stops for good after any arrow or dot choice). The live
   region carries a name only after a change the reader asked for, so someone
@@ -383,15 +403,18 @@ oxblood outline (offset 2px) on keyboard focus.
   (oxblood on hover) so no off-palette pixel appears in the field. The live
   count in mono beneath always states what the number is *of* ("276 names ·
   the last 3 months", "36 names · last names beginning with J", "2 names · 3
-  more mentions"). Matching is by name token prefix, so "Allan Jensen" finds
+  more mentions"). Screen readers hear the same line from a polite status
+  region once typing has paused for 0.7s — one count per search, not one per
+  keystroke; the visible line is hidden from them so it is not read twice.
+  Matching is by name token prefix, so "Allan Jensen" finds
   Allan Guy Jensen; records that only *mention* the query list in a second
   tier; a hyphenated surname is two names to the searcher, so "Tugnoli"
   reaches "Latzig-Tugnoli". Enter dismisses the phone keyboard (results are
   already live). The
   search and any browse filter mirror into the URL (`?q=`, `?month=`,
   `?letter=`, `?town=`, `?home=`) so Back and a shared link reopen the list.
-- **Form fields** (`{components.input-field}`): newsprint fill, rule border, 2px
-  corners; labels above in mono caps.
+- **Form fields** (`{components.input-field}`): newsprint fill, `border-control`
+  edge, 2px corners; labels above in mono caps.
 - **Focus**: a 2px oxblood outline offset 2px (inputs also switch the border to
   oxblood). Never `outline: none` without this replacement. The caret and text
   selection are oxblood-tinted.
@@ -421,7 +444,9 @@ the sentence — age joins them only where the years do not already carry it),
 and the funeral home as a tracked mono caption. There is no summary line: the
 extractor writes one sentence naming the person, their age and their town, and
 every one of those facts is already on the row or in its date heading. Rows divide with hairlines; the whole
-row is one link that washes on hover and turns the name oxblood. Groups are
+row is one link that washes on hover and turns the name oxblood. The link is
+named by the person alone; the fact line, any evidence line and the home
+describe it, so a screen reader's list of sixty links scans by name. Groups are
 headed by the **date of death** in oxblood mono ("Died September 2, 2026"; the
 few records without one say "Published …") — the register is a calendar of
 deaths, not of editions.
@@ -434,8 +459,8 @@ is not a person of that name says what it is instead:
   Schmidt & Schulta Funeral Home →" — filters to that home.
 - **A mention** (a maiden name, a surviving relative, a hall named for a
   family) keeps its row but replaces its summary with the **evidence line**:
-  the phrase around the hit in 12px Courier muted, the matched word washed in
-  hover-wash rather than highlighted, six words either side, ellipses outside.
+  the phrase around the hit in 12px Courier muted, the matched word set bold
+  in ink on the `mark` tone, six words either side, ellipses outside.
   Ten at a time under "Also named in N other notices" (just "Named in N
   notices" when no name matched), then "Show the rest".
 
@@ -458,23 +483,39 @@ newsroom's phone number is. Never a raw status code.
 ### Share buttons
 A row on every person page — "SHARE" as a tracked mono label, then Facebook /
 Copy link / Email / Save as PDF as four secondary-style boxes
-(`{components.share-button}`): Courier Prime 12px in oxblood on paper white,
-1px rule border, 2px corners, 6px 12px padding; hover to hover-wash. "Copy
-link" confirms inline by swapping its own label to "Link copied" for 1.5s —
-no toast, no icon. The row is hidden in print.
+(`{components.share-button}`): Courier Prime 12px (line-height 1.5, so links
+and buttons stand the same height) in oxblood on paper white, 1px
+`border-control` edge, 2px corners, 6px 12px padding; hover to hover-wash.
+"Copy link" confirms inline by swapping its own label to "Link copied" for 2s,
+and says the same in a status region so a screen reader hears it; a copy the
+browser refuses says "Copy failed" — no toast, no icon. The row is hidden in
+print.
+
+### Portrait viewer
+On a person page the portrait is a button ("Enlarge portrait of <name>"; the
+image keeps the name as its alt for image search) that opens the enlarged
+portrait in a native modal `<dialog>`: the page behind is inert, the backdrop
+is ink at 90%, and the image sits in a 4px newsprint frame over a paper-white
+mono **Close** button with its own paper-white focus ring (oxblood measures
+1.3:1 on the backdrop). Escape, Close, or any click dismisses it, and focus
+returns to the portrait.
 
 ### Mini widget card (signature)
 The compact article/sidebar embed (`{components.mini-card}`): a 380px-wide
 newsprint sheet with a 1px rule border and the 3px oxblood top edge, 16px
-padding. Inside, top to bottom: the "In Memoriam · WPR" kicker (10.5px mono,
+padding. Inside, top to bottom: the "In Memoriam · WPR" kicker (11px mono,
 tracked 0.22em, oxblood, centered); one card — a 72×90 ruled portrait (or a
 monogram tile) beside the name (serif 700, 1.08rem), the lifespan in 11.5px
 mono, and a two-line clamped summary in body weight; a centered nav row of
-30px round paper-white arrows around 6px dots (faint, oxblood when active, in
-22px hit areas); "View all obituaries →" in oxblood mono; and a hairline-topped
-sponsor strip with a 9.5px tracked label over 26px logos. The card fades in
-over 0.45s on change and auto-advances every 6s until hovered, focused, or
-touched. Everything is scoped under `.mini` so it can never bleed into a host
+30px round paper-white arrows (`border-control` edge) around 6px dots (muted;
+the current one 8px in oxblood) set edge to edge in 24px targets, one keyboard
+stop with arrow keys; a footer row with a mono **Pause / Resume** control
+beside "View all obituaries →" in oxblood mono; and a hairline-topped sponsor
+strip with a 9.5px tracked label over 26px logos. The card fades in over
+0.45s on change and auto-advances every 6s until hovered or focused, or until
+Pause, an arrow or a dot stops it for good; it never advances on its own
+under reduced motion. Its live region speaks only after a change the reader
+made. Everything is scoped under `.mini` so it can never bleed into a host
 page.
 
 ### Colophon (signature)
@@ -494,13 +535,14 @@ SemiBold over the sponsor line at the foot.
 ### Do:
 - **Do** keep oxblood to labels, edges, rules, and one active state per row of controls; the page should read as ink on newsprint with one color speaking.
 - **Do** separate groups with hairlines and whitespace; put the 3px oxblood edge on a card's top only.
-- **Do** measure every text color against the surface it sits on (newsprint 4.5:1 for small text; muted and faint already pass, rule and hairline never do).
+- **Do** measure every text color against the surface it sits on (newsprint 4.5:1 for small text; muted passes even on the hover wash; rule and hairline never carry text, and a control's edge is border-control at 3:1).
 - **Do** set every control in Courier Prime caps inside a 1px rule box with 2px corners; primary actions get the single oxblood fill.
 - **Do** keep portraits rectangular in a ruled frame with the light desaturation, and never crop them to circles.
 - **Do** keep the flag intact on every surface: seal beside wordmark linking home, tagline, thick-over-thin ink rule, the surface's own title below it.
 - **Do** honor reduced motion (the featured and mini fades are the only authored motion; the loading skeleton is a still hairline block, not a shimmer; all other transitions are 120–150ms and disable under `prefers-reduced-motion`).
 - **Do** keep the smallest type on the register and the pages at 11px (the tagline, sponsor labels, funeral-home captions, the colophon — only the mini widget, at card scale, runs smaller) and every control at a 24px minimum target, even when its visible mark is smaller.
 - **Do** design the print state of a person page as a keepsake.
+- **Do** gate every hover style behind `@media (hover: hover)`; focus styles stand on their own.
 
 ### Don't:
 - **Don't** add a second accent, a gradient, a glow, or any drop shadow.
@@ -509,4 +551,4 @@ SemiBold over the sponsor line at the foot.
 - **Don't** set body copy or names in Oswald or Courier Prime; Oswald is the nameplate, Courier is for data.
 - **Don't** put the tool's title above the newsroom's flag, and don't drop the colophon.
 - **Don't** use pure black or pure white as text or ground; ink and newsprint are the poles.
-- **Don't** let auto-advancing content run without a reachable pause; touch users get it by interacting.
+- **Don't** let auto-advancing content run without a visible Pause control — hover never fires on a phone.

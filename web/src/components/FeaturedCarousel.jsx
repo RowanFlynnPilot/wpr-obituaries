@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { lifespan, photoSrc } from "../lib/format.js";
 
 const BASE = import.meta.env.BASE_URL;
@@ -37,6 +37,7 @@ function withinDays(sourceDate, days) {
 // view, under the search, and stands down the moment the reader searches or
 // browses: then the list itself is the answer.
 export default function FeaturedCarousel({ obituaries }) {
+  const id = useId();
   const reduced = useMediaQuery(REDUCED);
   const featured = useMemo(() => {
     // filter() and slice() return fresh arrays, so shuffling in place is safe.
@@ -126,7 +127,16 @@ export default function FeaturedCarousel({ obituaries }) {
           </button>
         )}
 
-        <a className="featured__card" href={href} target="_top" key={ob.slug}>
+        {/* Named by the person, described by their years: the excerpt and the
+            "Read the full obituary" line stay out of the link's name. */}
+        <a
+          className="featured__card"
+          href={href}
+          target="_top"
+          key={ob.slug}
+          aria-labelledby={`${id}-name`}
+          aria-describedby={span ? `${id}-span` : undefined}
+        >
           <img
             className="featured__photo"
             src={photoSrc(ob.photoUrl)}
@@ -136,8 +146,14 @@ export default function FeaturedCarousel({ obituaries }) {
             height="168"
           />
           <div className="featured__text">
-            <span className="featured__name">{ob.name}</span>
-            {span && <span className="featured__span">{span}</span>}
+            <span className="featured__name" id={`${id}-name`}>
+              {ob.name}
+            </span>
+            {span && (
+              <span className="featured__span" id={`${id}-span`}>
+                {span}
+              </span>
+            )}
             <span className="featured__excerpt">
               {ob.excerpt || ob.summary}
             </span>
