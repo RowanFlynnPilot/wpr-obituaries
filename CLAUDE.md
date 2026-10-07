@@ -77,7 +77,7 @@ Source of truth → static output → embedded widget:
    that matched (`matchSnippet`) in place of its summary. The register is
    grouped by **date of death** (`eventDate`,
    falling back to the publication date for the 2% without one) with honest
-   "Died …" / "Published …" headings. Browse (month / last name, with town /
+   "Passed …" / "Published …" headings. Browse (month / last name, with town /
    home behind a second-tier line) is a secondary path behind one disclosure.
    The search or filter mirrors into the widget's URL (`lib/urlState.js`:
    `?q=`, `?month=`, `?letter=`, `?town=`, `?home=`, validated on read) so Back

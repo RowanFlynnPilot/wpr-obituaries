@@ -452,9 +452,9 @@ every one of those facts is already on the row or in its date heading. Rows divi
 row is one link that washes on hover and turns the name oxblood. The link is
 named by the person alone; the fact line, any evidence line and the home
 describe it, so a screen reader's list of sixty links scans by name. Groups are
-headed by the **date of death** in oxblood mono ("Died September 2, 2026"; the
-few records without one say "Published …") — the register is a calendar of
-deaths, not of editions.
+headed by the **date of death** in oxblood mono, worded as a family would say
+it ("Passed September 2, 2026"; the few records without one say "Published …")
+— the register is a calendar of deaths, not of editions.
 
 ### Second tier (mentions and arrangements)
 A row is a promise that this person is who you searched for, so anything that
