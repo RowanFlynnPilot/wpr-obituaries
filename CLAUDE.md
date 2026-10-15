@@ -256,10 +256,21 @@ platforms' mechanics, and the cross-source dedupe/overlap note are in
   anything not yet vendored. The widget's `photoSrc` prepends the base path for
   these repo-relative photos.
 - **Cross-post dedupe (done)**: `main._dedupe_people` collapses the same person
-  (name + death date) appearing in two posts to one canonical record for the
-  index/feed/home pages/sitemap (the fullest body wins); the duplicate page still
-  renders but `rel=canonical`s at its primary, so no URL 404s and ranking isn't
-  split.
+  appearing in two posts to one canonical record for the index/feed/home
+  pages/sitemap; the duplicate page still renders but `rel=canonical`s at its
+  primary, so no URL 404s and ranking isn't split. Within one first + last name
+  (`models.name_key`), records join on a shared **exact** birth date or death
+  date (`main._person_groups`). Across first names (Sandi/Sandra, Mike/Michael),
+  they join on surname + both exact dates. The birth date is there because the two copies'
+  death dates often disagree: a home re-lists a notice under a placeholder date,
+  or the batch extraction differs. Weaker evidence then folds what's left: the
+  same canonical funeral home within `SAME_HOME_DAYS` (30; an undated batch post
+  is compared by its publication date), and a bare death year into the *one*
+  dated person who died that year. A weak fold never joins two people who each
+  carry a birth date. Don't make a birth-date *mismatch* veto the strong rules:
+  WPR's extracted birth dates are unreliable (`1940-01-01` placeholders, partial
+  `1943-09`), and 8 real people match only on name + death date. The fullest body
+  wins the primary; on a tie, a dated record and then the earlier death date win.
 - **Robustness (done)**: `wp_client._get` retries the fetch with exponential
   backoff (the Anthropic client also retries); `extractor.sanity_warnings` logs
   implausible dates/ages (non-fatal); a source's *discovery* failure is

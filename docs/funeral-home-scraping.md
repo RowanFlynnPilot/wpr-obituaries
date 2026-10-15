@@ -125,11 +125,15 @@ only add a home the newsroom has an arrangement with.
   catalogue.
 - **Cross-source overlap:** because WPR's batch posts are built from these same
   homes, a person can appear from both `wordpress_scrape` and
-  `funeral_home_scrape`. The render-time dedupe (`main._dedupe_people`, by name +
-  death date) already collapses them to one canonical record for the index and
-  register; the duplicate page still renders but `rel=canonical`s at the primary,
-  so no URL 404s and ranking isn't split. Dedupe matches on exact name, so a
-  middle-name difference between the two sources can slip through as two entries
-  — a known limitation, not fixed here. Longer term, once the scraper covers a
+  `funeral_home_scrape`. The render-time dedupe (`main._dedupe_people`) collapses
+  them to one canonical record for the index and register: first + last name
+  (middles, initials, suffixes and nicknames ignored) plus a shared exact birth or
+  death date, or the same funeral home within 30 days when the batch omits the
+  date or the two disagree (rules in `CLAUDE.md`). The duplicate page still
+  renders but `rel=canonical`s at the primary, so no URL 404s and ranking isn't
+  split. A home's re-listing of one notice under a new URL (Rembs re-listed Betty
+  Jane Tasse with hidden dates, Aug 2026) is caught the same way, by the birth
+  date. A first name that differs across sources ("Sandi" vs "Sandra", "Mike"
+  vs "Michael") joins on the surname plus both exact dates. Longer term, once the scraper covers a
   home fully, its WPR batch coverage becomes redundant and `wordpress_scrape`
   could be retired — but that is a separate decision.
