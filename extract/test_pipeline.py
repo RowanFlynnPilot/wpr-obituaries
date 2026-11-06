@@ -8,6 +8,7 @@ broken build never deploys):
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import tempfile
 import xml.dom.minidom
@@ -219,7 +220,7 @@ def test_dedupe():
     short = mk("Sam Lee", 1, "2026-06-01", body="short", death_date="2026-05-30")
     full = mk("Sam Lee", 2, "2026-06-05", body="the full obituary " * 30, death_date="2026-05-30")
     other = mk("Pat Roe", 3, "2026-06-05", death_date="2026-06-01")
-    canonical, primary_by_slug = main._dedupe_people([short, full, other])
+    canonical, primary_by_slug = main._dedupe_people([short, full, other], [])
     assert len(canonical) == 2  # Sam Lee collapses
     assert primary_by_slug[short.slug].slug == full.slug  # fuller record wins
     assert primary_by_slug[full.slug].slug == full.slug
@@ -234,24 +235,96 @@ def test_dedupe():
     # date) collapse to one; the fuller record wins
     a = mk("Ryan Johnson", 4, "2026-06-10", body="x", death_date="2026-06-08")
     b = mk("Ryan Paul Johnson", 5, "2026-06-11", body="fuller " * 20, death_date="2026-06-08")
-    canon2, prim2 = main._dedupe_people([a, b])
+    canon2, prim2 = main._dedupe_people([a, b], [])
     assert len(canon2) == 1 and prim2[a.slug].slug == b.slug
     # but two different people who share a first+last and a death date stay apart
     c = mk("Mary Q. Adams", 6, "2026-06-10", death_date="2026-06-08")
     d = mk("Mary Z. Baker", 7, "2026-06-10", death_date="2026-06-08")
-    assert len(main._dedupe_people([c, d])[0]) == 2
+    assert len(main._dedupe_people([c, d], [])[0]) == 2
 
     # a WPR record with only a death year folds into the funeral-home record that
     # has the full date (same person, same year)
     yr = mk("Kay Solberg", 8, "2026-06-01", death_date=None, death_year=2026)
     dated = mk("Kay Solberg", 9, "2026-05-27", death_date="2026-05-27", death_year=2026)
-    assert len(main._dedupe_people([yr, dated])[0]) == 1
+    assert len(main._dedupe_people([yr, dated], [])[0]) == 1
     # but if two same-named people died that year, the ambiguous year-only stays apart
     d1 = mk("Lee Park", 10, "2026-03-02", death_date="2026-03-01", death_year=2026)
     d2 = mk("Lee Park", 11, "2026-09-02", death_date="2026-09-01", death_year=2026)
     yr2 = mk("Lee Park", 12, "2026-06-01", death_date=None, death_year=2026)
-    assert len(main._dedupe_people([d1, d2, yr2])[0]) == 3  # not merged into either
+    assert len(main._dedupe_people([d1, d2, yr2], [])[0]) == 3  # not merged into either
     print("ok: dedupe (name-variant + year-only collapse, ambiguous kept apart)")
+
+
+def test_dedupe_disagreeing_dates():
+    # The same person whose copies don't share a death date (Oct 2026 register).
+    hs = homes.load_homes(main.HOMES_FILE)
+    text = "Betty Jane Tasse, 93, formerly of Granton, was called home on July 15, 2026."
+
+    # Rembs re-listed Betty under a second URL with a hidden placeholder date of
+    # death. The birth date joins them, and the real date wins the tied primary.
+    real = mk("Betty Jane Tasse", 1, "2026-07-15", body=text, birth_date="1933-03-27",
+              death_date="2026-07-15", funeral_home="Rembs Funeral Home")
+    relisted = mk("Betty Jane Tasse", 2, "2026-08-25", body=text, birth_date="1933-03-27",
+                  death_date="2026-08-25", funeral_home="Rembs Funeral Home")
+    canonical, primary = main._dedupe_people([relisted, real], hs)
+    assert [r.slug for r in canonical] == [real.slug]
+    assert primary[relisted.slug].slug == real.slug  # the re-listing canonicals at it
+
+    # WPR's batch carried no dates at all ("E." vs the home's "E" is the same key);
+    # the funeral home handled it six days before the post ran.
+    home = mk("Martin E Burkhardt", 3, "2026-07-04", body="fuller " * 20, birth_date="1937-05-01",
+              death_date="2026-07-04", funeral_home="Mid-Wisconsin Cremation Society")
+    batch = mk("Martin E. Burkhardt", 4, "2026-07-10", death_date=None, death_year=None,
+               funeral_home="Mid Wisconsin Cremation Society")
+    canonical, primary = main._dedupe_people([batch, home], hs)
+    assert [r.slug for r in canonical] == [home.slug] and primary[batch.slug].slug == home.slug
+    # two extractions a few days apart on the date, one without a birth date
+    wpr = mk("Rosemary Farchione", 5, "2026-05-27", death_date="2026-05-23", funeral_home="Ascend")
+    fh = mk("Rosemary Farchione", 6, "2026-05-21", birth_date="1932-03-03",
+            death_date="2026-05-21", funeral_home="Ascend Funeral Home & Cremation Care")
+    assert len(main._dedupe_people([wpr, fh], hs)[0]) == 1
+    # the sources disagree on the first name, but surname + both dates agree
+    sandi = mk("Sandi K. Higgins", 16, "2026-07-13", body="fuller " * 20,
+               birth_date="1951-05-04", death_date="2026-07-13")
+    sandra = mk("Sandra K. Higgins", 17, "2026-07-17", birth_date="1951-05-04",
+                death_date="2026-07-13")
+    canonical, primary = main._dedupe_people([sandra, sandi], hs)
+    assert [r.slug for r in canonical] == [sandi.slug] and primary[sandra.slug].slug == sandi.slug
+    # ...but spouses who died the same day, or a shared birthday, are two people
+    spouse = mk("John Higgins", 18, "2026-07-13", birth_date="1949-02-11", death_date="2026-07-13")
+    assert len(main._dedupe_people([sandi, spouse], hs)[0]) == 2
+    cousin = mk("Sue Higgins", 19, "2026-03-01", birth_date="1951-05-04", death_date="2026-03-01")
+    assert len(main._dedupe_people([sandi, cousin], hs)[0]) == 2
+
+    # Genuinely different people who share a name stay apart:
+    # ...a different home, or the same home months apart
+    assert len(main._dedupe_people([home, dataclasses.replace(batch, funeral_home="Helke")], hs)[0]) == 2
+    late = mk("Martin E. Burkhardt", 7, "2026-10-20", death_date=None, death_year=None,
+              funeral_home="Mid Wisconsin Cremation Society")
+    assert len(main._dedupe_people([home, late], hs)[0]) == 2
+    # ...two birth dates at one home within days of each other, and a batch post
+    # between them (no birth date) can't bridge them into one person
+    a = mk("Mary Smith", 8, "2026-06-01", birth_date="1940-02-02", death_date="2026-06-01",
+           funeral_home="Helke")
+    b = mk("Mary Smith", 9, "2026-06-05", birth_date="1951-07-07", death_date="2026-06-05",
+           funeral_home="Helke")
+    w = mk("Mary Smith", 10, "2026-06-04", death_date=None, death_year=None, funeral_home="Helke")
+    assert len(main._dedupe_people([a, b], hs)[0]) == 2
+    canonical, primary = main._dedupe_people([a, b, w], hs)
+    assert len(canonical) == 2 and primary[w.slug].slug == b.slug  # the nearer one
+    # ...a partial birth date ("1941") identifies no one
+    p1 = mk("Ron Sem", 11, "2026-03-01", birth_date="1941", death_date="2026-03-01")
+    p2 = mk("Ron Sem", 12, "2026-09-01", birth_date="1941", death_date="2026-09-01")
+    assert len(main._dedupe_people([p1, p2], hs)[0]) == 2
+    # ...and an undated post's publication date is not a death date: it neither
+    # joins whoever died that day nor blocks a year-only record's fold
+    dated = mk("Kay Solberg", 13, "2026-05-27", death_date="2026-05-27")
+    undated = mk("Kay Solberg", 14, "2026-06-01", death_date=None, death_year=None)
+    yr = mk("Kay Solberg", 15, "2026-06-03", death_date=None, death_year=2026)
+    _, primary = main._dedupe_people([dated, undated, yr], hs)
+    assert primary[yr.slug].slug == dated.slug and primary[undated.slug].slug == undated.slug
+    print("ok: dedupe disagreeing dates (birth date, same home nearby, first-name variants; "
+          "no bridging or guessing)")
 
 
 def test_photo_resolution():
