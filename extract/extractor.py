@@ -138,7 +138,11 @@ def _records(response, source_url: str) -> list[dict]:
     """The people the model recorded, raising loudly if it recorded none properly."""
     calls = [b for b in response.content if b.type == "tool_use"]
     if len(calls) != 1 or not isinstance(calls[0].input.get("obituaries"), list):
-        raise ValueError(f"No usable record_obituaries call for {source_url}")
+        got = [(b.type, repr(getattr(b, "input", getattr(b, "text", "")))[:700]) for b in response.content]
+        raise ValueError(
+            f"No usable record_obituaries call for {source_url} "
+            f"(stop_reason={response.stop_reason}): {got}"
+        )
     return calls[0].input["obituaries"]
 
 
