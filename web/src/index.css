@@ -957,6 +957,14 @@ body {
   font-size: 1.05rem;
 }
 
+/* Above the close spellings: the plain statement that the name as typed is
+   not here, in ink, so the rows beneath read as suggestions. */
+.register__close-note {
+  margin: 26px 0 18px;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
 .register__empty-hint {
   margin: 14px 0 0;
   color: var(--muted);

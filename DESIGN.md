@@ -469,6 +469,13 @@ is not a person of that name says what it is instead:
   Ten at a time under "Also named in N other notices" (just "Named in N
   notices" when no name matched), then "Show the rest".
 
+### Close spellings
+When no one matches the name as typed but a near spelling does ("Kruger" for
+Krueger), the register says so in ink — "No one is listed as “Kruger”." — and
+lists up to twelve of the nearest names under a "Close spellings" heading, the
+count line reading "0 names · 4 close spellings". The rows are ordinary rows;
+the sentence above them is what keeps a suggestion from reading as the answer.
+
 ### Empty state
 A dead end on a memorial page must offer a way forward and never end on the
 sponsor card: "No one named “…” is listed yet." in ink, then a row of

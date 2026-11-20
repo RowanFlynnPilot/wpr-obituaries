@@ -73,7 +73,9 @@ Source of truth → static output → embedded widget:
    only. It fetches the JSON index and links each card to the static page. The
    name search is the product: it sits directly under the lede, matches by
    name-token prefix (`lib/search.js` — "Allan Jensen" finds Allan Guy Jensen,
-   "Tugnoli" finds Latzig-Tugnoli; diacritics folded). What is *not* a person
+   "Tugnoli" finds Latzig-Tugnoli; diacritics folded). When no name matches,
+   the nearest spellings are offered under a plain "No one is listed as …"
+   ("Kruger" reaches Krueger: one slip in an ordinary name, two in a long one). What is *not* a person
    of that name never becomes a look-alike row: a funeral home whose own name
    matches ("Schmidt" is also Schmidt & Schulta) collapses to one line into
    that home's notices, and a text mention keeps its row but shows the phrase

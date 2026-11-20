@@ -15,7 +15,7 @@ const BASE = import.meta.env.BASE_URL;
 const RECENT_MONTHS = 3; // default view: the current month plus the prior two
 const RECENT = { kind: "recent", value: RECENT_MONTHS };
 const NO_FILTER = { kind: "none" };
-const EMPTY = { names: [], mentions: [], homes: [] };
+const EMPTY = { names: [], close: [], mentions: [], homes: [] };
 
 // Newest date of death first (falling back to the publication date for the few
 // records without one), so the register reads as a calendar of deaths.
@@ -203,6 +203,7 @@ export default function App() {
               value={query}
               onChange={onSearch}
               count={results.names.length}
+              close={results.close.length}
               mentions={results.mentions.length}
               scope={query ? "" : scopeLabel(filter)}
             />
@@ -226,6 +227,7 @@ export default function App() {
           <Register
             key={`${query}|${filter.kind}|${filter.value ?? ""}`}
             obituaries={results.names}
+            close={results.close}
             mentions={results.mentions}
             homes={results.homes}
             query={query}
