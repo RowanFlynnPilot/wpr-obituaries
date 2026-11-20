@@ -24,7 +24,10 @@ Source of truth → static output → embedded widget:
    (`apiBase`/`categorySlug`) comes from the newsroom config, not constants.
 2. `extract/extractor.py` — Claude Haiku reads each batch post and returns one
    structured record per person. Regex parsing is wrong here: obituary
-   formatting varies too much. The model extracts only what is present and
+   formatting varies too much. The records come back as a forced tool call
+   (`RECORD_TOOL`), never as JSON the model writes out as text: one unescaped
+   quotation mark in a long body used to quarantine a whole post. The model
+   extracts only what is present and
    never invents detail (`clean_summary` strips the one placeholder it has
    been seen to narrate — "of an unspecified town" — so an absence is never
    published as a fact). `wp_client` + `extractor` are wrapped by

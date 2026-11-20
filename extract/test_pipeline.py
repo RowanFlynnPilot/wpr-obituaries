@@ -731,6 +731,40 @@ def test_clean_summary():
     print("ok: clean summary (placeholder town clause stripped, real towns kept)")
 
 
+def test_extraction_reads_the_tool_call():
+    from types import SimpleNamespace as NS
+
+    # a body full of quotation marks and a line break: the text that broke hand-written JSON
+    body = 'She was known as "Grandma Jo" to all.\n\nShe said, "Come in, sit down."'
+    person = {"name": "Jo Doe", "summary": "Jo Doe, 90, of Wausau.", "body": body, "age": 90,
+              "death_date": "2026-11-15", "birth_date": None, "death_year": 2026,
+              "funeral_home": None, "photo_url": None}
+
+    class Client:
+        def __init__(self, content, stop="tool_use"):
+            self.content, self.stop, self.sent = content, stop, None
+            self.messages = self
+
+        def create(self, **kw):
+            self.sent = kw
+            return NS(stop_reason=self.stop, content=self.content)
+
+    post = {"id": 7, "link": "http://x/p", "date": "2026-11-18T00:00:00",
+            "content": {"rendered": "<p>Jo Doe</p>"}}
+    client = Client([NS(type="tool_use", input={"obituaries": [person]})])
+    (ob,) = extractor.extract_obituaries(post, client)
+    assert ob.body == body and ob.age == 90 and ob.source_date == "2026-11-18"
+    assert client.sent["tool_choice"] == {"type": "tool", "name": "record_obituaries"}
+    # prose instead of a tool call, or a truncated reply, fails loudly rather than publishing nothing
+    for bad in (Client([NS(type="text", text="[]")]), Client([], stop="max_tokens")):
+        try:
+            extractor.extract_obituaries(post, bad)
+            raise AssertionError("should have raised")
+        except ValueError:
+            pass
+    print("ok: extraction reads the forced tool call (quotes in a body are safe; no call raises)")
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_") and callable(fn):
