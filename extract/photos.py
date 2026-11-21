@@ -38,6 +38,12 @@ def vendored_slugs(photos_dir: Path) -> set[str]:
     return {p.stem for p in photos_dir.glob("*.jpg")}
 
 
+def photo_size(photos_dir: Path, slug: str) -> tuple[int, int]:
+    """A vendored portrait's (width, height) in pixels, read from the file's header."""
+    with Image.open(photos_dir / local_filename(slug)) as im:
+        return im.size
+
+
 def _load_manifest(path: Path) -> dict[str, str]:
     if not path.exists():
         return {}

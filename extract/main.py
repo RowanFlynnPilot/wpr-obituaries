@@ -37,10 +37,11 @@ from config import load_newsroom
 from homes import load_homes, resolve_home
 from models import Obituary, name_key
 from og import render_card
-from photos import vendor_photos, vendored_slugs
+from photos import photo_size, vendor_photos, vendored_slugs
 from store import Master, load_manual, load_master, load_suppressed, save_master
 from templates import (
     render_archive,
+    render_not_found,
     render_memoriam,
     render_service_ics,
     service_sentence,
@@ -65,6 +66,7 @@ OG_CARD_VERSION = "2"  # v2: long single-token names shrink/hyphenate instead of
 SITEMAP_FILE = ROOT / "web" / "public" / "sitemap.xml"
 FEED_FILE = ROOT / "web" / "public" / "feed.xml"
 ROBOTS_FILE = ROOT / "web" / "public" / "robots.txt"
+NOT_FOUND_FILE = ROOT / "web" / "public" / "404.html"
 ARCHIVE_FILE = ROOT / "web" / "public" / "archive.html"
 DIGEST_FILE = ROOT / "web" / "public" / "data" / "digest.json"
 SPONSOR_FILE = DATA_DIR / "sponsor.json"
@@ -564,6 +566,7 @@ def _write_pages(
             render_person_page(
                 ob, sponsor, base_url, newsroom, related, _page_photo(ob, vendored, base_url),
                 og_image, home_url, canonical_url,
+                photo_size(PHOTOS_DIR, ob.slug) if ob.slug in vendored else None,
             ),
             encoding="utf-8",
         )
@@ -639,6 +642,7 @@ def render(master: Master, sponsor: dict, base_url: str, newsroom, allow_empty: 
     )
     FEED_FILE.write_text(render_feed(canonical, base_url, newsroom), encoding="utf-8")
     ROBOTS_FILE.write_text(render_robots(base_url), encoding="utf-8")
+    NOT_FOUND_FILE.write_text(render_not_found(base_url, newsroom), encoding="utf-8")
     extras = []
     dupes = len(records) - len(canonical)
     if dupes:

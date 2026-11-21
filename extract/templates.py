@@ -497,6 +497,80 @@ def _collection_page(
 """
 
 
+_NOT_FOUND_CSS = """
+    .lost { margin: 0 0 22px; }
+    .lost__form { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin: 0; }
+    .lost__field { flex: 1 1 260px; display: flex; flex-direction: column; gap: 6px; }
+    .lost__label { font-family: var(--mono); font-size: 12px; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--accent); }
+    .lost__input { font: inherit; font-size: 1.05rem; color: var(--ink); background: var(--paper-2);
+      border: 1px solid var(--border-control); border-radius: 2px; padding: 11px 13px; min-height: 46px; }
+    .lost__input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .lost__go { font-family: var(--mono); font-size: 13px; letter-spacing: 0.06em; color: var(--paper-2);
+      background: var(--accent); border: 1px solid var(--accent); border-radius: 2px;
+      padding: 0 20px; min-height: 46px; cursor: pointer; }
+    @media (hover: hover) { .lost__go:hover { background: var(--ink); border-color: var(--ink); } }
+"""
+
+
+def render_not_found(base_url: str, newsroom: Newsroom) -> str:
+    """The page a reader gets at an address that holds nothing (`404.html`).
+
+    It is served in place of any missing URL, at that URL, so every link in it
+    is absolute. The one thing it can do for the reader is carry them to the
+    name they came for: an address shaped like a person's page fills the search
+    with the name in it. Never indexed.
+    """
+    title = "Page not found"
+    return f"""<!doctype html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title} — {html.escape(newsroom.name)}</title>
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="{newsroom.paper}" />
+  {_favicon(base_url, newsroom)}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="{newsroom.fonts_url}" rel="stylesheet" />
+  {head_snippet(newsroom.analytics)}
+  <style>{_root_vars_wide(newsroom)}{_SECONDARY_CSS}{_NOT_FOUND_CSS}</style>
+</head>
+<body>
+  <main class="wrap">
+    {_masthead(base_url, newsroom, "Obituaries")}
+    <h1>This page is not here</h1>
+    <div class="rule"></div>
+    <p class="lost">The address may be mistyped, or the notice may have moved or been
+      withdrawn. Every published obituary can be found by name.</p>
+    <form class="lost__form" action="{base_url}/" method="get" role="search">
+      <div class="lost__field">
+        <label class="lost__label" for="lost-q">Search by name</label>
+        <input class="lost__input" id="lost-q" name="q" type="search" autocomplete="off"
+          autocapitalize="words" spellcheck="false" enterkeyhint="search" required />
+      </div>
+      <button class="lost__go" type="submit">Search</button>
+    </form>
+    <p class="foot-nav">
+      <a href="{base_url}/">Recent obituaries</a><span class="foot-nav__dot" aria-hidden="true">·</span>
+      <a href="{base_url}/archive.html">All obituaries, by month</a>
+    </p>
+    {_colophon(base_url, newsroom)}
+  </main>
+  <script>
+    // An address like /o/jane-a-doe-2026-3e7ba0.html names the person looked for.
+    (function () {{
+      var m = /[/]o[/]([a-z0-9-]+?)(?:-[0-9]{{4}})?(?:-[0-9a-f]{{6}})?[.]html$/.exec(location.pathname);
+      if (m) document.getElementById("lost-q").value = m[1].replace(/-/g, " ");
+    }})();
+  </script>
+  {event_script(newsroom.analytics)}
+</body>
+</html>
+"""
+
+
 def _structured_data(
     ob: Obituary, page_url: str, sponsor: dict, base_url: str, newsroom: Newsroom,
     photo_url: str | None = None,
@@ -749,6 +823,7 @@ def render_person_page(
     og_image: str | None = None,
     funeral_home_url: str | None = None,
     canonical_url: str | None = None,
+    photo_size: tuple[int, int] | None = None,
 ) -> str:
     page_url = f"{base_url}/o/{ob.slug}.html"
     canonical = canonical_url or page_url  # a duplicate points at the primary page
@@ -780,6 +855,8 @@ def render_person_page(
     photo = lightbox = ""
     if pic:
         img = f'src="{html.escape(pic)}" alt="{html.escape(ob.name)}" decoding="async"'
+        if photo_size:  # the portrait's own pixels, so the text never jumps when it arrives
+            img += f' width="{photo_size[0]}" height="{photo_size[1]}"'
         photo = (
             f'<button type="button" class="portrait" aria-haspopup="dialog" '
             f'aria-label="Enlarge portrait of {html.escape(ob.name)}">'

@@ -888,6 +888,24 @@ def test_placeholder_calendar_and_memoriam():
     print("ok: placeholder notices, the service calendar file, and the In Memoriam year page")
 
 
+def test_not_found_page_and_portrait_size():
+    # 404.html is served at whatever address was asked for, so nothing in it may
+    # be relative, and it must never be indexed.
+    import re
+
+    page = templates.render_not_found("http://b", NEWSROOM)
+    assert '<meta name="robots" content="noindex" />' in page
+    assert 'action="http://b/"' in page and 'name="q"' in page
+    assert 'rel="canonical"' not in page
+    assert not [h for h in re.findall(r'(?:href|src|action)="([^"]*)"', page) if not h.startswith("http")]
+    # A vendored portrait states its pixels, so the text holds still as it loads.
+    ob = mk("Jane Q. Doe", 1, "2026-06-10")
+    args = (ob, {"sponsors": []}, "http://b", NEWSROOM, [], "http://b/p.jpg", None, None, None)
+    assert 'width="300" height="450"' in templates.render_person_page(*args, photo_size=(300, 450))
+    assert ' height="' not in templates.render_person_page(*args).split('class="portrait"')[1].split("</button>")[0]
+    print("ok: not-found page (absolute, noindex), portrait dimensions")
+
+
 def test_town_from_opening():
     cases = {
         "Dale A. Hinz, 69, of Merrill, passed away peacefully.": "Merrill",

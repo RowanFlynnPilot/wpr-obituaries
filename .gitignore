@@ -17,6 +17,7 @@ web/public/data/digest.json
 web/public/sitemap.xml
 web/public/feed.xml
 web/public/robots.txt
+web/public/404.html
 web/public/archive.html
 web/public/o/*.html
 web/public/o/*.ics

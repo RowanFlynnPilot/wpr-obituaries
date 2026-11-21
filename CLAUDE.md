@@ -302,6 +302,16 @@ platforms' mechanics, and the cross-source dedupe/overlap note are in
   runs; render prefers the local copy and falls back to the remote URL for
   anything not yet vendored. The widget's `photoSrc` prepends the base path for
   these repo-relative photos.
+- **Not-found page (done)**: `web/public/404.html` (`templates.render_not_found`,
+  written each render, gitignored) is what GitHub Pages serves at any address
+  that holds nothing: a mistyped link, or a notice suppressed on request. It is
+  served *at the missing address*, so every link in it is absolute; it is
+  `noindex`; and an address shaped like a person's page fills its name search
+  with the name in the slug. The search submits to the register's `?q=`.
+- **Portrait dimensions (done)**: a vendored portrait's `<img>` on its page
+  carries the file's own `width`/`height` (`photos.photo_size`, read from the
+  JPEG header at render), so the text does not reflow when the image arrives.
+  A portrait still served from its remote URL has none.
 - **Cross-post dedupe (done)**: `main._dedupe_people` collapses the same person
   appearing in two posts to one canonical record for the index/feed/home
   pages/sitemap; the duplicate page still renders but `rel=canonical`s at its

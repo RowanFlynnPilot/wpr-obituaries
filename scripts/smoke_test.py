@@ -41,7 +41,10 @@ def local(route) -> None:
     """Pages reference the public base URL; answer those requests from the build."""
     path = route.request.url[len(LIVE):].split("?")[0].split("#")[0] or "index.html"
     target = DIST.joinpath(*path.split("/"))
-    route.fulfill(path=str(target)) if target.is_file() else route.fulfill(status=404, body="")
+    if target.is_file():
+        route.fulfill(path=str(target))
+    else:  # as the host does: the not-found page, at the address asked for
+        route.fulfill(status=404, path=str(DIST / "404.html"))
 
 
 def check(condition, message: str) -> None:
@@ -132,6 +135,15 @@ def main() -> None:
             ics = (DIST / "o" / f"{served['slug']}.ics").read_text(encoding="utf-8")
             check("BEGIN:VEVENT" in ics and served["serviceDate"].replace("-", "") in ics, "bad calendar file")
             print("ok: service line and calendar file")
+
+        # an address that holds nothing: the not-found page offers the name in it
+        page.goto(LIVE + "o/jane-a-nobody-2026-0a1b2c.html")
+        check(page.input_value("#lost-q") == "jane a nobody", "the not-found page did not read the name")
+        page.fill("#lost-q", surname)
+        page.click(".lost__go")
+        page.wait_for_selector(".entry__link")
+        check(target in names(), f"searching from the not-found page did not list {target!r}")
+        print("ok: not-found page carries the reader to a name")
 
         # the mini widget, the archive, the year page
         page.goto(base + "/mini.html")
