@@ -23,6 +23,7 @@ single bad post never costs us the rest of the catalogue.
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import hashlib
 import json
 import os
@@ -175,6 +176,25 @@ def _derive_town(summary: str) -> str | None:
     return town or None
 
 
+# Where the summary names no town, the notice's own opening line often does:
+# "Dale A. Hinz, 69, of Merrill, passed away…". The age anchors the match (so
+# "in loving memory of Elizabeth" never yields a town), only the first paragraph
+# is read, and a trailing state is dropped.
+_OPENING_TOWN_RE = re.compile(r",\s*(?:aged?\s+)?\d{1,3},?\s+of\s+([A-Z][\w'-]*(?:\s+[A-Z][\w'-]*){0,2})")
+_STATES = {"wisconsin", "wi"}
+
+
+def _town_from_opening(body: str) -> str | None:
+    """Best-effort town from the first paragraph of the notice. None if unclear."""
+    m = _OPENING_TOWN_RE.search((body or "").split("\n\n")[0])
+    if not m:
+        return None
+    words = m.group(1).split()
+    while words and words[-1].lower() in _STATES:
+        words.pop()
+    return " ".join(words) or None
+
+
 def _write_index(records: list[Obituary], vendored: set[str], homes: list[dict]) -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     # Newest batch first, then alphabetical by name within a date.
@@ -186,7 +206,7 @@ def _write_index(records: list[Obituary], vendored: set[str], homes: list[dict])
         record["photoUrl"] = _index_photo(r, vendored)
         home = resolve_home(r.funeral_home, homes)
         record["homeName"] = home["name"] if home else None  # canonical, for the facet
-        record["town"] = _derive_town(r.summary)
+        record["town"] = _derive_town(r.summary) or _town_from_opening(r.body)
         obituaries.append(record)
     payload = {"count": len(ordered), "obituaries": obituaries}
     INDEX_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -335,6 +355,13 @@ def _dedupe_people(
     primary_by_slug: dict[str, Obituary] = {}
     for group in _person_groups(records, homes):
         primary = max(group, key=_primary_rank)
+        # The fullest copy is often the newsroom's, but only the funeral home's
+        # states military service or a service date: the person keeps both.
+        primary = dataclasses.replace(
+            primary,
+            veteran=any(r.veteran for r in group),
+            service_date=max((r.service_date for r in group if r.service_date), default=None),
+        )
         canonical.append(primary)
         for r in group:
             primary_by_slug[r.slug] = primary
@@ -421,9 +448,11 @@ def _write_pages(
         home_url = f"{base_url}/funeral-home/{home['slug']}.html" if home else None
         primary = primary_by_slug.get(ob.slug, ob)
         canonical_url = f"{base_url}/o/{primary.slug}.html"
+        # the page states what any copy of this person's notice established
+        shown = dataclasses.replace(ob, veteran=primary.veteran, service_date=primary.service_date)
         (PAGES_DIR / f"{ob.slug}.html").write_text(
             render_person_page(
-                ob, sponsor, base_url, newsroom, related, _page_photo(ob, vendored, base_url),
+                shown, sponsor, base_url, newsroom, related, _page_photo(ob, vendored, base_url),
                 og_image, home_url, canonical_url,
             ),
             encoding="utf-8",

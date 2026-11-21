@@ -9,9 +9,12 @@ const PAGE_SIZE = 60;
 // The second tier is evidence, not a result set: a handful, then the rest on
 // request.
 const MENTION_PAGE = 10;
+// Close spellings are a suggestion: the nearest few.
+const CLOSE_PAGE = 12;
 
 export default function Register({
   obituaries,
+  close = [],
   mentions = [],
   homes = [],
   query,
@@ -27,7 +30,7 @@ export default function Register({
   const [limit, setLimit] = useState(PAGE_SIZE);
   const [allMentions, setAllMentions] = useState(false);
 
-  if (obituaries.length === 0 && mentions.length === 0 && homes.length === 0) {
+  if (obituaries.length === 0 && close.length === 0 && mentions.length === 0 && homes.length === 0) {
     return (
       <div className="register__empty">
         <p className="register__empty-text">
@@ -89,6 +92,21 @@ export default function Register({
 
   return (
     <div className="register">
+      {/* No one of that name, but a near spelling: say both, plainly, so a row
+          below is never mistaken for the name that was typed. */}
+      {close.length > 0 && (
+        <section className="register__group register__group--close">
+          <p className="register__close-note">No one is listed as “{query}”.</p>
+          <h2 className="register__date">
+            {close.length === 1 ? "A close spelling" : "Close spellings"}
+          </h2>
+          <ol className="register__list">
+            {close.slice(0, CLOSE_PAGE).map((ob) => (
+              <ObituaryRow key={ob.slug} ob={ob} />
+            ))}
+          </ol>
+        </section>
+      )}
       {groups.map((g) => (
         <section className="register__group" key={g.key}>
           <h2 className="register__date">{g.label}</h2>

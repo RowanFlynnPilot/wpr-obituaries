@@ -19,6 +19,7 @@ export function readState(search = window.location.search) {
   if (MONTH.test(month)) return { query: "", filter: { kind: "month", value: month } };
   const letter = (p.get("letter") || "").toUpperCase();
   if (LETTER.test(letter)) return { query: "", filter: { kind: "letter", value: letter } };
+  if (p.get("veterans") === "1") return { query: "", filter: { kind: "veterans", value: "1" } };
   for (const kind of FACETS) {
     const value = (p.get(kind) || "").trim().slice(0, MAX_VALUE);
     if (value) return { query: "", filter: { kind, value } };
@@ -30,7 +31,7 @@ export function readState(search = window.location.search) {
 export function stateSearch(query, filter) {
   const p = new URLSearchParams();
   if (query.trim()) p.set("q", query.trim());
-  else if (["month", "letter", ...FACETS].includes(filter.kind)) p.set(filter.kind, filter.value);
+  else if (["month", "letter", "veterans", ...FACETS].includes(filter.kind)) p.set(filter.kind, filter.value);
   const s = p.toString();
   return s ? `?${s}` : "";
 }

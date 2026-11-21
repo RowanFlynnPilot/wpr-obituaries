@@ -258,6 +258,122 @@ body {
   position: relative;
 }
 
+/* ---------- Upcoming services ---------- */
+/* A dated list in the register's own voice: an oxblood kicker, each day a mono
+   label over the names it holds. No box; hairlines do the dividing. */
+.services {
+  margin: 30px 0 6px;
+  padding-top: 22px;
+  border-top: 1px solid var(--hairline);
+}
+
+.services__kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 14px;
+}
+
+.services__list {
+  margin: 0;
+}
+
+.services__day {
+  display: grid;
+  grid-template-columns: 13.5em 1fr;
+  column-gap: 18px;
+  padding: 9px 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.services__day:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.services__date {
+  grid-column: 1;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  padding-top: 4px;
+}
+
+.services__person {
+  grid-column: 2;
+  margin: 0;
+  padding: 2px 0;
+  min-width: 0;
+}
+
+.services__link {
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.services__link:focus-visible,
+.services__all:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .services__link:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+}
+
+.services__home {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.services__all {
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  min-height: 24px;
+  cursor: pointer;
+}
+
+.services__note {
+  margin: 12px 0 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+
+@media (max-width: 480px) {
+  .services__day {
+    grid-template-columns: 1fr;
+  }
+  .services__date,
+  .services__person {
+    grid-column: 1;
+  }
+  .services__date {
+    padding: 0 0 2px;
+  }
+}
+
 .featured__card {
   display: flex;
   gap: 22px;
@@ -957,6 +1073,14 @@ body {
   font-size: 1.05rem;
 }
 
+/* Above the close spellings: the plain statement that the name as typed is
+   not here, in ink, so the rows beneath read as suggestions. */
+.register__close-note {
+  margin: 26px 0 18px;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
 .register__empty-hint {
   margin: 14px 0 0;
   color: var(--muted);
@@ -1290,6 +1414,20 @@ body {
   }
   .featured__arrow--next {
     right: -6px;
+  }
+}
+
+/* Moving between the register and a person's page, the portrait travels from
+   its row to its place on the page (and back) instead of the screen cutting.
+   Same-origin navigations only, so it plays on the obituaries site itself, not
+   through the WordPress embed; browsers without it navigate as before. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+  ::view-transition-group(*) {
+    animation-duration: 0.32s;
+    animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
   }
 }
 

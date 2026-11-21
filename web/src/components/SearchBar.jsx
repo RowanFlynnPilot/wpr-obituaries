@@ -15,11 +15,12 @@ function useSettled(value, ms) {
 // under the lede, reads at body size, and has a boundary a low-vision reader
 // can see. Nothing above it but the newsroom's flag and the title; nothing
 // between it and its results.
-export default function SearchBar({ value, onChange, count, mentions = 0, scope = "" }) {
+export default function SearchBar({ value, onChange, count, close = 0, mentions = 0, scope = "" }) {
   const names = `${count} ${count === 1 ? "name" : "names"}`;
+  const near = close ? ` · ${Math.min(close, 12)} close spelling${close === 1 ? "" : "s"}` : "";
   const extra = mentions ? ` · ${mentions} more mention${mentions === 1 ? "" : "s"}` : "";
   const scoped = scope ? ` · ${scope}` : "";
-  const line = `${names}${extra}${scoped}`;
+  const line = `${names}${near}${extra}${scoped}`;
   // Sighted readers watch the count change as they type. Screen-reader users
   // get the same text from a stable status region once typing pauses; the
   // visible line is hidden from them so it is not read twice.

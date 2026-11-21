@@ -44,9 +44,9 @@ jobs:
       WEBSHARE_PROXY_URL: ${{ secrets.WEBSHARE_PROXY_URL }}
       PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -59,7 +59,7 @@ jobs:
       # ones. The key tracks the config (brand) and master (records); restore-keys
       # falls back to the most recent cache so a normal run is mostly cache hits.
       - name: Restore OG share-card cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             web/public/assets/og
@@ -104,7 +104,7 @@ jobs:
       # job as an artifact rather than expecting it on main.
       - name: Save quarantined-extraction list
         if: steps.extract.outputs.code == '2'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: failures
           path: data/failures.json
@@ -134,7 +134,7 @@ jobs:
             done
           fi
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "20"
 
@@ -144,7 +144,7 @@ jobs:
           npm ci
           npm run build
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: web/dist
 
@@ -159,7 +159,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   # A successful deploy says nothing about whether a reader can reach the result.
   # In October 2026 the edge returned 526 for five days — the origin certificate
@@ -172,9 +172,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -192,7 +192,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: failures
       - name: Report quarantined extractions

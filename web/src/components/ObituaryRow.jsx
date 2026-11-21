@@ -19,7 +19,9 @@ export default function ObituaryRow({ ob, match = null }) {
   // every one of those facts is already above it — the name in title weight,
   // the town here, the date in the group heading. An echo is not information.
   // The full notice is one click away; the register's job is to get you there.
-  const facts = [span, ageFact(ob, span), ob.town].filter(Boolean).join(" · ");
+  const facts = [span, ageFact(ob, span), ob.town, ob.veteran && "Veteran"]
+    .filter(Boolean)
+    .join(" · ");
   const home = ob.homeName || ob.funeralHome;
   // The link's name is the person; the facts, the matched phrase and the home
   // describe it. Left to the browser, the name would be every line run
@@ -46,6 +48,8 @@ export default function ObituaryRow({ ob, match = null }) {
             loading="lazy"
             width="66"
             height="66"
+            // the same name as the portrait on this person's page (templates.py)
+            style={{ viewTransitionName: `portrait-${ob.slug}` }}
           />
         ) : (
           <span className="entry__photo entry__photo--blank" aria-hidden="true">

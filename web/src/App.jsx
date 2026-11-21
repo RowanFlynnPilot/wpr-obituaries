@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Masthead from "./components/Masthead.jsx";
 import SubmitForm from "./components/SubmitForm.jsx";
 import FeaturedCarousel from "./components/FeaturedCarousel.jsx";
+import UpcomingServices from "./components/UpcomingServices.jsx";
 import SearchBar from "./components/SearchBar.jsx";
 import BrowseBar from "./components/BrowseBar.jsx";
 import Register from "./components/Register.jsx";
@@ -15,7 +16,7 @@ const BASE = import.meta.env.BASE_URL;
 const RECENT_MONTHS = 3; // default view: the current month plus the prior two
 const RECENT = { kind: "recent", value: RECENT_MONTHS };
 const NO_FILTER = { kind: "none" };
-const EMPTY = { names: [], mentions: [], homes: [] };
+const EMPTY = { names: [], close: [], mentions: [], homes: [] };
 
 // Newest date of death first (falling back to the publication date for the few
 // records without one), so the register reads as a calendar of deaths.
@@ -51,6 +52,8 @@ function scopeLabel(filter) {
     case "town":
     case "home":
       return filter.value;
+    case "veterans":
+      return "veterans";
     default:
       return "every year";
   }
@@ -157,6 +160,9 @@ export default function App() {
     if (filter.kind === "town") {
       return of(all.filter((o) => o.town === filter.value));
     }
+    if (filter.kind === "veterans") {
+      return of(all.filter((o) => o.veteran));
+    }
     if (filter.kind === "home") {
       return of(all.filter((o) => (o.homeName || o.funeralHome) === filter.value));
     }
@@ -203,6 +209,7 @@ export default function App() {
               value={query}
               onChange={onSearch}
               count={results.names.length}
+              close={results.close.length}
               mentions={results.mentions.length}
               scope={query ? "" : scopeLabel(filter)}
             />
@@ -212,6 +219,7 @@ export default function App() {
       {data ? (
         <>
           {isDefault && <FeaturedCarousel obituaries={data.obituaries} />}
+          {isDefault && <UpcomingServices obituaries={data.obituaries} />}
           {!query && (
             <BrowseBar
               ref={browseRef}
@@ -226,6 +234,7 @@ export default function App() {
           <Register
             key={`${query}|${filter.kind}|${filter.value ?? ""}`}
             obituaries={results.names}
+            close={results.close}
             mentions={results.mentions}
             homes={results.homes}
             query={query}
