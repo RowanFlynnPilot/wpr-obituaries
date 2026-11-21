@@ -7,6 +7,7 @@ person. The model only extracts what is present; it never invents detail.
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 from datetime import date
@@ -32,15 +33,19 @@ def sanity_warnings(ob: Obituary) -> list[str]:
             warnings.append(f"age {ob.age} inconsistent with dates (~{years})")
     return warnings
 
+_INLINE = ["a", "strong", "em", "b", "i", "u", "span", "mark", "small", "sup", "sub"]
+
 MODEL = "claude-haiku-4-5-20251001"
 MAX_TOKENS = 16000
 
 _NULLABLE_TEXT = {"type": ["string", "null"]}
 _NULLABLE_INT = {"type": ["integer", "null"]}
 
-# The records come back as a tool call, so the API hands over parsed data. Asked
-# to write the JSON out as text, the model eventually leaves one quotation mark
-# unescaped inside a long obituary body, and the whole post fails to parse.
+# The model returns facts and a paragraph range per person, never the obituary
+# text itself: the body is lifted from the post by _body. Asked to retype a
+# long body inside JSON, the model eventually mis-escapes a quotation mark and
+# the whole post fails to parse (Nov. 18, 2026, three runs in a row); and a
+# retyped body is the model's copy, where a lifted one is the source's words.
 RECORD_TOOL = {
     "name": "record_obituaries",
     "description": "Record every obituary found in the batch post.",
@@ -73,16 +78,19 @@ RECORD_TOOL = {
                                 "entirely; never write 'unspecified' or 'unknown'. No flourishes."
                             ),
                         },
-                        "body": {
-                            "type": "string",
+                        "body_first": {
+                            "type": "integer",
+                            "description": "Number of the first paragraph of this person's obituary text",
+                        },
+                        "body_last": {
+                            "type": "integer",
                             "description": (
-                                "This person's full obituary text, paragraphs separated by a "
-                                "blank line. No other people's obituaries, sponsor lines, or "
-                                "funeral home logos."
+                                "Number of its last paragraph. The range must not take in another "
+                                "person's obituary, a sponsor line, or a funeral home logo."
                             ),
                         },
                     },
-                    "required": ["name", "summary", "body"],
+                    "required": ["name", "summary", "body_first", "body_last"],
                 },
             }
         },
@@ -92,8 +100,9 @@ RECORD_TOOL = {
 
 PROMPT = """You are extracting individual obituaries from a single \
 newspaper batch post. The post below contains one or more obituaries \
-concatenated together. Each [IMAGE: url] marker is a photo that appears \
-immediately before the person it belongs to.
+concatenated together, one numbered paragraph per line ("12| ..."). Each \
+[IMAGE: url] marker is a photo that appears immediately before the person it \
+belongs to.
 
 Record every person with the record_obituaries tool, one entry per person, in the order they appear.
 
@@ -109,14 +118,31 @@ Batch post text:
 
 
 def _to_markered_text(content_html: str) -> str:
-    """Flatten post HTML to text, inlining image URLs as [IMAGE: url]."""
+    """Flatten post HTML to one line per paragraph, inlining image URLs as [IMAGE: url]."""
     soup = BeautifulSoup(content_html, "html.parser")
     for img in soup.find_all("img"):
         src = img.get("src", "")
         img.replace_with(f"\n[IMAGE: {src}]\n")
+    for br in soup.find_all("br"):
+        br.replace_with("\n")
+    # Inline markup must not split a paragraph: a bolded name or a link is part
+    # of its sentence, and a paragraph is the unit a body is lifted by.
+    for tag in soup.find_all(_INLINE):
+        tag.unwrap()
+    soup.smooth()
     text = soup.get_text("\n")
-    lines = [line.strip() for line in text.splitlines()]
+    lines = [" ".join(line.split()) for line in text.splitlines()]
     return "\n".join(line for line in lines if line)
+
+
+def _body(lines: list[str], first, last, name: str, source_url: str) -> str:
+    """One person's obituary text: paragraphs first..last (1-based) of the post, photos left out."""
+    if not (isinstance(first, int) and isinstance(last, int) and 1 <= first <= last <= len(lines)):
+        raise ValueError(
+            f"Bad paragraph range {first!r}..{last!r} for {name} in {source_url} "
+            f"({len(lines)} paragraphs)"
+        )
+    return "\n\n".join(l for l in lines[first - 1 : last] if not l.startswith("[IMAGE:"))
 
 
 # The model occasionally narrates an absence ("Jane Doe, 84, of an unspecified
@@ -137,6 +163,10 @@ def clean_summary(summary: str) -> str:
 def _records(response, source_url: str) -> list[dict]:
     """The people the model recorded, raising loudly if it recorded none properly."""
     calls = [b for b in response.content if b.type == "tool_use"]
+    if len(calls) == 1 and isinstance(calls[0].input.get("obituaries"), str):
+        # Haiku sometimes sends the array as one JSON string; with no bodies in
+        # it, that string is short facts and parses (and raises here if not).
+        return json.loads(calls[0].input["obituaries"])
     if len(calls) != 1 or not isinstance(calls[0].input.get("obituaries"), list):
         got = [(b.type, repr(getattr(b, "input", getattr(b, "text", "")))[:700]) for b in response.content]
         raise ValueError(
@@ -152,7 +182,8 @@ def extract_obituaries(post: dict, client: Anthropic) -> list[Obituary]:
     source_url = post["link"]
     source_date = post["date"][:10]
     content_html = post["content"]["rendered"]
-    text = _to_markered_text(content_html)
+    lines = _to_markered_text(content_html).split("\n")
+    text = "\n".join(f"{n}| {line}" for n, line in enumerate(lines, 1))
 
     response = client.messages.create(
         model=MODEL,
@@ -185,7 +216,7 @@ def extract_obituaries(post: dict, client: Anthropic) -> list[Obituary]:
             funeral_home=r.get("funeral_home"),
             photo_url=r.get("photo_url"),
             summary=clean_summary(r.get("summary") or ""),
-            body=(r.get("body") or "").strip(),
+            body=_body(lines, r.get("body_first"), r.get("body_last"), name, source_url),
         )
         for warning in sanity_warnings(ob):
             print(f"  WARN {ob.name} ({source_url}): {warning}", file=sys.stderr)

@@ -731,14 +731,17 @@ def test_clean_summary():
     print("ok: clean summary (placeholder town clause stripped, real towns kept)")
 
 
-def test_extraction_reads_the_tool_call():
+def test_extraction_lifts_bodies_by_paragraph_range():
+    import json
     from types import SimpleNamespace as NS
 
-    # a body full of quotation marks and a line break: the text that broke hand-written JSON
-    body = 'She was known as "Grandma Jo" to all.\n\nShe said, "Come in, sit down."'
-    person = {"name": "Jo Doe", "summary": "Jo Doe, 90, of Wausau.", "body": body, "age": 90,
-              "death_date": "2026-11-15", "birth_date": None, "death_year": 2026,
-              "funeral_home": None, "photo_url": None}
+    html = ('<figure><img src="http://x/jo.jpg"></figure><p><strong>Jo Doe</strong></p>'
+            '<p>She was known as "Grandma Jo" to <a href="#">all</a>.</p><p>She said, "Come in."</p>'
+            '<p>SPONSORED BY A HOME</p><p>Al Roe</p><p>Al farmed.</p>')
+    people = [
+        {"name": "Jo Doe", "summary": "Jo Doe, 90, of Wausau.", "age": 90, "body_first": 1, "body_last": 4},
+        {"name": "Al Roe", "summary": "Al Roe.", "body_first": 7, "body_last": 7},
+    ]
 
     class Client:
         def __init__(self, content, stop="tool_use"):
@@ -749,20 +752,27 @@ def test_extraction_reads_the_tool_call():
             self.sent = kw
             return NS(stop_reason=self.stop, content=self.content)
 
-    post = {"id": 7, "link": "http://x/p", "date": "2026-11-18T00:00:00",
-            "content": {"rendered": "<p>Jo Doe</p>"}}
-    client = Client([NS(type="tool_use", input={"obituaries": [person]})])
-    (ob,) = extractor.extract_obituaries(post, client)
-    assert ob.body == body and ob.age == 90 and ob.source_date == "2026-11-18"
+    post = {"id": 7, "link": "http://x/p", "date": "2026-11-18T00:00:00", "content": {"rendered": html}}
+    client = Client([NS(type="tool_use", input={"obituaries": people})])
+    jo, al = extractor.extract_obituaries(post, client)
+    # the body is the post's own paragraphs: quotes intact, inline markup not splitting a line, no photo line
+    assert jo.body == 'Jo Doe\n\nShe was known as "Grandma Jo" to all.\n\nShe said, "Come in."', jo.body
+    assert al.body == "Al farmed." and jo.age == 90 and jo.source_date == "2026-11-18"
     assert client.sent["tool_choice"] == {"type": "tool", "name": "record_obituaries"}
-    # prose instead of a tool call, or a truncated reply, fails loudly rather than publishing nothing
-    for bad in (Client([NS(type="text", text="[]")]), Client([], stop="max_tokens")):
+    assert '3| She was known as "Grandma Jo" to all.' in client.sent["messages"][0]["content"]
+    # the array sent as one JSON string (Haiku does this) is read the same
+    as_text = Client([NS(type="tool_use", input={"obituaries": json.dumps(people)})])
+    assert [o.name for o in extractor.extract_obituaries(post, as_text)] == ["Jo Doe", "Al Roe"]
+    # prose instead of a call, a truncated reply, or a range off the page fails loudly
+    off = [dict(people[0], body_last=99)]
+    for bad in (Client([NS(type="text", text="[]")]), Client([], stop="max_tokens"),
+                Client([NS(type="tool_use", input={"obituaries": off})])):
         try:
             extractor.extract_obituaries(post, bad)
             raise AssertionError("should have raised")
         except ValueError:
             pass
-    print("ok: extraction reads the forced tool call (quotes in a body are safe; no call raises)")
+    print("ok: extraction lifts bodies by paragraph range (source wording; bad ranges and no call raise)")
 
 
 if __name__ == "__main__":
