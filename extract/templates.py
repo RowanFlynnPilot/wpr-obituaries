@@ -15,7 +15,7 @@ from __future__ import annotations
 import html
 import re
 import json
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from itertools import groupby
 from urllib.parse import parse_qsl, quote, urlencode, urlsplit, urlunsplit
 
@@ -157,7 +157,8 @@ def render_robots(base_url: str) -> str:
 
 
 def render_sitemap(
-    obituaries: list[Obituary], base_url: str, home_slugs: list[str] | None = None
+    obituaries: list[Obituary], base_url: str, home_slugs: list[str] | None = None,
+    memoriam_years: list[int] | None = None,
 ) -> str:
     """Build a sitemap.xml of the register, every per-person page, and the
     funeral-home landing pages.
@@ -178,6 +179,8 @@ def render_sitemap(
         urls.append(
             f"  <url><loc>{loc}</loc><lastmod>{ob.source_date}</lastmod></url>"
         )
+    for year in memoriam_years or []:
+        urls.append(f"  <url><loc>{html.escape(base_url)}/in-memoriam-{year}.html</loc>{stamp}</url>")
     for slug in home_slugs or []:
         loc = html.escape(f"{base_url}/funeral-home/{slug}.html")
         urls.append(f"  <url><loc>{loc}</loc></url>")
@@ -365,7 +368,8 @@ def _month_heading(date_str: str) -> str:
 
 
 def render_archive(
-    obituaries: list[Obituary], base_url: str, newsroom: Newsroom, sponsor: dict
+    obituaries: list[Obituary], base_url: str, newsroom: Newsroom, sponsor: dict,
+    years: list[int] | None = None,
 ) -> str:
     """A single crawlable index of every published obituary, grouped by month.
 
@@ -376,11 +380,27 @@ def render_archive(
     """
     page_url = f"{base_url}/archive.html"
     ordered = sorted(obituaries, key=lambda o: o.source_date, reverse=True)
+    body = _sections(groupby(ordered, key=lambda o: _month_heading(o.source_date)), base_url)
+    description = (
+        f"Browse every obituary published on {newsroom.name} for "
+        f"{newsroom.coverage_area}, organized by month."
+    )
+    count = f"{len(obituaries)} obituaries published for {html.escape(newsroom.coverage_area)}"
+    if years:
+        links = " · ".join(f'<a href="{base_url}/in-memoriam-{y}.html">In Memoriam {y}</a>' for y in years)
+        count += f'<br />{links}'
+    return _collection_page(
+        "All Obituaries", "Obituary Index", count, description, page_url, body, base_url, newsroom, sponsor
+    )
+
+
+def _sections(groups, base_url: str) -> str:
+    """Month sections of linked names, shared by the archive and the year pages."""
     sections = []
-    for heading, group in groupby(ordered, key=lambda o: _month_heading(o.source_date)):
+    for heading, group in groups:
         items = []
         for r in group:
-            span = r.lifespan()
+            span = " · ".join(x for x in (r.lifespan(), "Veteran" if r.veteran else "") if x)
             meta = f' <span class="meta">{span}</span>' if span else ""
             items.append(
                 f'<li><a href="{base_url}/o/{r.slug}.html">{html.escape(r.name)}</a>{meta}</li>'
@@ -391,16 +411,43 @@ def render_archive(
             f'      <h2 class="archive__month">{heading}</h2>\n'
             f'      <ul class="list">\n        {links}\n      </ul>\n    </section>'
         )
-    body = "\n    ".join(sections)
+    return "\n    ".join(sections)
+
+
+def render_memoriam(
+    year: int, people: list[Obituary], base_url: str, newsroom: Newsroom, sponsor: dict
+) -> str:
+    """Everyone the register holds who died in one year, by the month of their passing.
+
+    The archive is filed by when a notice was published; this page is filed by
+    when a life ended, which is how a community looks back on a year.
+    """
+    ordered = sorted(people, key=lambda o: (o.public_death, o.name))
+    body = _sections(groupby(ordered, key=lambda o: f"{date.fromisoformat(o.public_death):%B}"), base_url)
+    veterans = sum(1 for o in people if o.veteran)
+    count = f"{len(people):,} people in this register who died in {year}"
+    if veterans:  # a floor: only a funeral home's feed, or the notice itself, marks one
+        count += f", including {veterans} veterans"
     description = (
-        f"Browse every obituary published on {newsroom.name} for "
-        f"{newsroom.coverage_area}, organized by month."
+        f"In memoriam, {year}: the {len(people):,} people whose obituaries {newsroom.name} "
+        f"published, by the month of their passing."
     )
+    return _collection_page(
+        f"In Memoriam {year}", "The year in remembrance", count, description,
+        f"{base_url}/in-memoriam-{year}.html", body, base_url, newsroom, sponsor,
+    )
+
+
+def _collection_page(
+    title: str, kicker: str, count: str, description: str, page_url: str, body: str,
+    base_url: str, newsroom: Newsroom, sponsor: dict,
+) -> str:
+    """The shared shell of the archive and the In Memoriam pages."""
     collection = _json_ld(
         {
             "@context": "https://schema.org",
             "@type": "CollectionPage",
-            "name": f"All Obituaries — {newsroom.name}",
+            "name": f"{title} — {newsroom.name}",
             "url": page_url,
             "inLanguage": "en-US",
             "isPartOf": {"@type": "WebSite", "name": newsroom.name, "url": newsroom.url},
@@ -411,7 +458,7 @@ def render_archive(
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>All Obituaries — {html.escape(newsroom.name)}</title>
+  <title>{html.escape(title)} — {html.escape(newsroom.name)}</title>
   <meta name="description" content="{html.escape(description)}" />
   <meta name="robots" content="max-image-preview:large" />
   <meta name="theme-color" content="{newsroom.paper}" />
@@ -419,7 +466,7 @@ def render_archive(
   <link rel="canonical" href="{page_url}" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="{html.escape(newsroom.name)}" />
-  <meta property="og:title" content="All Obituaries — {html.escape(newsroom.name)}" />
+  <meta property="og:title" content="{html.escape(title)} — {html.escape(newsroom.name)}" />
   <meta property="og:description" content="{html.escape(description)}" />
   <meta property="og:url" content="{page_url}" />
   <script type="application/ld+json">
@@ -435,9 +482,9 @@ def render_archive(
 <body>
   <main class="wrap">
     <a class="topnav" href="{base_url}/">&larr; Search obituaries</a>
-    {_masthead(base_url, newsroom, 'Obituary Index')}
-    <h1>All Obituaries</h1>
-    <p class="count">{len(obituaries)} obituaries published for {html.escape(newsroom.coverage_area)}</p>
+    {_masthead(base_url, newsroom, kicker)}
+    <h1>{html.escape(title)}</h1>
+    <p class="count">{count}</p>
     <div class="rule"></div>
     {body}
     {_sponsor_section(sponsor, base_url, newsroom)}
@@ -602,6 +649,41 @@ def _service_detail(body: str, day: date) -> str:
     return '<span class="service__note">Times and places are in the notice below.</span>'
 
 
+def render_service_ics(ob: Obituary, base_url: str, newsroom: Newsroom) -> str:
+    """An all-day calendar entry for the service date, carrying the notice's own sentence.
+
+    All-day because the feed gives a date and nothing else: the time lives in
+    the quoted sentence, where the family wrote it, not in a field we guessed.
+    """
+    day = date.fromisoformat(ob.service_date)
+    detail = html.unescape(re.sub(r"<[^>]+>", "", _service_detail(ob.body, day)))
+    text = lambda s: re.sub(r"([,;\\])", r"\\\1", s).replace("\n", "\\n")
+    lines = [
+        "BEGIN:VCALENDAR", "VERSION:2.0", f"PRODID:-//{text(newsroom.name)}//Obituaries//EN",
+        "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "BEGIN:VEVENT",
+        f"UID:{ob.slug}-service@{base_url.split('//')[-1]}",
+        f"DTSTAMP:{day:%Y%m%d}T000000Z",
+        f"DTSTART;VALUE=DATE:{day:%Y%m%d}",
+        f"DTEND;VALUE=DATE:{day + timedelta(days=1):%Y%m%d}",
+        f"SUMMARY:{text('Service for ' + ob.name)}",
+        f"DESCRIPTION:{text(detail + chr(10) + chr(10) + base_url + '/o/' + ob.slug + '.html')}",
+        f"URL:{base_url}/o/{ob.slug}.html",
+        "TRANSP:TRANSPARENT", "END:VEVENT", "END:VCALENDAR",
+    ]
+    # RFC 5545: no line longer than 75 octets; a continuation starts with a space
+    folded = []
+    for line in lines:
+        raw = line.encode("utf-8")
+        while len(raw) > 75:
+            cut = 75
+            while (raw[cut] & 0xC0) == 0x80:  # never split a multi-byte character
+                cut -= 1
+            folded.append(raw[:cut].decode("utf-8"))
+            raw = b" " + raw[cut:]
+        folded.append(raw.decode("utf-8"))
+    return "\r\n".join(folded) + "\r\n"
+
+
 def _related_section(related: list[Obituary], base_url: str) -> str:
     """Internal links to recent obituaries — recirculation and crawl depth."""
     if not related:
@@ -668,6 +750,11 @@ def render_person_page(
     body_paragraphs = "\n".join(
         f"      <p>{html.escape(p)}</p>" for p in ob.body.split("\n\n") if p.strip()
     )
+    if ob.awaiting_text:  # the home's stand-in line is not the notice
+        body_paragraphs = (
+            '      <p class="awaiting">The full obituary has not been published yet. '
+            "It will appear here once the funeral home shares it.</p>"
+        )
     lifespan = " · ".join(x for x in (ob.lifespan(), "Veteran" if ob.veteran else "") if x)
     # The service date, when the funeral home's feed gives one. Stated without
     # a tense: the page is rebuilt three times a week, so "upcoming" could be
@@ -678,7 +765,8 @@ def render_person_page(
         service = (
             f'<p class="service"><span class="service__label">Service</span> '
             f'<time datetime="{ob.service_date}">{day:%A}, {day:%B} {day.day}, {day.year}</time>'
-            f'{_service_detail(ob.body, day)}</p>'
+            f'{_service_detail(ob.body, day)}'
+            f'<a class="service__cal" href="{base_url}/o/{ob.slug}.ics">Add to calendar</a></p>'
         )
     # A real button that opens the enlarged portrait (the script below wires
     # it). The image keeps the person's name as its alt — Google Images reads
@@ -802,6 +890,7 @@ def render_person_page(
       color: var(--muted); margin: 10px 0 0;
     }}
     .rule {{ height: 3px; background: var(--accent); width: 54px; margin: 26px 0; }}
+    .awaiting {{ font-style: italic; color: var(--muted); }}
     .service {{
       font-family: var(--mono); font-size: 1.05rem; letter-spacing: 0.02em;
       color: var(--ink); margin: 0 0 26px; padding: 14px 0;
@@ -812,6 +901,12 @@ def render_person_page(
       color: var(--accent); margin-right: 10px;
     }}
     .service__note {{ display: block; margin-top: 4px; font-size: 12.5px; color: var(--muted); }}
+    .service__cal {{
+      display: inline-block; margin-top: 10px; font-size: 12px; letter-spacing: 0.04em;
+      color: var(--accent); background: var(--paper-2); border: 1px solid var(--border-control);
+      border-radius: 2px; padding: 6px 12px; text-decoration: none;
+    }}
+    @media (hover: hover) {{ .service__cal:hover {{ background: var(--hover); }} }}
     .portrait {{
       float: right; display: block; width: 184px; max-width: 42%; margin: 4px 0 18px 26px;
       padding: 0; background: none; border: 1px solid var(--rule); filter: grayscale(0.15);
@@ -943,7 +1038,7 @@ def render_person_page(
       .arrangements {{ text-align: center; }}
       .arrangements a {{ color: #000; text-decoration: none; }}
       /* Drop the interactive chrome — keep the name, dates, portrait, and text. */
-      .topnav, .share, .sponsor-card, .more, .back, .foot-nav, .lightbox {{ display: none !important; }}
+      .topnav, .share, .sponsor-card, .more, .back, .foot-nav, .lightbox, .service__cal {{ display: none !important; }}
     }}
   </style>
 </head>

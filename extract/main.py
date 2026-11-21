@@ -41,6 +41,8 @@ from photos import vendor_photos, vendored_slugs
 from store import Master, load_manual, load_master, load_suppressed, save_master
 from templates import (
     render_archive,
+    render_memoriam,
+    render_service_ics,
     render_feed,
     render_home_page,
     render_person_page,
@@ -368,6 +370,25 @@ def _home_dates(group: list[Obituary]) -> dict:
     return dates
 
 
+# A year's page needs most of a year behind it: the catalogue's first weeks
+# (December 2025) would otherwise stand as "In Memoriam 2025".
+MEMORIAM_MIN = 150
+
+
+def _memoriam_years(canonical: list[Obituary]) -> dict[int, list[Obituary]]:
+    """People by the year they died, for the In Memoriam pages.
+
+    Only a death date the record may publish places someone in a year; a year
+    with too few names (the catalogue's first weeks) gets no page.
+    """
+    years: dict[int, list[Obituary]] = {}
+    for r in canonical:
+        died = r.public_death
+        if died and _exact(died):
+            years.setdefault(int(died[:4]), []).append(r)
+    return {y: people for y, people in years.items() if len(people) >= MEMORIAM_MIN}
+
+
 def _dedupe_people(
     records: list[Obituary], homes: list[dict]
 ) -> tuple[list[Obituary], dict[str, Obituary]]:
@@ -460,6 +481,7 @@ def _write_pages(
     # From the deduped list — a person present via two sources must not appear
     # twice (under two URLs) in every page's "more recent obituaries" links.
     recent = sorted(canonical, key=lambda r: r.source_date, reverse=True)[:8]
+    ics_kept: set[str] = set()
     town_of = {r.slug: _derive_town(r.summary) or _town_from_opening(r.body) for r in canonical}
     by_town: dict[str, list[Obituary]] = {}
     for r in sorted(canonical, key=lambda r: r.source_date, reverse=True):
@@ -493,6 +515,11 @@ def _write_pages(
         home = resolve_home(ob.funeral_home, homes)
         home_url = f"{base_url}/funeral-home/{home['slug']}.html" if home else None
         canonical_url = f"{base_url}/o/{primary.slug}.html"
+        if ob.service_date:
+            (PAGES_DIR / f"{ob.slug}.ics").write_text(
+                render_service_ics(ob, base_url, newsroom), encoding="utf-8", newline=""
+            )
+            ics_kept.add(ob.slug)
         (PAGES_DIR / f"{ob.slug}.html").write_text(
             render_person_page(
                 ob, sponsor, base_url, newsroom, related, _page_photo(ob, vendored, base_url),
@@ -500,6 +527,9 @@ def _write_pages(
             ),
             encoding="utf-8",
         )
+    for stale in PAGES_DIR.glob("*.ics"):  # a service date that was withdrawn upstream
+        if stale.stem not in ics_kept:
+            stale.unlink()
     _prune_og_orphans({ob.slug for ob in records})
     _save_og_cache(fresh_cache)
     print(f"OG cards: {og_made} generated, {og_kept} reused from cache.")
@@ -554,11 +584,17 @@ def render(master: Master, sponsor: dict, base_url: str, newsroom, allow_empty: 
     _write_index(canonical, vendored, homes)
     _write_pages(records, canonical, sponsor, base_url, vendored, homes, primary_by_slug, newsroom)
     home_slugs = _write_home_pages(canonical, sponsor, base_url, homes, newsroom)
+    years = _memoriam_years(canonical)
     ARCHIVE_FILE.write_text(
-        render_archive(canonical, base_url, newsroom, sponsor), encoding="utf-8"
+        render_archive(canonical, base_url, newsroom, sponsor, sorted(years, reverse=True)),
+        encoding="utf-8",
     )
+    for year, people in years.items():
+        (ARCHIVE_FILE.parent / f"in-memoriam-{year}.html").write_text(
+            render_memoriam(year, people, base_url, newsroom, sponsor), encoding="utf-8"
+        )
     SITEMAP_FILE.write_text(
-        render_sitemap(canonical, base_url, home_slugs), encoding="utf-8"
+        render_sitemap(canonical, base_url, home_slugs, sorted(years)), encoding="utf-8"
     )
     FEED_FILE.write_text(render_feed(canonical, base_url, newsroom), encoding="utf-8")
     ROBOTS_FILE.write_text(render_robots(base_url), encoding="utf-8")

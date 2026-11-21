@@ -855,6 +855,39 @@ def test_hidden_dates_are_withheld_and_home_dates_win():
     print("ok: hidden dates withheld; the home's dates win a disagreement; service sentence quoted whole")
 
 
+def test_placeholder_calendar_and_memoriam():
+    import dataclasses
+
+    waiting = mk("Jay Roe", 3, "2026-11-18", death_date="2026-11-18",
+                 body="The obituary will posted when available.")
+    assert waiting.awaiting_text and waiting.excerpt() == ""
+    page = templates.render_person_page(
+        waiting, {"sponsors": []}, "http://b", config.load_newsroom(), [], None, None, None, None)
+    assert "will posted" not in page and "has not been published yet" in page
+    real = mk("Al Roe", 4, "2026-11-18", death_date="2026-11-18",
+              body="Al farmed. Services are pending at this time.\n\n" + "He loved his family. " * 10)
+    assert not real.awaiting_text  # a full notice that mentions pending services is a notice
+
+    served = dataclasses.replace(
+        real, service_date="2026-12-01", veteran=True,
+        body="A service will be held at 11:00 a.m. Tuesday, December 1, 2026, at St. Mary's, Wausau.")
+    ics = templates.render_service_ics(served, "http://b", config.load_newsroom())
+    assert "DTSTART;VALUE=DATE:20261201" in ics and "DTEND;VALUE=DATE:20261202" in ics
+    assert "SUMMARY:Service for Al Roe" in ics and "11:00 a.m." in ics.replace("\r\n ", "")
+    assert all(len(line.encode()) <= 75 for line in ics.split("\r\n"))
+    assert "/o/" + served.slug + ".ics" in templates.render_person_page(
+        served, {"sponsors": []}, "http://b", config.load_newsroom(), [], None, None, None, None)
+
+    people = [mk(f"P{i} Doe", 100 + i, "2026-03-05", death_date="2026-03-05") for i in range(main.MEMORIAM_MIN)]
+    stub = [mk("Old Doe", 999, "2025-12-30", death_date="2025-12-30")]
+    hidden = [dataclasses.replace(mk("Hid Doe", 998, "2026-03-06", death_date="2026-03-06"), hide_death=True)]
+    years = main._memoriam_years(people + stub + hidden + [served])
+    assert list(years) == [2026] and len(years[2026]) == main.MEMORIAM_MIN + 1  # no stub year, no hidden date
+    memoriam = templates.render_memoriam(2026, years[2026], "http://b", config.load_newsroom(), {"sponsors": []})
+    assert "In Memoriam 2026" in memoriam and "March" in memoriam and "including 1 veterans" in memoriam
+    print("ok: placeholder notices, the service calendar file, and the In Memoriam year page")
+
+
 def test_town_from_opening():
     cases = {
         "Dale A. Hinz, 69, of Merrill, passed away peacefully.": "Merrill",

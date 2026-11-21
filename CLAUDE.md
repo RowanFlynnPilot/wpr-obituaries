@@ -116,7 +116,15 @@ Source of truth → static output → embedded widget:
    sentence naming that date quoted beneath it word for word (never parsed:
    people act on a time and place). The mini widget counts the coming services
    from `recent.json`'s `serviceDates`. Each page's "More obituaries" lists up
-   to three recent people from the same town before the newest notices. Veterans are marked on the
+   to three recent people from the same town before the newest notices. A
+   page with a service date also gets `o/<slug>.ics`, an all-day calendar entry
+   carrying that quoted sentence ("Add to calendar"). A body that is only the
+   home's stand-in line ("The obituary will posted when available.",
+   `Obituary.awaiting_text`) is replaced on the page by a plain "not published
+   yet" line. `in-memoriam-<year>.html` lists everyone who died in a year by
+   the month of their passing (years with at least `MEMORIAM_MIN` people),
+   linked from the archive and the sitemap. The batch extractor also records
+   `veteran` when a notice states the person's own military service. Veterans are marked on the
    row's fact line and the page's lifespan line, and are a browse filter
    (`?veterans=1`). Register rows carry no
    summary line: the extractor's one sentence restates the name, age and town
@@ -131,7 +139,9 @@ Source of truth → static output → embedded widget:
    (`lib/frame.js`, measured from `body.offsetHeight` so the frame can shrink
    as well as grow); copy-paste snippets + a live `embed-test.html` harness are
    in `docs/embedding.md`.
-7. `.github/workflows/extract.yml` — cron Mon/Wed/Fri 6 AM Central. Runs sync +
+7. `.github/workflows/extract.yml` — cron daily, about 6 AM Central (the homes
+   post service dates any day; WPR's batch posts still land Mon/Wed/Fri, and
+   only a new post costs a model call). Runs sync +
    render, commits the updated master back (`contents: write`), then builds the
    widget and deploys to Pages. Quarantined units (exit 2) still deploy the rest
    and go red in a separate `report` job; a crashed extract (exit 1) skips the

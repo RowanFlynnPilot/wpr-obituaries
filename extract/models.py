@@ -9,6 +9,12 @@ import unicodedata
 from dataclasses import dataclass
 
 
+_PENDING = re.compile(
+    r"obituary[^.]*\b(?:pending|forthcoming|to follow|(?:will|to) be posted|will posted|when available)"
+    r"|check back",
+    re.IGNORECASE,
+)
+
 _NAME_SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
 
 # A nickname in parentheses or quotes is not part of the name, and a *trailing*
@@ -132,12 +138,25 @@ class Obituary:
         )
         return f"{birth} – {death}" if birth and death else death
 
+    @property
+    def awaiting_text(self) -> bool:
+        """True when the body is the funeral home's stand-in, not an obituary.
+
+        A home lists a person before the family's text arrives ("The obituary
+        will posted when available.", "Full obituary and service details are
+        pending."). That line is the home's note to its own visitors; published
+        as the notice it reads as if that were all there is to say.
+        """
+        return len(self.body.split()) < 25 and bool(_PENDING.search(self.body))
+
     def excerpt(self, limit: int = 200) -> str:
         """The opening of the obituary body, trimmed at a word boundary.
 
         A warmer teaser than the one-line summary — used by the featured
         carousel to show "the beginning of their obituary".
         """
+        if self.awaiting_text:
+            return ""
         first = self.body.split("\n\n")[0].strip() if self.body else ""
         if len(first) <= limit:
             return first

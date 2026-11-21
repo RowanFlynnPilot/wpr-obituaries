@@ -68,6 +68,14 @@ RECORD_TOOL = {
                         "death_date": {**_NULLABLE_TEXT, "description": _FULL_DATE_ONLY},
                         "death_year": _NULLABLE_INT,
                         "age": _NULLABLE_INT,
+                        "veteran": {
+                            "type": "boolean",
+                            "description": (
+                                "true only if the text states that this person served in the armed "
+                                "forces (a branch, a war, 'veteran', military honors). A relative's "
+                                "service does not count. Otherwise false."
+                            ),
+                        },
                         "funeral_home": {
                             **_NULLABLE_TEXT,
                             "description": "Funeral home handling arrangements, or null",
@@ -99,7 +107,7 @@ RECORD_TOOL = {
                     # every field required (null where the text is silent): left optional,
                     # the model skips them, and a named funeral home goes unrecorded
                     "required": [
-                        "name", "birth_date", "death_date", "death_year", "age", "funeral_home",
+                        "name", "birth_date", "death_date", "death_year", "age", "veteran", "funeral_home",
                         "photo_url", "summary", "body_first", "body_last",
                     ],
                 },
@@ -228,6 +236,7 @@ def extract_obituaries(post: dict, client: Anthropic) -> list[Obituary]:
             photo_url=r.get("photo_url"),
             summary=clean_summary(r.get("summary") or ""),
             body=_body(lines, r.get("body_first"), r.get("body_last"), name, source_url),
+            veteran=r.get("veteran") is True,
         )
         for warning in sanity_warnings(ob):
             print(f"  WARN {ob.name} ({source_url}): {warning}", file=sys.stderr)
