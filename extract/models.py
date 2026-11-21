@@ -175,7 +175,6 @@ class Obituary:
             "photoUrl": self.photo_url,
             "summary": self.summary,
             "excerpt": self.excerpt(),
-            "sourceUrl": self.source_url,
             "sourceDate": self.source_date,
             **({"veteran": True} if self.veteran else {}),
             **({"serviceDate": self.service_date} if self.service_date else {}),

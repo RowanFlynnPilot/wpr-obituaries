@@ -253,7 +253,8 @@ def _write_index(
         record["town"] = _derive_town(r.summary) or _town_from_opening(r.body)
         obituaries.append(record)
     payload = {"count": len(ordered), "memoriamYears": memoriam_years, "obituaries": obituaries}
-    INDEX_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    # Compact: every reader of the register downloads this file.
+    INDEX_FILE.write_text(json.dumps(payload, separators=(",", ":")), encoding="utf-8")
     # The mini widget only ever shows the freshest few, so it gets its own small
     # feed instead of downloading the full (forever-growing) index on every load.
     recent = {
@@ -263,7 +264,7 @@ def _write_index(
         # days against the reader's clock without the full index
         "serviceDates": sorted(o["serviceDate"] for o in obituaries if o.get("serviceDate")),
     }
-    RECENT_FILE.write_text(json.dumps(recent, indent=2), encoding="utf-8")
+    RECENT_FILE.write_text(json.dumps(recent, separators=(",", ":")), encoding="utf-8")
 
 
 def _sponsor_line(sponsor: dict) -> str:
@@ -492,9 +493,9 @@ def _save_og_cache(cache: dict[str, str]) -> None:
 
 def _prune_og_orphans(live_slugs: set[str]) -> None:
     """Delete cards for obituaries no longer rendered (suppressed/removed)."""
-    for png in OG_DIR.glob("*.png"):
-        if png.stem not in live_slugs:
-            png.unlink()
+    for card in OG_DIR.iterdir():  # anything that is not a live card, old PNGs included
+        if card.suffix != ".jpg" or card.stem not in live_slugs:
+            card.unlink()
 
 
 def _write_pages(
@@ -545,7 +546,7 @@ def _write_pages(
         skip |= {r.slug for r in nearby}
         related = (nearby + [r for r in recent if r.slug not in skip])[:6]
         portrait = PHOTOS_DIR / f"{ob.slug}.jpg" if ob.slug in vendored else None
-        og_path = OG_DIR / f"{ob.slug}.png"
+        og_path = OG_DIR / f"{ob.slug}.jpg"
         digest = _og_input_hash(ob, portrait, brand_fp)
         if og_cache.get(ob.slug) == digest and og_path.exists():
             og_kept += 1
@@ -553,7 +554,7 @@ def _write_pages(
             render_card(ob.name, ob.lifespan(), portrait, og_path, newsroom, sponsor_line)
             og_made += 1
         fresh_cache[ob.slug] = digest
-        og_image = f"{base_url}/assets/og/{ob.slug}.png"
+        og_image = f"{base_url}/assets/og/{ob.slug}.jpg"
         home = resolve_home(ob.funeral_home, homes)
         home_url = f"{base_url}/funeral-home/{home['slug']}.html" if home else None
         canonical_url = f"{base_url}/o/{primary.slug}.html"

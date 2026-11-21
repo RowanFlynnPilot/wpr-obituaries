@@ -284,7 +284,8 @@ platforms' mechanics, and the cross-source dedupe/overlap note are in
   render. Submit it in Search Console. (A root `robots.txt` only helps once a
   custom domain serves the site at root — a project Pages subpath ignores it.)
 - **Incremental render (done)**: composing the branded share-cards (`og.py`, PIL)
-  is the dominant render cost, so `_write_pages` memoizes them — a card is rebuilt
+  is the dominant render cost, so `_write_pages` memoizes them (the cards are
+  JPEG: as PNG they were 420 MB of a 532 MB site, against Pages' 1 GB limit) — a card is rebuilt
   only when its inputs change (name, dates, portrait bytes, or brand), keyed by a
   content hash in `.cache/og-cards.json` (gitignored, not deployed). HTML is cheap
   and always rewritten. Warm renders are ~8× faster (585 cards: ~34s → ~4s). CI

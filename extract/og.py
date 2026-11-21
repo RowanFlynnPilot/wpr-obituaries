@@ -121,4 +121,7 @@ def render_card(
     draw.text((margin, H - 52), footer, font=_font("CourierPrime-Regular.ttf", 22), fill=MUTED)
 
     dest.parent.mkdir(parents=True, exist_ok=True)
-    img.save(dest, "PNG", compress_level=6)
+    # JPEG, not PNG: a card is mostly a photograph, and as PNG the cards were
+    # four-fifths of the deployed site (420 MB of 532 in Nov. 2026, against
+    # GitHub Pages' 1 GB limit). Full-resolution colour keeps the type crisp.
+    img.save(dest, "JPEG", quality=88, subsampling=0, optimize=True, progressive=True)
