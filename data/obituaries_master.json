@@ -557,6 +557,7 @@
     "funeral_home_scrape:154011038002810": "cf74cf1d08bd",
     "funeral_home_scrape:154232250202134": "1a39702e58c2",
     "funeral_home_scrape:154297836543511": "292b999447b0",
+    "funeral_home_scrape:154674089961355": "48f39136513b",
     "funeral_home_scrape:155016173008159": "b960c597170e",
     "funeral_home_scrape:156198518210457": "578b3e44a033",
     "funeral_home_scrape:156522465747629": "021fdffec620",
@@ -31263,6 +31264,23 @@
       "slug": "douglas-daniel-brandt-2026-df96b9",
       "veteran": true,
       "service_date": "2026-11-25"
+    },
+    {
+      "name": "Eileen M. Wucherpfenning",
+      "source_id": 154674089961355,
+      "source_url": "https://www.rembsfh.com/obituaries/eileen-m-wucherpfenning",
+      "source_date": "2026-11-20",
+      "death_year": 2026,
+      "birth_date": "1933-05-13",
+      "death_date": "2026-11-20",
+      "age": 93,
+      "funeral_home": "Rembs Funeral Home",
+      "photo_url": "https://cdn.tukioswebsites.com/cfebf99a-a3e4-4eea-afaf-3def3f0736ea/lg",
+      "summary": "Eileen M. Wucherpfenning, age 93, of Marshfield, passed away on November 20, 2026.",
+      "body": "Eileen May Wucherpfennig, age 93, passed away peacefully on November 20, 2026 in Marshfield, WI.\n\nVisitation will be held on Tuesday, November 24, 2026, from 4:00 PM to 8:00 PM at Rembs Funeral Home. A funeral service will follow on Wednesday, November 25, at 11:00 AM at Rembs Funeral Home, with a visitation starting at 9:00 AM. The burial will follow the service at Hillside Cemetary. Arrangements are under the care of Rembs Funeral Home.\n\nThe honor of pallbearers belongs to Kevin Lezotte, Brian Lezotte, Jim Bredlau, Lee Bredlau, Steve Kadolph, and Brian Fravert.\n\nBorn on May 14, 1933, to the late George and Hilda (Haslow) Bredlau, Eileen was born in a country home near Greenwood. She attended Neillsville area schools before entering the workforce at the age of 17. Starting out by caring for local children and households, she built a lifelong reputation for hard work, reliability, and genuine care for others. Over the years, her strong work ethic led her to roles candling eggs, as well as positions at Auto Test and Nelson Filters. Once her own children were in school, Eileen worked at Spencer Schools, and even after retiring, her nurturing spirit continued as she happily babysat her great-nieces.\n\nEileen married Melchior Hoesly in Neillsville, WI, on November 21, 1954. Melch died in an auto accident, January 30, 1965. Eileen married Walter Wucherpfennig in Loyal, WI on December 18, 1965. Just one month shy of 61 years, they spent their life devoted to one another.\n\nEileen’s favorite place to be was camping. She spent many wonderful years making memories at Rock Dam, Dexter County Park, and North Wood County Park, even serving alongside her husband as campground hosts for several years. Some of Eileen’s favorite memories were made with her family attending dance recitals and sporting events for her granddaughters, at the Family Camp-Out, trips to Disney World, bus trips with her sister, Marian and cousin John and Carol Bredlau, as well as sitting around a table playing cards, and shaking dice with her nieces and nephews.\n\nEileen is survived by her husband of 60 years, Walter Wucherpfennig; her daughter, Lynette, and her son, Scott (his wife Heather) and her granddaughters, McKenna and Camryn. Eileen is further survived by her brother, Al (his wife Sue) Bredlau and her sister, Marian Kadolph, and many beloved nieces and nephews. In addition, she is survived by her sisters-in-law, Lenore Williams, Lois Aumann, and Deb Wucherpfennig; and her brother-in-law David (his wife Nancy) Wucherpfennig and many cherished nieces and nephews.\n\nEileen is predeceased by her parents, George and Hilda Bredlau, her sister, Norma and brother-in-law Alvin Lezotte (his wife, Yvonne); and her sister Carol (her husband Ray) Wedekind; her brother-in-law, Larry Kadolph; and her first husband Melchior Hoesly. She is also predeceased by her in-laws, Reinhold and Martha Wucherpfennig, Carol (her husband Vic) Sandley, Lucille (her husband Jim) Bauer, Marvin Wucherpfennig, Glenn Wucherpfennig, Les Williams, and Henry Aumann Jr.\n\nThe family would like to thank Compassus Home Hospice for their kindness and compassion.",
+      "source": "funeral_home_scrape",
+      "slug": "eileen-m-wucherpfenning-2026-8cacde",
+      "service_date": "2026-11-24"
     },
     {
       "name": "Lois E. Schultz",
