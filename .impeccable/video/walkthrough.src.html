@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WPR Obituaries, in sixty seconds</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&amp;family=Oswald:wght@500;600;700&amp;family=Courier+Prime:wght@400;700&amp;display=swap">
+<style>
+/* A 60-second, 1080x1920 walkthrough of WPR Obituaries in the tool's own world: newsprint, ink and one oxblood
+   voice; Oswald for the nameplate, Merriweather for names and reading, Courier Prime for what would be typed on a
+   form. The cover is the register's own masthead; pages turn like a newspaper section's, 1 to 6, each a real screen
+   of the tool. The motion stays quiet — this is a memorial page: arrivals, slow scrolls, a search typed letter by
+   letter, a few taps. v2 borrows the advertising video's vocabulary where it suits a memorial: a tilted phone with
+   the register's own figures settling beside it (odometers that ease in, never bounce), pages that lift in 3D, and a
+   slow camera drift across a wall of names behind the end card. mix.py scores it (piano bed, soft page turns). Every frame is a pure function of time: seek(t) sets every style from t alone, so render.mjs
+   can step it frame by frame. build.py fills the layout marker from the capture. */
+:root {
+  --ink: #1b1a18; --newsprint: #f6f2ea; --paper: #fffdf7; --muted: #6b665d; --rule: #d9d3c6; --hairline: #e7e1d5;
+  --oxblood: #7c2e36;
+  --name: Oswald, 'Arial Narrow', sans-serif; --serif: Merriweather, Georgia, serif; --mono: 'Courier Prime', 'Courier New', monospace;
+}
+html, body { margin: 0; background: var(--ink) }
+#stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--ink); font-family: var(--serif); color: var(--ink); -webkit-font-smoothing: antialiased }
+.scene { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--paper); will-change: transform; visibility: hidden }
+.scene.turning { box-shadow: -30px 0 60px rgba(27, 26, 24, .28) }
+.abs { position: absolute; margin: 0 }
+.fx { will-change: transform, opacity }
+img { display: block; max-width: none }
+
+/* The flag, as the register sets it: seal beside the wordmark, the tagline, the sponsors, thick-over-thin in ink */
+.front { background: var(--newsprint) }
+.flag { left: 0; width: 1080px; display: flex; justify-content: center; align-items: center; gap: 22px }
+.flag .seal { width: 100px; height: 100px; border-radius: 50% }
+.flag .wm { height: 64px; width: auto; mix-blend-mode: multiply }
+.tagline { left: 0; width: 1080px; text-align: center; font: 400 21px/1 var(--mono); letter-spacing: .28em; text-transform: uppercase; color: var(--muted) }
+.presented { left: 0; width: 1080px; display: flex; justify-content: center; align-items: center; gap: 26px }
+.presented span { font: 400 19px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--muted) }
+.presented img { height: 74px; width: auto }
+.flagrule { left: 80px; width: 920px; height: 5px; border-top: 8px solid var(--ink); border-bottom: 2px solid var(--ink) }
+.eyebrow { left: 0; width: 1080px; text-align: center; font: 700 30px/1 var(--mono); letter-spacing: .32em; text-transform: uppercase; color: var(--oxblood) }
+.nameplate { left: 0; width: 1080px; text-align: center; font: 600 172px/.98 var(--name); letter-spacing: .02em; text-transform: uppercase; color: var(--ink) }
+.lede { left: 110px; width: 860px; text-align: center; font: italic 300 42px/1.5 var(--serif); color: var(--muted) }
+.searchc { left: 80px; width: 920px }
+.searchc img { width: 920px }
+.caret { position: absolute; width: 4px; background: var(--oxblood) }
+.note { left: 0; width: 1080px; text-align: center; font: 400 25px/1.4 var(--mono); letter-spacing: .06em; color: var(--muted) }
+
+/* A page: kicker, head, the thick-over-thin rule, a line on what it is, the screen, the caption, the folio */
+.kick { left: 80px; top: 112px; font: 700 28px/1 var(--mono); letter-spacing: .24em; text-transform: uppercase; color: var(--oxblood) }
+.title { left: 78px; top: 154px; width: 940px; font: 700 88px/1 var(--name); text-transform: uppercase; letter-spacing: .005em; color: var(--ink) }
+.title em { font-style: normal; color: var(--oxblood) }
+.rule { left: 80px; top: 340px; width: 920px; height: 4px; border-top: 7px solid var(--ink); border-bottom: 2px solid var(--ink) }
+.src { left: 80px; top: 372px; width: 920px; font: italic 300 30px/1.4 var(--serif); color: var(--muted) }
+.cap { left: 80px; top: 1530px; width: 920px; font: 400 40px/1.45 var(--serif); color: var(--ink) }
+.cap small { display: block; margin-top: 14px; font: 400 25px/1.45 var(--mono); letter-spacing: .02em; color: var(--muted) }
+.folio { left: 80px; top: 1800px; width: 920px; padding-top: 20px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; font: 400 21px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--muted) }
+.folio b { font-weight: 700; color: var(--ink) }
+.win { left: 80px; top: 452px; width: 920px; height: 1040px; overflow: hidden; background: var(--newsprint); box-shadow: 0 0 0 1px var(--rule) }
+.win img { position: absolute; left: 0; top: 0; width: 920px }
+.tap { position: absolute; border-radius: 50%; border: 5px solid rgba(124, 46, 54, .55); box-sizing: border-box; opacity: 0 }
+.ring { position: absolute; border: 4px solid var(--oxblood); border-radius: 8px; box-sizing: border-box; opacity: 0 }
+
+/* 1: the register on a phone, tilted, with its own figures settling beside it */
+.phone { left: 64px; top: 470px; width: 420px; height: 860px; box-sizing: border-box; padding: 16px; border-radius: 62px; background: var(--ink); box-shadow: 30px 40px 70px rgba(27, 26, 24, .3) }
+.phone .screen { position: relative; width: 388px; height: 828px; border-radius: 46px; overflow: hidden; background: var(--newsprint) }
+.phone .screen img { position: absolute; left: 0; top: 0; width: 388px }
+.phone .island { position: absolute; left: 139px; top: 14px; width: 110px; height: 30px; border-radius: 15px; background: var(--ink); z-index: 2 }
+.odo { display: inline-flex; align-items: flex-start; font-variant-numeric: tabular-nums }
+.odo .col { display: inline-block; overflow: hidden; position: relative }
+.odo .strip { display: block }
+.odo .strip span, .odo .fixed { display: block; text-align: center }
+.odo i { font-style: normal; color: var(--oxblood) }
+.fig { left: 566px; width: 440px }
+.fig .odo { font: 700 132px/1 var(--name); color: var(--ink) }
+.fig .lb { display: block; margin-top: 14px; font: italic 300 32px/1.35 var(--serif); color: var(--muted) }
+.figline { left: 566px; width: 420px; padding-top: 20px; border-top: 1px solid var(--rule); font: 400 23px/1.55 var(--mono); letter-spacing: .03em; color: var(--muted) }
+#p-win, .sheet { transform-origin: 50% 100% }
+
+/* 6: the printed keepsake, a sheet lifted off the page */
+.sheet { left: 240px; top: 560px; width: 600px; background: #fff; box-shadow: 0 0 0 1px var(--rule), 0 16px 40px rgba(27, 26, 24, .2) }
+.sheet img { width: 600px }
+
+/* End card: a wall of the register's names, the camera drifting slowly across it, then the ask over it */
+.namewall { position: absolute; inset: 0; perspective: 1400px; overflow: hidden; pointer-events: none }
+.names { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d }
+.nrow { position: absolute; white-space: nowrap; font: 700 44px/1 var(--serif); letter-spacing: -.005em; color: var(--ink) }
+.nrow b { font: 400 30px/1 var(--mono); color: var(--oxblood); padding: 0 26px; vertical-align: 6px }
+
+/* End card: the ask, the address, the sponsors' card, the colophon */
+.big { left: 0; width: 1080px; text-align: center; font: 700 170px/.92 var(--name); text-transform: uppercase; letter-spacing: .005em; color: var(--ink) }
+.big span { display: block }
+.big .ox { color: var(--oxblood) }
+.deck { left: 120px; width: 840px; text-align: center; font: italic 300 42px/1.45 var(--serif); color: var(--muted) }
+.find { left: 0; width: 1080px; text-align: center; font: 700 26px/1 var(--mono); letter-spacing: .24em; text-transform: uppercase; color: var(--oxblood) }
+.addr { left: 0; width: 1080px; text-align: center; font: 500 64px/1.14 var(--name); letter-spacing: .01em; color: var(--ink) }
+.card { left: 150px; width: 780px; background: var(--paper); box-shadow: 0 0 0 1px var(--rule); border-top: 4px solid var(--oxblood); padding: 34px 0 38px; display: flex; flex-direction: column; align-items: center; gap: 26px }
+.card span { font: 400 21px/1 var(--mono); letter-spacing: .24em; text-transform: uppercase; color: var(--muted) }
+.card div { display: flex; align-items: center; gap: 56px }
+.card img { height: 128px; width: auto }
+.colophon { left: 0; width: 1080px; text-align: center; font: 400 21px/1.5 var(--mono); letter-spacing: .03em; color: var(--muted) }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <section class="scene front" id="s0">
+    <div class="abs flag" style="top: 350px"><img class="seal" src="shots/wpr-seal.png" alt=""><img class="wm" src="shots/wpr-logo.png" alt="Wausau Pilot &amp; Review"></div>
+    <p class="abs tagline" style="top: 478px">Where Locals Look First For News</p>
+    <div class="abs presented" style="top: 526px"><span>Obituaries made possible by</span><img src="shots/helke.png" alt=""><img src="shots/brainard.png" alt=""></div>
+    <span class="abs flagrule" style="top: 634px"></span>
+    <p class="abs eyebrow" style="top: 700px">In Memoriam</p>
+    <h1 class="abs nameplate" style="top: 754px">Obituaries</h1>
+    <p class="abs lede" style="top: 950px">Remembering the lives of Wausau and Marathon County residents.</p>
+    <div class="abs searchc" id="c-search" style="top: 1120px"><img src="shots/search-cover.png" alt=""><span class="caret" id="c-caret"></span></div>
+    <p class="abs note" style="top: 1500px">Published free of charge<br>every Monday, Wednesday and Friday</p>
+  </section>
+
+  <section class="scene" id="s1">
+    <p class="abs kick">The register</p>
+    <h2 class="abs title">Newest first,<br><em>by date of passing</em></h2>
+    <span class="abs rule"></span>
+    <p class="abs src">From Wausau Pilot &amp; Review and the area’s funeral homes</p>
+    <div class="abs phone fx" id="r-phone"><div class="screen"><span class="island"></span><img id="r-img" src="shots/phone-register.png" alt=""></div></div>
+    <div class="abs fig fx" id="r-f0" style="top: 560px"><div class="odo" id="r-o0" data-odo="<!--NOTICES-->" data-suffix="+" data-h="132"></div><span class="lb">notices in the register</span></div>
+    <div class="abs fig fx" id="r-f1" style="top: 868px"><div class="odo" id="r-o1" data-odo="<!--HOMES-->" data-h="132"></div><span class="lb">area funeral homes</span></div>
+    <p class="abs figline fx" id="r-f2" style="top: 1176px">Updated every morning</p>
+    <p class="abs cap fx" id="r-cap">Every notice in one place, with the services coming up this week.</p>
+    <footer class="abs folio"><span>Wausau Pilot &amp; Review · Obituaries</span><b>1 / 6</b></footer>
+  </section>
+
+  <section class="scene" id="s2">
+    <p class="abs kick">Browse</p>
+    <h2 class="abs title">By month<br><em>or last name</em></h2>
+    <span class="abs rule"></span>
+    <p class="abs src">Town, funeral home and veterans are one more tap away</p>
+    <div class="abs win fx" id="b-win"><img class="fx" id="b-open" src="shots/browse-open.png" alt=""><img class="fx" id="b-k" src="shots/browse-k.png" alt=""><span class="tap" id="b-tap"></span></div>
+    <p class="abs cap fx" id="b-cap">Look through a whole month, or every last name that starts with one letter.</p>
+    <footer class="abs folio"><span>Wausau Pilot &amp; Review · Obituaries</span><b>2 / 6</b></footer>
+  </section>
+
+  <section class="scene" id="s3">
+    <p class="abs kick">Find a name</p>
+    <h2 class="abs title">Search<br><em>any name</em></h2>
+    <span class="abs rule"></span>
+    <p class="abs src">No one is listed as “Kruger”, so the nearest names are offered</p>
+    <div class="abs win fx" id="q-win"><img id="q-rest" src="shots/search-rest.png" alt=""><!--STATES--><span class="caret" id="q-caret"></span><span class="tap" id="q-tap"></span></div>
+    <p class="abs cap fx" id="q-cap">Type a name the way it sounds. Close spellings are found too, across more than <!--NOTICES--> notices.</p>
+    <footer class="abs folio"><span>Wausau Pilot &amp; Review · Obituaries</span><b>3 / 6</b></footer>
+  </section>
+
+  <section class="scene" id="s4">
+    <p class="abs kick">Named in a notice</p>
+    <h2 class="abs title">Found inside<br><em>other notices</em></h2>
+    <span class="abs rule"></span>
+    <p class="abs src">When a name appears in someone else’s obituary</p>
+    <div class="abs win fx" id="m-win"><img id="m-img" src="shots/mentions.png" alt=""></div>
+    <p class="abs cap fx" id="m-cap">A search also finds a name inside other notices, like a mother’s maiden name, and shows the line it came from.</p>
+    <footer class="abs folio"><span>Wausau Pilot &amp; Review · Obituaries</span><b>4 / 6</b></footer>
+  </section>
+
+  <section class="scene" id="s5">
+    <p class="abs kick">A page of their own</p>
+    <h2 class="abs title">Every life,<br><em>its own page</em></h2>
+    <span class="abs rule"></span>
+    <p class="abs src">The full notice, the service, and a date to add to your calendar</p>
+    <div class="abs win fx" id="p-win"><img id="p-img" src="shots/person.png" alt=""></div>
+    <p class="abs cap fx" id="p-cap">Each person has a page of their own, with the service date in the notice’s own words.</p>
+    <footer class="abs folio"><span>Wausau Pilot &amp; Review · Obituaries</span><b>5 / 6</b></footer>
+  </section>
+
+  <section class="scene" id="s6">
+    <p class="abs kick">Share &amp; keep</p>
+    <h2 class="abs title">Share it.<br><em>Keep it.</em></h2>
+    <span class="abs rule"></span>
+    <p class="abs src">Facebook, a link, email, or a printable keepsake</p>
+    <div class="abs win fx" id="s-win"><div id="s-cam" style="position: absolute; left: 0; top: 0; width: 920px; height: 100%; transform-origin: 0 0"><img src="shots/person-foot.png" alt=""><img class="fx" id="s-copied" src="shots/person-foot-copied.png" alt=""><span class="tap" id="s-tap1"></span><span class="tap" id="s-tap2"></span></div></div>
+    <div class="abs sheet fx" id="s-sheet"><img src="shots/print.png" alt=""></div>
+    <p class="abs cap fx" id="s-cap">Send a notice to family in a tap, or save it as a PDF to print and keep.</p>
+    <footer class="abs folio"><span>Wausau Pilot &amp; Review · Obituaries</span><b>6 / 6</b></footer>
+  </section>
+
+  <section class="scene front" id="s7">
+    <div class="namewall" id="e-wall"><div class="names" id="e-names"><!--NAMES--></div></div>
+    <div class="abs flag" style="top: 150px"><img class="seal" src="shots/wpr-seal.png" alt=""><img class="wm" src="shots/wpr-logo.png" alt="Wausau Pilot &amp; Review"></div>
+    <p class="abs tagline" style="top: 278px">Where Locals Look First For News</p>
+    <span class="abs flagrule" style="top: 336px"></span>
+    <h2 class="abs big" style="top: 430px"><span class="fx" id="e-l1">Find an</span><span class="ox fx" id="e-l2">obituary.</span></h2>
+    <p class="abs deck fx" id="e-deck" style="top: 768px">Free, from Wausau Pilot &amp; Review. Nothing to sign up for.</p>
+    <p class="abs find fx" id="e-find" style="top: 946px">Find it at</p>
+    <p class="abs addr fx" id="e-addr" style="top: 994px">wausaupilotandreview.com<br>/obituaries</p>
+    <div class="abs card fx" id="e-card" style="top: 1260px"><span>Obituaries made possible by</span><div><img src="shots/helke.png" alt="Helke Funeral Home"><img src="shots/brainard.png" alt="Brainard Funeral Home"></div></div>
+    <p class="abs colophon fx" id="e-colo" style="top: 1700px">Wausau Pilot &amp; Review · 715-301-5539<br>Nonprofit local journalism for north central Wisconsin</p>
+  </section>
+
+</div>
+<script>
+// ---- The composition: size, frame rate, length. render.mjs reads window.ready. ---------------------------------
+window.COMPOSITION = { width: 1080, height: 1920, fps: 30, duration: 62 };
+/*LAYOUT*/
+
+// ---- The engine: easing and helpers. Nothing reads the clock; seek(t) is the only entry point. ----------------
+function bezier(x1, y1, x2, y2) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+  const sx = (t) => ((ax * t + bx) * t + cx) * t, sy = (t) => ((ay * t + by) * t + cy) * t;
+  return (x) => {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    let lo = 0, hi = 1, t = x;
+    for (let i = 0; i < 40; i++) { const v = sx(t); if (Math.abs(v - x) < 1e-7) break; if (v < x) lo = t; else hi = t; t = (lo + hi) / 2; }
+    return sy(t);
+  };
+}
+const OUT = bezier(.16, 1, .3, 1);                                                   // arrivals
+const INOUT = (k) => (k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);     // turns, scrolls, swaps
+const p = (t, a, b, e = OUT) => (t <= a ? 0 : t >= b ? 1 : e((t - a) / (b - a)));  // progress of a window [a, b]
+const lerp = (a, b, k) => a + (b - a) * k;
+const $ = (id) => document.getElementById(id);
+function arrive(el, k, dy = 60) { el.style.opacity = k; el.style.transform = 'translateY(' + ((1 - k) * dy).toFixed(1) + 'px)'; }
+function scrollTo(el, y) { el.style.transform = 'translateY(' + (-y).toFixed(1) + 'px)'; }
+function tap(el, t, a) {        // a ring that widens and fades where a finger lands
+  const k = p(t, a, a + 0.55);
+  el.style.opacity = t > a && t < a + 0.55 ? (0.9 * (1 - k)).toFixed(3) : 0;
+  el.style.transform = 'scale(' + lerp(0.4, 1.6, k).toFixed(4) + ')';
+}
+// an odometer: every digit a column of 0-9 twice over; it turns once round and settles on its figure, right to left
+const ODOS = {};
+function odoRoll(id, t, start, each = 0.14, dur = 1.7) {
+  const o = ODOS[id];
+  o.cols.forEach((c, j) => {
+    const a = start + (o.cols.length - 1 - j) * each;
+    c.strip.style.transform = 'translateY(' + (-(10 + c.d) * p(t, a, a + dur) * o.h).toFixed(1) + 'px)';
+  });
+}
+const blink = (t, from) => (t < from || ((t - from) % 1.06) < 0.62 ? 1 : 0);   // a caret: steady while typing, then blinking
+
+// ---- Pages and their turns: [turn in starts, turn out starts], each lasting TURN seconds. ---------------------
+const TURN = 0.6;
+const PAGES = [[null, 5.4], [5.4, 13.4], [13.4, 21.4], [21.4, 29.4], [29.4, 37.4], [37.4, 45.0], [45.0, 53.2], [53.2, null]];
+const TYPE_AT = 23.9, KEY = 0.2;     // the search is typed from here, one letter every KEY seconds
+
+// Layout constants, set once in ready() from the capture's measurements (never during the timeline)
+let K = {}, STATES = [], RINGS = [];
+
+function seek(t) {
+  PAGES.forEach(([tin, tout], i) => {
+    const el = $('s' + i);
+    const inK = tin === null ? 1 : p(t, tin, tin + TURN, INOUT);
+    const outK = tout === null ? 0 : p(t, tout, tout + TURN, INOUT);
+    el.style.visibility = (tin === null || t >= tin) && (tout === null || t < tout + TURN) ? 'visible' : 'hidden';
+    el.style.zIndex = i;
+    el.style.transform = 'translateX(' + (inK < 1 ? lerp(1080, 0, inK) : -240 * outK).toFixed(2) + 'px)';
+    el.classList.toggle('turning', inK > 0 && inK < 1);
+  });
+
+  // Cover: the register's masthead, composed from the first frame (it is the thumbnail); the search field's caret waits
+  $('c-caret').style.opacity = blink(t, 0);
+
+  // 1: the register on a phone, tilted, scrolling from the masthead down to the day's notices; its figures settle beside it
+  const ph = p(t, 6.0, 6.9);
+  $('r-phone').style.opacity = ph;
+  $('r-phone').style.transform = 'perspective(1600px) translateX(' + lerp(-160, 0, ph).toFixed(1) + 'px) rotateY(' + lerp(24, 12, p(t, 6.0, 13.4, INOUT)).toFixed(2) + 'deg) rotateX(4deg)';
+  scrollTo($('r-img'), lerp(0, K.rScroll, p(t, 7.4, 12.8, INOUT)));
+  arrive($('r-f0'), p(t, 6.5, 7.2), 30);
+  odoRoll('r-o0', t, 6.7);
+  arrive($('r-f1'), p(t, 6.9, 7.6), 30);
+  odoRoll('r-o1', t, 7.1);
+  arrive($('r-f2'), p(t, 7.6, 8.3), 20);
+  arrive($('r-cap'), p(t, 7.8, 8.5), 24);
+
+  // 2: Browse is open; K is tapped and the list becomes every surname that starts with it
+  arrive($('b-win'), p(t, 14.1, 14.8), 40);
+  arrive($('b-cap'), p(t, 14.9, 15.6), 24);
+  tap($('b-tap'), t, 16.4);
+  const bk = p(t, 16.55, 16.95, INOUT);
+  $('b-k').style.opacity = bk;
+  const by = lerp(0, K.bScroll, p(t, 17.5, 19.6, INOUT));
+  scrollTo($('b-open'), by);
+  scrollTo($('b-k'), by);
+
+  // 3: the field is tapped and the name typed; every letter narrows the list (the capture's own states)
+  arrive($('q-win'), p(t, 22.1, 22.8), 40);
+  arrive($('q-cap'), p(t, 22.9, 23.6), 24);
+  tap($('q-tap'), t, 23.45);
+  const focused = t >= 23.55;
+  const n = Math.max(0, Math.min(STATES.length - 1, Math.floor((t - TYPE_AT) / KEY) + 1));
+  $('q-rest').style.visibility = focused ? 'hidden' : 'visible';
+  STATES.forEach((el, i) => { el.style.visibility = focused && i === n ? 'visible' : 'hidden'; });
+  const c = L.search.states[n].caret;
+  Object.assign($('q-caret').style, { left: (c.x * K.k).toFixed(1) + 'px', top: (c.y * K.k).toFixed(1) + 'px', height: (c.h * K.k).toFixed(1) + 'px' });
+  $('q-caret').style.opacity = focused ? blink(t, TYPE_AT + (STATES.length - 1) * KEY + 0.4) : 0;
+
+  // 4: the mentions, each matched word ringed in turn
+  arrive($('m-win'), p(t, 30.1, 30.8), 40);
+  arrive($('m-cap'), p(t, 30.8, 31.5), 24);
+  RINGS.forEach((el, j) => {
+    const k = p(t, 32.0 + j * 0.9, 32.6 + j * 0.9);
+    el.style.opacity = k;
+    el.style.transform = 'scale(' + lerp(1.25, 1, k).toFixed(4) + ')';
+  });
+
+  // 5: her page, from the nameplate down through the notice
+  const pk = p(t, 38.0, 39.1);
+  $('p-win').style.opacity = pk;
+  $('p-win').style.transform = 'perspective(1800px) translateY(' + lerp(70, 0, pk).toFixed(1) + 'px) rotateX(' + lerp(16, 0, pk).toFixed(2) + 'deg)';
+  arrive($('p-cap'), p(t, 38.8, 39.5), 24);
+  scrollTo($('p-img'), lerp(0, K.pScroll, p(t, 39.9, 44.4, INOUT)));
+
+  // 6: Copy link answers "Link copied", then Save as PDF lifts the printed keepsake off the page
+  arrive($('s-win'), p(t, 45.7, 46.4), 40);
+  arrive($('s-cap'), p(t, 46.4, 47.1), 24);
+  const z = p(t, 46.5, 47.4, INOUT);          // the camera leans in on the share row
+  $('s-cam').style.transform = 'translate(' + (K.cam.dx * z).toFixed(1) + 'px, ' + (K.cam.dy * z).toFixed(1) + 'px) scale(' + (1 + (K.cam.s - 1) * z).toFixed(4) + ')';
+  tap($('s-tap1'), t, 47.7);
+  $('s-copied').style.opacity = p(t, 47.8, 48.05, INOUT) * (1 - p(t, 49.6, 49.85, INOUT));
+  tap($('s-tap2'), t, 50.0);
+  const sk = p(t, 50.25, 51.5);
+  if (t >= 50.25) $('s-win').style.opacity = lerp(1, 0.35, p(t, 50.25, 51.0, INOUT));
+  $('s-sheet').style.opacity = Math.min(1, sk * 1.6);
+  $('s-sheet').style.transform = 'perspective(1600px) translateY(' + lerp(280, 0, sk).toFixed(1) + 'px) rotateX(' + lerp(40, 0, sk).toFixed(2) + 'deg) scale(' + lerp(0.84, 1, sk).toFixed(4) + ')';
+
+  // End card: the camera drifts across a wall of the register's names; as the ask arrives the wall falls back to a
+  // watermark, so the names stay present without competing with the words over them
+  const glide = Math.max(0, t - 53.2) / 8.8;
+  $('e-names').style.transform = 'translate3d(' + lerp(160, -260, glide).toFixed(1) + 'px, ' + lerp(150, -120, glide).toFixed(1) + 'px, 0) rotateX(54deg) rotateZ(-9deg)';
+  $('e-wall').style.opacity = (0.34 - 0.29 * p(t, 55.0, 56.2, INOUT)).toFixed(3);
+  arrive($('e-l1'), p(t, 55.1, 56.0), 60);
+  arrive($('e-l2'), p(t, 55.3, 56.2), 60);
+  arrive($('e-deck'), p(t, 56.0, 56.7), 30);
+  arrive($('e-find'), p(t, 56.6, 57.2), 20);
+  arrive($('e-addr'), p(t, 56.7, 57.4), 20);
+  arrive($('e-card'), p(t, 57.5, 58.3), 30);
+  arrive($('e-colo'), p(t, 58.1, 58.8), 16);
+}
+
+// ---- Ready: wait for fonts and images, set the layout constants once, draw frame 0. ---------------------------
+window.ready = (async () => {
+  await Promise.all(['700 88px Oswald', '600 172px Oswald', '500 64px Oswald', '700 28px "Courier Prime"', '400 21px "Courier Prime"',
+    '400 40px Merriweather', 'italic 300 42px Merriweather'].map((f) => document.fonts.load(f)));
+  await document.fonts.ready;
+  K.k = 920 / L.phone;                                         // the phone-width captures, at the window's width
+  // odometers: each digit becomes a column of 0-9 twice over
+  document.querySelectorAll('.odo').forEach((el) => {
+    const h = +el.dataset.h, cols = [];
+    for (const ch of el.dataset.odo) {
+      if (/\d/.test(ch)) {
+        const col = document.createElement('span'); col.className = 'col'; col.style.height = h + 'px';
+        const strip = document.createElement('span'); strip.className = 'strip';
+        for (let r = 0; r < 20; r++) { const d = document.createElement('span'); d.textContent = r % 10; d.style.height = h + 'px'; d.style.lineHeight = h + 'px'; strip.appendChild(d); }
+        col.appendChild(strip); el.appendChild(col); cols.push({ strip, d: +ch });
+      } else {
+        const f = document.createElement('span'); f.className = 'fixed'; f.textContent = ch; f.style.height = h + 'px'; f.style.lineHeight = h + 'px'; el.appendChild(f);
+      }
+    }
+    if (el.dataset.suffix) { const i = document.createElement('i'); i.textContent = el.dataset.suffix; i.style.lineHeight = h + 'px'; el.appendChild(i); }
+    ODOS[el.id] = { cols, h };
+  });
+  // 1: the phone scrolls from the masthead until Upcoming services sits at the top of its screen
+  const kp = 388 / L.phoneRegister.w;
+  K.phoneScroll = Math.min(L.phoneRegister.h * kp - 828, (L.phoneRegister.services - 70) * kp);
+  // the cover's caret, in the search field it shows
+  const kc = 920 / L.searchCover.w, cc = L.searchCover.caret;
+  Object.assign($('c-caret').style, { left: (cc.x * kc).toFixed(1) + 'px', top: (cc.y * kc).toFixed(1) + 'px', height: (cc.h * kc).toFixed(1) + 'px' });
+  K.rScroll = K.phoneScroll;
+  // 2: scroll until the K list's heading sits under the letters
+  K.bScroll = Math.min(L.browse.h * K.k - 1040, 520);
+  const kl = L.browse.k, td = kl.w * K.k * 2.4;
+  Object.assign($('b-tap').style, { left: ((kl.x + kl.w / 2) * K.k - td / 2) + 'px', top: ((kl.y + kl.h / 2) * K.k - td / 2) + 'px', width: td + 'px', height: td + 'px' });
+  // 3: one image per typed state, stacked; the tap lands on the field
+  STATES = [...document.querySelectorAll('#q-win img.state')];
+  const f = L.search.field, fd = f.h * K.k * 1.5;
+  Object.assign($('q-tap').style, { left: ((f.x + f.w * 0.42) * K.k - fd / 2) + 'px', top: ((f.y + f.h / 2) * K.k - fd / 2) + 'px', width: fd + 'px', height: fd + 'px' });
+  // 4: the mentions at the window's width, a ring around every matched word
+  const km = 920 / L.mentions.w;
+  $('m-win').style.height = Math.min(1040, L.mentions.h * km).toFixed(1) + 'px';
+  RINGS = L.mentions.marks.map((m) => {
+    const r = document.createElement('span'), pad = 9;
+    r.className = 'ring';
+    Object.assign(r.style, { left: (m.x * km - pad) + 'px', top: (m.y * km - pad) + 'px', width: (m.w * km + 2 * pad) + 'px', height: (m.h * km + 2 * pad) + 'px' });
+    $('m-win').appendChild(r);
+    return r;
+  });
+  // 5: down her page, but never past its end
+  K.pScroll = Math.min(L.person.h * 920 / L.person.w - 1040, 1500);
+  // 6: the share row's height, and a tap on Copy link, then on Save as PDF
+  const ks = 920 / L.share.w;
+  $('s-win').style.height = (L.share.h * ks).toFixed(1) + 'px';
+  [['s-tap1', 'Copy link'], ['s-tap2', 'Save as PDF']].forEach(([id, label]) => {
+    const btn = L.share.buttons[label], d = btn.h * ks * 1.9;
+    Object.assign($(id).style, { left: ((btn.x + btn.w / 2) * ks - d / 2) + 'px', top: ((btn.y + btn.h / 2) * ks - d / 2) + 'px', width: d + 'px', height: d + 'px' });
+  });
+  // the camera: frame the share row (its label through Save as PDF) across the window, a little above center
+  const sb = L.share.buttons, x0 = (sb.Facebook.x - 58) * ks, x1 = (sb['Save as PDF'].x + sb['Save as PDF'].w) * ks;
+  const cs = Math.min(1.45, 880 / (x1 - x0)), cy = (sb.Facebook.y + sb.Facebook.h / 2) * ks;
+  K.cam = { s: cs, dx: 460 - ((x0 + x1) / 2) * cs, dy: 600 - cy * cs };
+  await Promise.all([...document.images].map((img) => img.decode().catch(() => null)));
+  seek(0);
+  return { duration: 62, fps: 30, frames: 62 * 30, states: STATES.length, rings: RINGS.length, scrolls: [K.rScroll, K.bScroll, K.pScroll].map(Math.round), cam: K.cam };
+})();
+window.seek = seek;
+</script>
+</body>
+</html>

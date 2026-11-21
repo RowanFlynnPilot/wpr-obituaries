@@ -137,3 +137,34 @@ only add a home the newsroom has an arrangement with.
   vs "Michael") joins on the surname plus both exact dates. Longer term, once the scraper covers a
   home fully, its WPR batch coverage becomes redundant and `wordpress_scrape`
   could be retired — but that is a separate decision.
+
+## Facts only a home's feed states
+
+Three things come from the homes' own data and are never guessed from text.
+
+- **Veteran** (`Obituary.veteran`): Tukios `is_veteran`. Tribute has no such
+  field. The batch extractor also sets it when a WPR notice states the person's
+  own military service. Shown as the word "Veteran" on the register row and the
+  page's lifespan line, and as a browse filter (`?veterans=1`).
+- **Service date** (`Obituary.service_date`, a day, never a time): Tukios
+  `next_service_starts_at`; on Tribute, the earliest schema.org `Event`
+  `startDate` on the person page (`tribute.first_event_day`). Drives the
+  register's Upcoming services list, the page's "Service" line, the
+  `o/<slug>.ics` calendar file, and `data/digest.json`. Time and place are not
+  parsed: the page quotes the notice's own sentence naming that date
+  (`templates._service_detail`). Both fields are part of the Tukios revision
+  hash, so a changed or withdrawn service date re-emits the record. A Tribute
+  unit's revision is the sitemap `lastmod`, so a service added without an edit
+  to the obituary is picked up only when `lastmod` next moves.
+- **Hidden dates** (`hide_birth` / `hide_death`): Tukios `show_date_of_birth` /
+  `show_date_of_death` set to false. The home hides the date on its own site,
+  and the stored value can be a placeholder (a re-listing's date). The date
+  stays in the master because the cross-source dedupe matches on it, but
+  `public_birth` / `public_death` withhold it from the page, the index, the
+  summary, the lifespan and the structured data, and an age is dropped with a
+  hidden birth date. The feed reports age 0 when it has no birth date; that is
+  read as no age.
+
+All three are written to the master only when set. The dedupe hands a person's
+veteran mark and service date to whichever copy becomes the primary, and where
+copies disagree on a date the home's shown date wins (`main._home_dates`).
