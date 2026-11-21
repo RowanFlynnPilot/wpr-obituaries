@@ -144,6 +144,26 @@ jobs:
           npm ci
           npm run build
 
+      # The reader's side of the tests: search, browse, a person's page, the
+      # mini widget, driven in a real browser against today's build. A failure
+      # stops the deploy (the last good one stays live). If the browser itself
+      # can't be installed on the runner, that is the runner's fault, not the
+      # site's: the check is skipped with a warning rather than blocking.
+      - name: Install browser for smoke test
+        id: browser
+        continue-on-error: true
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Browser smoke test
+        if: steps.browser.outcome == 'success'
+        run: python scripts/smoke_test.py
+
+      - name: Note a skipped smoke test
+        if: steps.browser.outcome != 'success'
+        run: echo "::warning::Browser could not be installed; the smoke test did not run."
+
       - uses: actions/upload-pages-artifact@v5
         with:
           path: web/dist

@@ -634,6 +634,12 @@ def _sentences(text: str) -> list[str]:
     return out
 
 
+def service_sentence(body: str, service_date: str) -> str | None:
+    """The notice's own sentence naming the service date, as plain text, or None."""
+    quoted = re.search(r"“(.*)”", html.unescape(_service_detail(body, date.fromisoformat(service_date))))
+    return quoted.group(1) if quoted else None
+
+
 def _service_detail(body: str, day: date) -> str:
     """The notice's own sentence about the service, quoted as written.
 

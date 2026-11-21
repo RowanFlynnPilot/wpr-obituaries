@@ -41,6 +41,14 @@ MAX_TOKENS = 16000
 _NULLABLE_TEXT = {"type": ["string", "null"]}
 # "September of 2026" used to come back as 2026-09-01 and a bare birth year as
 # January 1: a day nobody stated, published as a fact.
+# A birth is often given loosely ("born in 1930", "in September, 1954"). The
+# year is worth keeping (it is half the lifespan line), so a birth date carries
+# exactly the precision the text has; a death without a day keeps death_year.
+_AS_STATED = (
+    "The date exactly as precise as the text states it: YYYY-MM-DD when day, month and "
+    "year are given, YYYY-MM for a month and year, YYYY for a year alone, else null. "
+    "Never fill in a day or month the text does not state."
+)
 _FULL_DATE_ONLY = (
     "YYYY-MM-DD, only when the text states the day, month and year. If any part is "
     "missing (a month and year, a year alone), use null: never fill in a day or month."
@@ -64,7 +72,7 @@ RECORD_TOOL = {
                     "type": "object",
                     "properties": {
                         "name": {"type": "string", "description": "Full name as written"},
-                        "birth_date": {**_NULLABLE_TEXT, "description": _FULL_DATE_ONLY},
+                        "birth_date": {**_NULLABLE_TEXT, "description": _AS_STATED},
                         "death_date": {**_NULLABLE_TEXT, "description": _FULL_DATE_ONLY},
                         "death_year": _NULLABLE_INT,
                         "age": _NULLABLE_INT,

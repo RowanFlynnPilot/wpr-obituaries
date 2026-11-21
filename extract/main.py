@@ -43,6 +43,7 @@ from templates import (
     render_archive,
     render_memoriam,
     render_service_ics,
+    service_sentence,
     render_feed,
     render_home_page,
     render_person_page,
@@ -65,6 +66,7 @@ SITEMAP_FILE = ROOT / "web" / "public" / "sitemap.xml"
 FEED_FILE = ROOT / "web" / "public" / "feed.xml"
 ROBOTS_FILE = ROOT / "web" / "public" / "robots.txt"
 ARCHIVE_FILE = ROOT / "web" / "public" / "archive.html"
+DIGEST_FILE = ROOT / "web" / "public" / "data" / "digest.json"
 SPONSOR_FILE = DATA_DIR / "sponsor.json"
 INDEX_FILE = DATA_DIR / "obituaries.json"
 RECENT_FILE = DATA_DIR / "recent.json"
@@ -197,7 +199,45 @@ def _town_from_opening(body: str) -> str | None:
     return " ".join(words) or None
 
 
-def _write_index(records: list[Obituary], vendored: set[str], homes: list[dict]) -> None:
+def _write_digest(
+    records: list[Obituary], vendored: set[str], base_url: str, homes: list[dict]
+) -> None:
+    """A small feed for other WPR surfaces (the newsletters): the services coming
+    up and the newest notices, each with its absolute URL.
+
+    Written at render, so a consumer must cut `upcomingServices` against its own
+    send date; every entry carries its date for that.
+    """
+    def entry(r: Obituary) -> dict:
+        home = resolve_home(r.funeral_home, homes)
+        return {
+            "name": r.name,
+            "url": f"{base_url}/o/{r.slug}.html",
+            "lifespan": r.lifespan(),
+            "town": _derive_town(r.summary) or _town_from_opening(r.body),
+            "home": home["name"] if home else r.funeral_home,
+            "photo": _page_photo(r, vendored, base_url),
+        }
+
+    today = date.today().isoformat()
+    services = sorted((r for r in records if r.service_date and r.service_date >= today),
+                      key=lambda r: (r.service_date, r.name))
+    newest = sorted(records, key=lambda r: (r.source_date, r.name), reverse=True)[:12]
+    payload = {
+        "generated": today,
+        "register": f"{base_url}/",
+        "upcomingServices": [
+            {**entry(r), "serviceDate": r.service_date, "detail": service_sentence(r.body, r.service_date)}
+            for r in services
+        ],
+        "newest": [{**entry(r), "passed": r.public_death} for r in newest],
+    }
+    DIGEST_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
+def _write_index(
+    records: list[Obituary], vendored: set[str], homes: list[dict], memoriam_years: list[int]
+) -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     # Newest batch first, then alphabetical by name within a date.
     ordered = sorted(records, key=lambda r: r.name)
@@ -210,7 +250,7 @@ def _write_index(records: list[Obituary], vendored: set[str], homes: list[dict])
         record["homeName"] = home["name"] if home else None  # canonical, for the facet
         record["town"] = _derive_town(r.summary) or _town_from_opening(r.body)
         obituaries.append(record)
-    payload = {"count": len(ordered), "obituaries": obituaries}
+    payload = {"count": len(ordered), "memoriamYears": memoriam_years, "obituaries": obituaries}
     INDEX_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     # The mini widget only ever shows the freshest few, so it gets its own small
     # feed instead of downloading the full (forever-growing) index on every load.
@@ -581,10 +621,11 @@ def render(master: Master, sponsor: dict, base_url: str, newsroom, allow_empty: 
     # still gets a page (duplicates rel=canonical at their primary).
     canonical, primary_by_slug = _dedupe_people(records, homes)
     vendored = vendored_slugs(PHOTOS_DIR)
-    _write_index(canonical, vendored, homes)
+    years = _memoriam_years(canonical)
+    _write_index(canonical, vendored, homes, sorted(years, reverse=True))
+    _write_digest(canonical, vendored, base_url, homes)
     _write_pages(records, canonical, sponsor, base_url, vendored, homes, primary_by_slug, newsroom)
     home_slugs = _write_home_pages(canonical, sponsor, base_url, homes, newsroom)
-    years = _memoriam_years(canonical)
     ARCHIVE_FILE.write_text(
         render_archive(canonical, base_url, newsroom, sponsor, sorted(years, reverse=True)),
         encoding="utf-8",

@@ -248,7 +248,7 @@ export default function App() {
       ) : (
         <LoadingSkeleton />
       )}
-      <Footer sponsor={sponsor}>
+      <Footer sponsor={sponsor} years={data?.memoriamYears}>
         <SubmitForm ref={submitRef} open={submitOpen} onOpenChange={setSubmitOpen} />
       </Footer>
     </main>

@@ -211,6 +211,27 @@ def firm_name(session, url: str) -> str | None:
     return None
 
 
+_EVENT_DAY = re.compile(r"\s*(\d{1,2})/(\d{1,2})/(\d{4})\b")
+
+
+def first_event_day(page_html: str) -> str | None:
+    """The earliest service on a person page, as YYYY-MM-DD, or None.
+
+    The page lists each visitation and service as a schema.org Event whose
+    startDate reads " 11/24/2026 9:00:00 AM". Only the day is taken: the times
+    and places are in the notice, which is what the page quotes.
+    """
+    days = []
+    for obj in _iter_ld(page_html):
+        types = obj.get("@type")
+        if "Event" not in (types if isinstance(types, list) else [types]):
+            continue
+        m = _EVENT_DAY.match(str(obj.get("startDate") or ""))
+        if m:
+            days.append(f"{m.group(3)}-{int(m.group(1)):02d}-{int(m.group(2)):02d}")
+    return min(days, default=None)
+
+
 def person_record(session, url: str) -> dict | None:
     """Fetch a person page and return its Person data, or None if unusable.
 
@@ -221,10 +242,12 @@ def person_record(session, url: str) -> dict | None:
     their JSON-LD (a nickname reads `Stanley &quot;Stan&quot; Szymanski`), so the
     raw parse keeps the entity. body_text already unescapes the description.
     """
-    person = _parse_person_ld(_get(session, url).text)
+    page = _get(session, url).text
+    person = _parse_person_ld(page)
     if not person:
         return None
     return {
+        "serviceDate": first_event_day(page),
         "name": html.unescape((person.get("name") or "").strip()),
         "birthDate": person.get("birthDate"),
         "deathDate": person.get("deathDate"),

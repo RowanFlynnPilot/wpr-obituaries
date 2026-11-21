@@ -9,7 +9,7 @@ const { identity, branding, copy } = config;
 // full index, submitting a notice) come first, the sponsor card after them,
 // and the colophon — provenance and the newsroom's phone — closes the page.
 // The sponsor card is never the last thing.
-export default function Footer({ sponsor, children }) {
+export default function Footer({ sponsor, years = [], children }) {
   const sponsors = sponsor?.sponsors || [];
   return (
     <footer className="footer">
@@ -20,6 +20,14 @@ export default function Footer({ sponsor, children }) {
             Browse the full obituary index →
           </a>
         </p>
+        {/* The year's remembrance: everyone who died that year, by month. */}
+        {years.map((year) => (
+          <p className="footer__index" key={year}>
+            <a href={`${BASE}in-memoriam-${year}.html`} target="_top">
+              In Memoriam {year} →
+            </a>
+          </p>
+        ))}
         {children}
       </div>
 

@@ -215,6 +215,7 @@ def tribute_to_obituary(rec: dict, home_name: str) -> Obituary | None:
         age=age,
         funeral_home=home_name,
         photo_url=rec.get("image"),
+        service_date=_iso_day(rec.get("serviceDate")),
         summary=_summary(name, age, _city_from_body(body), death_date),
         body=body,
     )

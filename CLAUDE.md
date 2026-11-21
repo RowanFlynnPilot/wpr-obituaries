@@ -123,7 +123,15 @@ Source of truth → static output → embedded widget:
    `Obituary.awaiting_text`) is replaced on the page by a plain "not published
    yet" line. `in-memoriam-<year>.html` lists everyone who died in a year by
    the month of their passing (years with at least `MEMORIAM_MIN` people),
-   linked from the archive and the sitemap. The batch extractor also records
+   linked from the archive, the register's footer (`memoriamYears` in the
+   index) and the sitemap. `data/digest.json` is a small feed for other WPR
+   surfaces (the newsletters): upcoming services and the newest notices with
+   absolute URLs. Tribute homes get a `service_date` too, from the Event
+   JSON-LD on each person page (`tribute.first_event_day`). A birth date
+   carries only the precision its notice states ("1930", "1954-09").
+   `scripts/smoke_test.py` drives the built site in a headless browser before
+   every deploy (search, close spellings, browse, a person's page, the mini
+   widget); a failure stops the deploy. The batch extractor also records
    `veteran` when a notice states the person's own military service. Veterans are marked on the
    row's fact line and the page's lifespan line, and are a browse filter
    (`?veterans=1`). Register rows carry no
