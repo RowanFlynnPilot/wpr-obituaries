@@ -90,7 +90,12 @@ RECORD_TOOL = {
                             ),
                         },
                     },
-                    "required": ["name", "summary", "body_first", "body_last"],
+                    # every field required (null where the text is silent): left optional,
+                    # the model skips them, and a named funeral home goes unrecorded
+                    "required": [
+                        "name", "birth_date", "death_date", "death_year", "age", "funeral_home",
+                        "photo_url", "summary", "body_first", "body_last",
+                    ],
                 },
             }
         },
