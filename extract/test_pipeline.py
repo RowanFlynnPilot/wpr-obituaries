@@ -713,6 +713,48 @@ def test_sanity_warnings():
     print("ok: sanity warnings (flag bad, pass good)")
 
 
+def test_feed_facts_veteran_and_service_date():
+    import dataclasses
+    from adapters import funeral_home_scrape as fhs
+
+    row = {"display_name": "Al Roe", "date_of_death": "2026-11-18", "public_url": "http://h/al",
+           "obituary_text": "<p>Al farmed.</p>", "is_veteran": True,
+           "next_service_starts_at": "2026-12-01T11:00:00"}
+    ob = fhs.to_obituary(row, "A Home")
+    assert ob.veteran and ob.service_date == "2026-12-01"
+    plain = fhs.to_obituary({**row, "is_veteran": False, "next_service_starts_at": None}, "A Home")
+    assert not plain.veteran and plain.service_date is None
+    # either fact changing re-emits the record
+    assert fhs._revision(row) != fhs._revision({**row, "next_service_starts_at": None})
+    # set facts are stored and indexed; unset ones leave the record as it always was
+    assert ob.to_record_dict()["veteran"] is True and ob.to_index_dict()["serviceDate"] == "2026-12-01"
+    assert "veteran" not in plain.to_record_dict() and "service_date" not in plain.to_record_dict()
+    assert Obituary.from_record_dict(plain.to_record_dict()) == plain
+    # the newsroom's fuller copy wins the dedupe, and keeps what the home's copy established
+    fuller = dataclasses.replace(
+        mk("Al Roe", 9, "2026-11-19", body="a much longer body " * 20, death_date="2026-11-18"))
+    (person,), _ = main._dedupe_people([fuller, ob])
+    assert person.slug == fuller.slug and person.veteran and person.service_date == "2026-12-01"
+    page = templates.render_person_page(
+        person, {"sponsors": []}, "http://b", config.load_newsroom(), [], None, None, None, None)
+    assert "· Veteran" in page and "Tuesday, December 1, 2026" in page
+    print("ok: feed facts (veteran + service date mapped, stored only when set, kept through dedupe)")
+
+
+def test_town_from_opening():
+    cases = {
+        "Dale A. Hinz, 69, of Merrill, passed away peacefully.": "Merrill",
+        "Jo Doe, age 90, of Rib Mountain, WI, died.": "Rib Mountain",
+        "Jo Doe, 90, of Athens Wisconsin passed away.": "Athens",
+        "Jo Doe, 90, of Wisconsin, passed away.": None,
+        "In loving memory of Elizabeth Smith.": None,
+        "She was kind.\n\nHer son, 60, of Tampa, survives.": None,  # only the opening paragraph
+    }
+    for body, town in cases.items():
+        assert main._town_from_opening(body) == town, (body, main._town_from_opening(body))
+    print("ok: town from the notice's opening line (age-anchored, first paragraph, state dropped)")
+
+
 def test_clean_summary():
     cases = {
         "Mark R. Jackson, 69, of unspecified town, passed away on July 20, 2026.":

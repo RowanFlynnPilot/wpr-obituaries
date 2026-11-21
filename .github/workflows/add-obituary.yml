@@ -35,9 +35,9 @@ jobs:
     env:
       PUBLIC_BASE_URL: ${{ vars.PUBLIC_BASE_URL }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -80,7 +80,7 @@ jobs:
       # Same OG share-card cache as the extract workflow, so render only composes
       # the new record's card instead of regenerating every card on a clean checkout.
       - name: Restore OG share-card cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             web/public/assets/og
@@ -92,7 +92,7 @@ jobs:
       - name: Render the site (no scrape — render only)
         run: python extract/main.py --render-only
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "20"
 
@@ -102,7 +102,7 @@ jobs:
           npm ci
           npm run build
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: web/dist
 
@@ -114,4 +114,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

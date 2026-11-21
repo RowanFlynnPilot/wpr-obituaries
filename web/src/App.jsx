@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Masthead from "./components/Masthead.jsx";
 import SubmitForm from "./components/SubmitForm.jsx";
 import FeaturedCarousel from "./components/FeaturedCarousel.jsx";
+import UpcomingServices from "./components/UpcomingServices.jsx";
 import SearchBar from "./components/SearchBar.jsx";
 import BrowseBar from "./components/BrowseBar.jsx";
 import Register from "./components/Register.jsx";
@@ -51,6 +52,8 @@ function scopeLabel(filter) {
     case "town":
     case "home":
       return filter.value;
+    case "veterans":
+      return "veterans";
     default:
       return "every year";
   }
@@ -157,6 +160,9 @@ export default function App() {
     if (filter.kind === "town") {
       return of(all.filter((o) => o.town === filter.value));
     }
+    if (filter.kind === "veterans") {
+      return of(all.filter((o) => o.veteran));
+    }
     if (filter.kind === "home") {
       return of(all.filter((o) => (o.homeName || o.funeralHome) === filter.value));
     }
@@ -213,6 +219,7 @@ export default function App() {
       {data ? (
         <>
           {isDefault && <FeaturedCarousel obituaries={data.obituaries} />}
+          {isDefault && <UpcomingServices obituaries={data.obituaries} />}
           {!query && (
             <BrowseBar
               ref={browseRef}

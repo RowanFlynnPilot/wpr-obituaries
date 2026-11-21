@@ -19,7 +19,7 @@ const BrowseBar = forwardRef(function BrowseBar(
   ref
 ) {
   const filtered = filter.kind !== "recent" && filter.kind !== "none";
-  const facetActive = filter.kind === "town" || filter.kind === "home";
+  const facetActive = ["town", "home", "veterans"].includes(filter.kind);
   const [moreOpen, setMoreOpen] = useState(facetActive);
   useEffect(() => {
     if (filtered) onOpenChange(true);
@@ -55,6 +55,8 @@ const BrowseBar = forwardRef(function BrowseBar(
     [obituaries]
   );
   const homes = useMemo(() => countBy(obituaries, (o) => o.homeName), [obituaries]);
+  // Military service is marked only where a funeral home's own feed states it.
+  const veterans = useMemo(() => obituaries.filter((o) => o.veteran).length, [obituaries]);
 
   const isMonth = (k) => filter.kind === "month" && filter.value === k;
   const isLetter = (l) => filter.kind === "letter" && filter.value === l;
@@ -170,7 +172,9 @@ const BrowseBar = forwardRef(function BrowseBar(
                 aria-controls="browse-more"
                 onClick={() => setMoreOpen((v) => !v)}
               >
-                {moreOpen ? "Fewer ways to browse" : "More ways to browse: town, funeral home"}
+                {moreOpen
+                  ? "Fewer ways to browse"
+                  : `More ways to browse: town, funeral home${veterans ? ", veterans" : ""}`}
               </button>
               {moreOpen && (
                 <div className="browse__row browse__row--selects" id="browse-more">
@@ -207,6 +211,23 @@ const BrowseBar = forwardRef(function BrowseBar(
                         ))}
                       </select>
                     </label>
+                  )}
+                  {veterans > 0 && (
+                    <button
+                      type="button"
+                      className={`browse__chip${filter.kind === "veterans" ? " is-active" : ""}`}
+                      aria-pressed={filter.kind === "veterans"}
+                      onClick={() =>
+                        onFilter(
+                          filter.kind === "veterans"
+                            ? { kind: "recent", value: recentMonths }
+                            : { kind: "veterans", value: "1" }
+                        )
+                      }
+                    >
+                      Veterans
+                      <span className="browse__count">{veterans}</span>
+                    </button>
                   )}
                 </div>
               )}

@@ -89,6 +89,12 @@ class Obituary:
     # extraction missed) must never move a page Google has already indexed, so
     # the store carries the original slug forward across re-extractions.
     slug: str = ""
+    # Two facts only a funeral home's own feed states outright, so they are
+    # recorded when a source gives them and never guessed from the text:
+    # military service, and the date of the next service (visitation, funeral
+    # or burial — the notice itself carries the times and places).
+    veteran: bool = False
+    service_date: str | None = None
 
     def __post_init__(self) -> None:
         if not self.slug:
@@ -136,11 +142,21 @@ class Obituary:
             "excerpt": self.excerpt(),
             "sourceUrl": self.source_url,
             "sourceDate": self.source_date,
+            **({"veteran": True} if self.veteran else {}),
+            **({"serviceDate": self.service_date} if self.service_date else {}),
         }
 
     def to_record_dict(self) -> dict:
-        """Full record (incl. body + source) for the persistent master store."""
-        return dataclasses.asdict(self)
+        """Full record (incl. body + source) for the persistent master store.
+
+        The two feed-only facts are written only when set, so the thousand-odd
+        records that have neither stay byte-identical in the committed master.
+        """
+        record = dataclasses.asdict(self)
+        for optional in ("veteran", "service_date"):
+            if not record[optional]:
+                del record[optional]
+        return record
 
     @classmethod
     def from_record_dict(cls, record: dict) -> "Obituary":

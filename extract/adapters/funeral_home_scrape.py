@@ -66,6 +66,8 @@ def _revision(row: dict) -> str:
         "dod": row.get("date_of_death"),
         "text": row.get("obituary_text"),
         "photo": row.get("default_image"),
+        "veteran": bool(row.get("is_veteran")),
+        "service": row.get("next_service_starts_at"),
     }
     return hashlib.sha1(json.dumps(material, sort_keys=True).encode()).hexdigest()[:12]
 
@@ -150,7 +152,15 @@ def to_obituary(row: dict, home_name: str) -> Obituary | None:
         photo_url=_photo_url(row),
         summary=_summary(name, age, city, dod),
         body=_html_to_paragraphs(row.get("obituary_text", "")),
+        veteran=bool(row.get("is_veteran")),
+        service_date=_iso_day(row.get("next_service_starts_at")),
     )
+
+
+def _iso_day(value) -> str | None:
+    """The YYYY-MM-DD of a feed date or datetime, or None when absent or malformed."""
+    day = str(value or "")[:10]
+    return day if re.fullmatch(r"\d{4}-\d{2}-\d{2}", day) else None
 
 
 def _age(birth_date: str | None, death_date: str | None) -> int | None:

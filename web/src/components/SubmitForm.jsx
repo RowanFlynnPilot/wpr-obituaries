@@ -10,7 +10,7 @@ const { identity } = config;
 const FIELDS = [
   { name: "name", label: "Full name", required: true },
   { name: "birth_date", label: "Date of birth", type: "date" },
-  { name: "death_date", label: "Date of death", type: "date" },
+  { name: "death_date", label: "Date of passing", type: "date" },
   { name: "age", label: "Age", type: "number" },
   { name: "funeral_home", label: "Funeral home" },
   // Publication date is a newsroom concept a family can't know — the editor

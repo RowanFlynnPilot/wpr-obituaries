@@ -469,6 +469,21 @@ is not a person of that name says what it is instead:
   Ten at a time under "Also named in N other notices" (just "Named in N
   notices" when no name matched), then "Show the rest".
 
+### Upcoming services
+Under the Recently Remembered strip in the default view: an oxblood mono kicker,
+then one hairline-divided row per day ("Today", "Saturday, November 21") with
+the names in title weight linking to their pages and the home as a tracked mono
+caption. Six people, then "Show all N". A mono footnote says where the dates
+come from and that times and places are in each notice. On a person's page the
+same fact is a "Service" line between hairlines under the name rule, set in
+mono with an oxblood label and stated without a tense. On phones the day label
+stacks above its names.
+
+### Veteran mark
+The word "Veteran" joins the mono fact line in a register row and the lifespan
+line on a page ("1931 – 2026 · Veteran"). Text only: no flag, star or emblem.
+Marked only where a funeral home's own feed states it.
+
 ### Close spellings
 When no one matches the name as typed but a near spelling does ("Kruger" for
 Krueger), the register says so in ink — "No one is listed as “Kruger”." — and
@@ -554,6 +569,7 @@ SemiBold over the sponsor line at the foot.
 - **Do** honor reduced motion (the featured and mini fades are the only authored motion; the loading skeleton is a still hairline block, not a shimmer; all other transitions are 120–150ms and disable under `prefers-reduced-motion`).
 - **Do** keep the smallest type on the register and the pages at 11px (the tagline, sponsor labels, funeral-home captions, the colophon — only the mini widget, at card scale, runs smaller) and every control at a 24px minimum target, even when its visible mark is smaller.
 - **Do** design the print state of a person page as a keepsake.
+- **Do** let the portrait travel between its register row and its page (a 0.32s view transition, off under reduced motion); it is the one piece of motion that crosses pages.
 - **Do** gate every hover style behind `@media (hover: hover)`; focus styles stand on their own.
 
 ### Don't:

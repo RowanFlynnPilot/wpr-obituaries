@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import html
 import json
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from itertools import groupby
 from urllib.parse import parse_qsl, quote, urlencode, urlsplit, urlunsplit
 
@@ -628,7 +628,18 @@ def render_person_page(
     body_paragraphs = "\n".join(
         f"      <p>{html.escape(p)}</p>" for p in ob.body.split("\n\n") if p.strip()
     )
-    lifespan = ob.lifespan()
+    lifespan = " · ".join(x for x in (ob.lifespan(), "Veteran" if ob.veteran else "") if x)
+    # The service date, when the funeral home's feed gives one. Stated without
+    # a tense: the page is rebuilt three times a week, so "upcoming" could be
+    # two days stale, where a dated line is true whenever it is read.
+    service = ""
+    if ob.service_date:
+        day = date.fromisoformat(ob.service_date)
+        service = (
+            f'<p class="service"><span class="service__label">Service</span> '
+            f'<time datetime="{ob.service_date}">{day:%A}, {day:%B} {day.day}, {day.year}</time>'
+            f'<span class="service__note">Times and places are in the notice below.</span></p>'
+        )
     # A real button that opens the enlarged portrait (the script below wires
     # it). The image keeps the person's name as its alt — Google Images reads
     # it for name searches — and the button names the action.
@@ -637,7 +648,9 @@ def render_person_page(
         img = f'src="{html.escape(pic)}" alt="{html.escape(ob.name)}" decoding="async"'
         photo = (
             f'<button type="button" class="portrait" aria-haspopup="dialog" '
-            f'aria-label="Enlarge portrait of {html.escape(ob.name)}"><img {img} /></button>'
+            f'aria-label="Enlarge portrait of {html.escape(ob.name)}">'
+            # the same name as this person's portrait in the register row (ObituaryRow.jsx)
+            f'<img {img} style="view-transition-name: portrait-{ob.slug}" /></button>'
         )
         # The enlarged copy is the same file, already cached by the time it opens.
         lightbox = f"""<dialog class="lightbox" id="lightbox" aria-label="Enlarged portrait">
@@ -749,12 +762,32 @@ def render_person_page(
       color: var(--muted); margin: 10px 0 0;
     }}
     .rule {{ height: 3px; background: var(--accent); width: 54px; margin: 26px 0; }}
+    .service {{
+      font-family: var(--mono); font-size: 1.05rem; letter-spacing: 0.02em;
+      color: var(--ink); margin: 0 0 26px; padding: 14px 0;
+      border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+    }}
+    .service__label {{
+      font-weight: 700; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--accent); margin-right: 10px;
+    }}
+    .service__note {{ display: block; margin-top: 4px; font-size: 12.5px; color: var(--muted); }}
     .portrait {{
       float: right; display: block; width: 184px; max-width: 42%; margin: 4px 0 18px 26px;
       padding: 0; background: none; border: 1px solid var(--rule); filter: grayscale(0.15);
       cursor: zoom-in;
     }}
     .portrait img {{ display: block; width: 100%; height: auto; }}
+    /* Moving between the register and a person's page, the portrait travels from
+       its row to its place on the page (and back) instead of the screen cutting.
+       Same-origin navigations only, so it plays on the obituaries site itself, not
+       through the WordPress embed; browsers without it navigate as before. */
+    @media (prefers-reduced-motion: no-preference) {{
+      @view-transition {{ navigation: auto; }}
+      ::view-transition-group(*) {{
+        animation-duration: 0.32s; animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+      }}
+    }}
     .body {{ font-weight: 300; font-size: 1.06rem; }}
     .body p {{ margin: 0 0 1.2em; }}
     .arrangements {{
@@ -881,6 +914,7 @@ def render_person_page(
     <h1>{html.escape(ob.name)}</h1>
     {f'<p class="lifespan">{lifespan}</p>' if lifespan else ''}
     <div class="rule"></div>
+    {service}
     <article class="body">
       {photo}
 {body_paragraphs}

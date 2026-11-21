@@ -40,7 +40,12 @@ Source of truth → static output → embedded widget:
    ride the same seam: `extract/adapters/funeral_home_scrape.py` reads the area
    funeral homes' own sites *upstream* of WPR's batches (Tukios JSON API — already
    structured, no model extraction; see `docs/funeral-home-scraping.md`), and
-   `extract/adapters/intake.py` folds in reviewed manual submissions.
+   `extract/adapters/intake.py` folds in reviewed manual submissions. The
+   Tukios feed also states two facts outright, recorded only when a source
+   gives them and never guessed from text: `veteran` (`is_veteran`) and
+   `service_date` (`next_service_starts_at`, date only). Both are stored in the
+   master only when set, and the dedupe hands them to whichever copy of a
+   person wins.
 3. `extract/templates.py` — renders one crawlable HTML page per person plus a
    `sitemap.xml`. **This is the SEO layer.** Each page has the name in the title
    and H1, schema.org `NewsArticle` structured data about the `Person` (schema.org
@@ -96,7 +101,13 @@ Source of truth → static output → embedded widget:
    placement), so nothing sits between the search and its results. The
    "Recently Remembered" strip (`FeaturedCarousel`, five portraits drawn at
    random from the past 30 days, redrawn once per visit) opens the default view
-   under the search and stands down as soon as the reader searches or browses. Register rows carry no
+   under the search and stands down as soon as the reader searches or browses.
+   Beneath it, **Upcoming services** (`UpcomingServices.jsx`) lists people whose
+   service date falls in the next 10 days, cut against the reader's own clock
+   so a past date never lingers between rebuilds; each person's page carries
+   the same date as a tense-free "Service" line. Veterans are marked on the
+   row's fact line and the page's lifespan line, and are a browse filter
+   (`?veterans=1`). Register rows carry no
    summary line: the extractor's one sentence restates the name, age and town
    the row already shows. Vite
    builds **two embeds** from this one app: `index.html` (the full register,
@@ -314,7 +325,10 @@ platforms' mechanics, and the cross-source dedupe/overlap note are in
   and paid sponsor links carrying `rel="noopener sponsored"` plus UTM tags
   (`sponsor_href` in Python, `lib/sponsor.js` in the widget, same params).
   Accent-topped cards are square-cornered (the house convention marks cards on
-  the top edge only). The tagline, phone, and provenance are optional config
+  the top edge only). A portrait carries the same `view-transition-name`
+  (`portrait-<slug>`) in its register row and on its page, so same-origin
+  navigation between the two moves it instead of cutting (not through the
+  WordPress iframe; off under reduced motion). The tagline, phone, and provenance are optional config
   keys (`identity.tagline`, `identity.phone`, `copy.provenance`); absent = hidden.
 
 ## v2 (deferred, by decision)
