@@ -212,7 +212,13 @@ def _write_index(records: list[Obituary], vendored: set[str], homes: list[dict])
     INDEX_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     # The mini widget only ever shows the freshest few, so it gets its own small
     # feed instead of downloading the full (forever-growing) index on every load.
-    recent = {"count": len(obituaries[:RECENT_COUNT]), "obituaries": obituaries[:RECENT_COUNT]}
+    recent = {
+        "count": len(obituaries[:RECENT_COUNT]),
+        "obituaries": obituaries[:RECENT_COUNT],
+        # every service date on file, so the mini widget can count the coming
+        # days against the reader's clock without the full index
+        "serviceDates": sorted(o["serviceDate"] for o in obituaries if o.get("serviceDate")),
+    }
     RECENT_FILE.write_text(json.dumps(recent, indent=2), encoding="utf-8")
 
 
@@ -341,6 +347,27 @@ def _primary_rank(r: Obituary) -> tuple:
     return (len(r.body or ""), died is not None, earliest, r.source_date, r.slug)
 
 
+def _home_dates(group: list[Obituary]) -> dict:
+    """The dates a person's canonical record should carry, when a funeral home gives them.
+
+    A home's feed states dates as data; a batch post's dates are read out of
+    prose, and they go wrong in ordinary ways (a service date taken for the
+    death, a typed "2023", "April" for "August"). So where the copies disagree,
+    the home's shown dates win. Among several home listings the earliest death
+    date is the real one: what lands there by mistake is the date of something
+    later, a re-listing. A date the home hides is never taken.
+    """
+    listings = [r for r in group if r.source == "funeral_home_scrape"]
+    died = min((r.death_date for r in listings if _exact(r.death_date) and not r.hide_death), default=None)
+    born = min((r.birth_date for r in listings if _exact(r.birth_date) and not r.hide_birth), default=None)
+    dates = {}
+    if died:
+        dates.update(death_date=died, death_year=int(died[:4]), hide_death=False)
+    if born:
+        dates.update(birth_date=born, hide_birth=False)
+    return dates
+
+
 def _dedupe_people(
     records: list[Obituary], homes: list[dict]
 ) -> tuple[list[Obituary], dict[str, Obituary]]:
@@ -361,6 +388,7 @@ def _dedupe_people(
             primary,
             veteran=any(r.veteran for r in group),
             service_date=max((r.service_date for r in group if r.service_date), default=None),
+            **_home_dates(group),
         )
         canonical.append(primary)
         for r in group:
@@ -431,9 +459,27 @@ def _write_pages(
     og_made = og_kept = 0
     # From the deduped list — a person present via two sources must not appear
     # twice (under two URLs) in every page's "more recent obituaries" links.
-    recent = sorted(canonical, key=lambda r: r.source_date, reverse=True)[:7]
-    for ob in records:
-        related = [r for r in recent if r.slug != ob.slug][:6]
+    recent = sorted(canonical, key=lambda r: r.source_date, reverse=True)[:8]
+    town_of = {r.slug: _derive_town(r.summary) or _town_from_opening(r.body) for r in canonical}
+    by_town: dict[str, list[Obituary]] = {}
+    for r in sorted(canonical, key=lambda r: r.source_date, reverse=True):
+        if town_of[r.slug]:
+            by_town.setdefault(town_of[r.slug], []).append(r)
+    for raw in records:
+        primary = primary_by_slug.get(raw.slug, raw)
+        # Every copy of a person's notice states what the person's record
+        # established: service, veteran status, and the dates that won.
+        ob = dataclasses.replace(
+            raw, veteran=primary.veteran, service_date=primary.service_date,
+            birth_date=primary.birth_date, death_date=primary.death_date, death_year=primary.death_year,
+            hide_birth=primary.hide_birth, hide_death=primary.hide_death,
+        )
+        # Up to three recent neighbours from the same town, then the newest
+        # notices: a reader of one Merrill obituary is likelier to know another.
+        skip = {raw.slug, primary.slug}
+        nearby = [r for r in by_town.get(town_of.get(primary.slug) or "", []) if r.slug not in skip][:3]
+        skip |= {r.slug for r in nearby}
+        related = (nearby + [r for r in recent if r.slug not in skip])[:6]
         portrait = PHOTOS_DIR / f"{ob.slug}.jpg" if ob.slug in vendored else None
         og_path = OG_DIR / f"{ob.slug}.png"
         digest = _og_input_hash(ob, portrait, brand_fp)
@@ -446,13 +492,10 @@ def _write_pages(
         og_image = f"{base_url}/assets/og/{ob.slug}.png"
         home = resolve_home(ob.funeral_home, homes)
         home_url = f"{base_url}/funeral-home/{home['slug']}.html" if home else None
-        primary = primary_by_slug.get(ob.slug, ob)
         canonical_url = f"{base_url}/o/{primary.slug}.html"
-        # the page states what any copy of this person's notice established
-        shown = dataclasses.replace(ob, veteran=primary.veteran, service_date=primary.service_date)
         (PAGES_DIR / f"{ob.slug}.html").write_text(
             render_person_page(
-                shown, sponsor, base_url, newsroom, related, _page_photo(ob, vendored, base_url),
+                ob, sponsor, base_url, newsroom, related, _page_photo(ob, vendored, base_url),
                 og_image, home_url, canonical_url,
             ),
             encoding="utf-8",

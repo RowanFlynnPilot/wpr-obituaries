@@ -13,6 +13,7 @@ datelines and labels — so a shared page reads as Wausau Pilot & Review.
 from __future__ import annotations
 
 import html
+import re
 import json
 from datetime import date, datetime, timezone
 from itertools import groupby
@@ -492,8 +493,8 @@ def _structured_data(
         "about": {
             "@type": "Person",
             "name": ob.name,
-            **({"birthDate": ob.birth_date} if ob.birth_date else {}),
-            **({"deathDate": ob.death_date} if ob.death_date else {}),
+            **({"birthDate": ob.public_birth} if ob.public_birth else {}),
+            **({"deathDate": ob.public_death} if ob.public_death else {}),
             **({"image": portrait} if portrait else {}),
         },
     }
@@ -562,6 +563,45 @@ def _share_section(name: str, page_url: str, newsroom_name: str) -> str:
     </div>"""
 
 
+_SENTENCE_BREAK = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
+# A period after one of these is not the end of a sentence.
+_ABBREVIATION = re.compile(r"\b(?:St|Dr|Rev|Fr|Mr|Mrs|Ms|Sr|Jr|Ave|Rd|Hwy|Msgr|Pr|[A-Z])\.$")
+# "…at 11:00 a.m. Saturday" runs on; "…until 6:00 p.m. Online condolences…" does not.
+_CLOCK = re.compile(r"[ap]\.m\.$", re.I)
+_DAY_WORD = re.compile(
+    r"(?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day|January|February|March|April|May|June|July|August"
+    r"|September|October|November|December"
+)
+_NOT_THE_SERVICE = re.compile(
+    r"\b(?:born|passed away|died|went to be|entered eternal|preceded in death|survived by)\b", re.I
+)
+
+
+def _sentences(text: str) -> list[str]:
+    out: list[str] = []
+    for piece in _SENTENCE_BREAK.split(" ".join(text.split())):
+        if out and (_ABBREVIATION.search(out[-1]) or (_CLOCK.search(out[-1]) and _DAY_WORD.match(piece))):
+            out[-1] += " " + piece
+        else:
+            out.append(piece)
+    return out
+
+
+def _service_detail(body: str, day: date) -> str:
+    """The notice's own sentence about the service, quoted as written.
+
+    The feed gives only the date. The time and place are in the notice, and
+    people act on them, so they are never parsed or rephrased: the sentence
+    that names this date is shown word for word. No such sentence, or an
+    unwieldy one, and the reader is pointed to the notice instead.
+    """
+    names_day = re.compile(rf"\b(?:{day:%B}|{day:%b}\.?)\s+{day.day}(?:st|nd|rd|th)?\b(?!\d)")
+    for text in _sentences(body):
+        if names_day.search(text) and not _NOT_THE_SERVICE.search(text) and 30 <= len(text) <= 340:
+            return f'<span class="service__note">From the notice: “{html.escape(text)}”</span>'
+    return '<span class="service__note">Times and places are in the notice below.</span>'
+
+
 def _related_section(related: list[Obituary], base_url: str) -> str:
     """Internal links to recent obituaries — recirculation and crawl depth."""
     if not related:
@@ -575,7 +615,7 @@ def _related_section(related: list[Obituary], base_url: str) -> str:
         )
     links = "\n        ".join(items)
     return f"""<section class="more">
-      <p class="more__label">More recent obituaries</p>
+      <p class="more__label">More obituaries</p>
       <ul class="more__list">
         {links}
       </ul>
@@ -638,7 +678,7 @@ def render_person_page(
         service = (
             f'<p class="service"><span class="service__label">Service</span> '
             f'<time datetime="{ob.service_date}">{day:%A}, {day:%B} {day.day}, {day.year}</time>'
-            f'<span class="service__note">Times and places are in the notice below.</span></p>'
+            f'{_service_detail(ob.body, day)}</p>'
         )
     # A real button that opens the enlarged portrait (the script below wires
     # it). The image keeps the person's name as its alt — Google Images reads

@@ -39,6 +39,12 @@ MODEL = "claude-haiku-4-5-20251001"
 MAX_TOKENS = 16000
 
 _NULLABLE_TEXT = {"type": ["string", "null"]}
+# "September of 2026" used to come back as 2026-09-01 and a bare birth year as
+# January 1: a day nobody stated, published as a fact.
+_FULL_DATE_ONLY = (
+    "YYYY-MM-DD, only when the text states the day, month and year. If any part is "
+    "missing (a month and year, a year alone), use null: never fill in a day or month."
+)
 _NULLABLE_INT = {"type": ["integer", "null"]}
 
 # The model returns facts and a paragraph range per person, never the obituary
@@ -58,8 +64,8 @@ RECORD_TOOL = {
                     "type": "object",
                     "properties": {
                         "name": {"type": "string", "description": "Full name as written"},
-                        "birth_date": {**_NULLABLE_TEXT, "description": "YYYY-MM-DD, or null"},
-                        "death_date": {**_NULLABLE_TEXT, "description": "YYYY-MM-DD, or null"},
+                        "birth_date": {**_NULLABLE_TEXT, "description": _FULL_DATE_ONLY},
+                        "death_date": {**_NULLABLE_TEXT, "description": _FULL_DATE_ONLY},
                         "death_year": _NULLABLE_INT,
                         "age": _NULLABLE_INT,
                         "funeral_home": {
@@ -113,7 +119,7 @@ Record every person with the record_obituaries tool, one entry per person, in th
 
 Rules:
 - Extract only what the text states. Use null for anything absent.
-- Never fabricate dates, ages, or biographical detail.
+- Never fabricate dates, ages, or biographical detail. A date with no stated day is null.
 - If no obituary for a real person is present, record an empty list.
 
 Batch post text:

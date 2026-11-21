@@ -99,6 +99,14 @@ export default function MiniWidget() {
   }
 
   const ob = picks[index];
+  // Services from today through the next ten days, by the reader's own clock.
+  const pad = (n) => String(n).padStart(2, "0");
+  const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const horizon = new Date();
+  horizon.setDate(horizon.getDate() + 10);
+  const services = (data.serviceDates || []).filter(
+    (d) => d >= iso(new Date()) && d <= iso(horizon)
+  ).length;
   const span = lifespan(ob);
   const sponsors = sponsor?.sponsors || [];
   const allUrl = registerUrl();
@@ -228,6 +236,12 @@ export default function MiniWidget() {
           View all obituaries →
         </a>
       </div>
+
+      {services > 0 && (
+        <a className="mini__services" href={allUrl} target="_top">
+          {services === 1 ? "1 service" : `${services} services`} in the coming days →
+        </a>
+      )}
 
       {sponsors.length > 0 && (
         <div className="mini__sponsors">

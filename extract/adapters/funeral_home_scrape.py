@@ -67,6 +67,7 @@ def _revision(row: dict) -> str:
         "text": row.get("obituary_text"),
         "photo": row.get("default_image"),
         "veteran": bool(row.get("is_veteran")),
+        "hidden": [row.get("show_date_of_birth") is False, row.get("show_date_of_death") is False],
         "service": row.get("next_service_starts_at"),
     }
     return hashlib.sha1(json.dumps(material, sort_keys=True).encode()).hexdigest()[:12]
@@ -133,7 +134,9 @@ def to_obituary(row: dict, home_name: str) -> Obituary | None:
         print(f"  {NAME}: skipping incomplete record {row.get('id')!r}", file=sys.stderr)
         return None
     city = (row.get("city") or "").strip() or None
-    age = row.get("age")
+    age = row.get("age") or None  # the feed says 0 when it has no birth date
+    hide_birth = row.get("show_date_of_birth") is False
+    hide_death = row.get("show_date_of_death") is False
     uid = _unit_id(public_url)
     return Obituary(
         name=name,
@@ -143,15 +146,19 @@ def to_obituary(row: dict, home_name: str) -> Obituary | None:
         death_year=int(dod[:4]),
         birth_date=row.get("date_of_birth"),
         death_date=dod,
-        age=age,
+        age=None if hide_birth else age,
         # Attribute to the configured home, not the Tukios `branch` — for some
         # homes `branch` is a chapel LOCATION (Peterson/Kraemer's "Wausau East",
         # "Athens") or a sub-brand ("Waid"), which breaks the funeral-home facet
         # and shows a town where the home should be. The home name is canonical.
         funeral_home=home_name,
         photo_url=_photo_url(row),
-        summary=_summary(name, age, city, dod),
+        # a hidden date is kept for matching but never written into the summary,
+        # and an age is a date in another form when the birth date is hidden
+        summary=_summary(name, None if hide_birth else age, city, None if hide_death else dod),
         body=_html_to_paragraphs(row.get("obituary_text", "")),
+        hide_birth=hide_birth,
+        hide_death=hide_death,
         veteran=bool(row.get("is_veteran")),
         service_date=_iso_day(row.get("next_service_starts_at")),
     )

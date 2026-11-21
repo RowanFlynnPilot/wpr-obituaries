@@ -95,6 +95,12 @@ class Obituary:
     # or burial — the notice itself carries the times and places).
     veteran: bool = False
     service_date: str | None = None
+    # A funeral home can hide a date on its own site (a family's wish, or a
+    # placeholder it never meant to show). The date stays in the record, because
+    # matching one person across sources depends on it, but it is withheld from
+    # everything published: see public_birth / public_death.
+    hide_birth: bool = False
+    hide_death: bool = False
 
     def __post_init__(self) -> None:
         if not self.slug:
@@ -102,17 +108,27 @@ class Obituary:
             digest = hashlib.sha1(self.source_url.encode()).hexdigest()[:6]
             object.__setattr__(self, "slug", f"{slugify(self.name)}-{stamp}-{digest}")
 
+    @property
+    def public_birth(self) -> str | None:
+        """The birth date as it may be published (None when the home hides it)."""
+        return None if self.hide_birth else self.birth_date
+
+    @property
+    def public_death(self) -> str | None:
+        """The death date as it may be published (None when the home hides it)."""
+        return None if self.hide_death else self.death_date
+
     def lifespan(self) -> str:
         """'1950 – 2026', the death year alone, or '' when nothing is dated.
 
         The one lifespan formatter — the share card and every template use it,
         so the OG image and the page can never drift apart.
         """
-        birth = self.birth_date[:4] if self.birth_date else ""
+        birth = self.public_birth[:4] if self.public_birth else ""
         death = (
-            self.death_date[:4]
-            if self.death_date
-            else (str(self.death_year) if self.death_year else "")
+            self.public_death[:4]
+            if self.public_death
+            else (str(self.death_year) if self.death_year and not self.hide_death else "")
         )
         return f"{birth} – {death}" if birth and death else death
 
@@ -132,9 +148,9 @@ class Obituary:
         return {
             "slug": self.slug,
             "name": self.name,
-            "birthDate": self.birth_date,
-            "deathDate": self.death_date,
-            "deathYear": self.death_year,
+            "birthDate": self.public_birth,
+            "deathDate": self.public_death,
+            "deathYear": None if self.hide_death else self.death_year,
             "age": self.age,
             "funeralHome": self.funeral_home,
             "photoUrl": self.photo_url,
@@ -153,7 +169,7 @@ class Obituary:
         records that have neither stay byte-identical in the committed master.
         """
         record = dataclasses.asdict(self)
-        for optional in ("veteran", "service_date"):
+        for optional in ("veteran", "service_date", "hide_birth", "hide_death"):
             if not record[optional]:
                 del record[optional]
         return record

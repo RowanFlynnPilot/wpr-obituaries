@@ -814,6 +814,47 @@ def test_feed_facts_veteran_and_service_date():
     print("ok: feed facts (veteran + service date mapped, stored only when set, kept through dedupe)")
 
 
+def test_hidden_dates_are_withheld_and_home_dates_win():
+    import dataclasses
+    from datetime import date
+    from adapters import funeral_home_scrape as fhs
+
+    row = {"display_name": "Bea Doe", "date_of_birth": "1933-03-27", "date_of_death": "2026-08-25",
+           "public_url": "http://h/bea", "obituary_text": "<p>Bea.</p>", "age": 93, "city": "Granton",
+           "show_date_of_birth": False, "show_date_of_death": False}
+    hidden = fhs.to_obituary(row, "A Home")
+    # kept for matching, withheld from everything published
+    assert hidden.birth_date == "1933-03-27" and hidden.hide_birth and hidden.hide_death
+    assert hidden.lifespan() == "" and hidden.age is None and "2026" not in hidden.summary
+    idx = hidden.to_index_dict()
+    assert idx["birthDate"] is None and idx["deathDate"] is None and idx["deathYear"] is None
+    page = templates.render_person_page(
+        hidden, {"sponsors": []}, "http://b", config.load_newsroom(), [], None, None, None, None)
+    assert "1933" not in page and "birthDate" not in page
+    assert fhs.to_obituary({**row, "age": 0, "show_date_of_birth": True}, "A Home").age is None
+
+    # the batch post read the wrong year; the home's shown date is the person's date
+    home = dataclasses.replace(
+        mk("Len Roe", 5, "2026-10-16", death_date="2026-10-16", birth_date="1939-07-22"),
+        source="funeral_home_scrape")
+    batch = mk("Len Roe", 6, "2026-10-21", death_date="2023-10-16", death_year=2023,
+               birth_date="1939-07-22", body="the fuller newsroom copy " * 10)
+    (person,), _ = main._dedupe_people([batch, home], [])
+    assert person.slug == batch.slug and person.death_date == "2026-10-16" and person.death_year == 2026
+    # a hidden (placeholder) date is never taken as the person's date
+    relisted = dataclasses.replace(home, death_date="2026-12-01", hide_death=True)
+    assert main._home_dates([batch, relisted]).get("death_date") is None
+
+    # the service line quotes the notice's own sentence, whole, and only that sentence
+    body = ("Al Roe, 80, died Nov. 18, 2026. He farmed.\n\nThe memorial service will be held at 2:00 P.M., "
+            "Saturday, December 12, 2026, at Trinity Lutheran Church, 107 N. State St., Merrill, WI. "
+            "Visitation will be until 6:00 p.m. Online condolences may be left.")
+    detail = templates._service_detail(body, date(2026, 12, 12))
+    assert "107 N. State St., Merrill, WI." in detail and "Online" not in detail and "died" not in detail
+    assert "notice below" in templates._service_detail("He farmed.", date(2026, 12, 12))
+    print("ok: hidden dates withheld; the home's dates win a disagreement; service sentence quoted whole")
+
+
 def test_town_from_opening():
     cases = {
         "Dale A. Hinz, 69, of Merrill, passed away peacefully.": "Merrill",

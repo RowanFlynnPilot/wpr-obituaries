@@ -476,7 +476,10 @@ the names in title weight linking to their pages and the home as a tracked mono
 caption. Six people, then "Show all N". A mono footnote says where the dates
 come from and that times and places are in each notice. On a person's page the
 same fact is a "Service" line between hairlines under the name rule, set in
-mono with an oxblood label and stated without a tense. On phones the day label
+mono with an oxblood label and stated without a tense; beneath it, in muted
+mono, the notice's own sentence about that day, in quotation marks and
+unaltered ("From the notice: …"). The mini widget carries one muted mono line
+under its footer, "19 services in the coming days →", into the register. On phones the day label
 stacks above its names.
 
 ### Veteran mark

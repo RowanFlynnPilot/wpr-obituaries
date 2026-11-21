@@ -45,7 +45,14 @@ Source of truth → static output → embedded widget:
    gives them and never guessed from text: `veteran` (`is_veteran`) and
    `service_date` (`next_service_starts_at`, date only). Both are stored in the
    master only when set, and the dedupe hands them to whichever copy of a
-   person wins.
+   person wins. The feed's `show_date_of_birth` / `show_date_of_death` flags
+   are honored too (`hide_birth` / `hide_death`): a hidden date stays in the
+   record, because matching a person across sources depends on it, but
+   `public_birth` / `public_death` withhold it from the page, the index, the
+   summary, the lifespan and the structured data. And where a person's copies
+   disagree on a date, the funeral home's shown date wins over one read out of
+   a batch post's prose (`main._home_dates`); the extractor returns a date only
+   when day, month and year are all stated.
 3. `extract/templates.py` — renders one crawlable HTML page per person plus a
    `sitemap.xml`. **This is the SEO layer.** Each page has the name in the title
    and H1, schema.org `NewsArticle` structured data about the `Person` (schema.org
@@ -105,7 +112,11 @@ Source of truth → static output → embedded widget:
    Beneath it, **Upcoming services** (`UpcomingServices.jsx`) lists people whose
    service date falls in the next 10 days, cut against the reader's own clock
    so a past date never lingers between rebuilds; each person's page carries
-   the same date as a tense-free "Service" line. Veterans are marked on the
+   the same date as a tense-free "Service" line, with the notice's own
+   sentence naming that date quoted beneath it word for word (never parsed:
+   people act on a time and place). The mini widget counts the coming services
+   from `recent.json`'s `serviceDates`. Each page's "More obituaries" lists up
+   to three recent people from the same town before the newest notices. Veterans are marked on the
    row's fact line and the page's lifespan line, and are a browse filter
    (`?veterans=1`). Register rows carry no
    summary line: the extractor's one sentence restates the name, age and town
